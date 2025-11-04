@@ -1,15 +1,30 @@
+gitignore
+# IDE and project files
 *.iml
 .gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+.idea
 .DS_Store
-/build
-/captures
-.externalNativeBuild
 .cxx
+.externalNativeBuild
+
+# Local configuration
+# SDK location, API keys, etc. should be saved here
 local.properties
+
+# Build output
+/build
+
+# Captures and debugging
+/captures
+
+# Google Services file (VERY IMPORTANT)
+google-services.json
+
+# Keystore files (EXTREMELY IMPORTANT)
+*.jks
+*.keystore
+
+# Generated files for Fabric Crashlytics.
+com_crashlytics_export_strings.xml
+*.json
+app/google-services.json
