@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">mobile_android</string>
     <string name="client_id">1036143739909-30asfr6cl5cn6ffj7e4mo0oko5k2ms98.apps.googleusercontent.com</string>
+    <string name="title_home">Home</string>
+    <string name="title_calendar">Calendar</string>
+    <string name="title_mypage">MyPage</string>
 </resources>

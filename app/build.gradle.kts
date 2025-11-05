@@ -18,10 +18,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildFeatures {
-        viewBinding = true
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -32,9 +28,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -48,6 +46,8 @@ dependencies {
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation("androidx.navigation:navigation-fragment:2.9.5")
+    implementation("androidx.navigation:navigation-ui:2.9.5")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -58,7 +58,5 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 // EncryptedSharedPreferences
 }

@@ -1,4 +1,4 @@
-package com.example.mobile_android;
+package com.example.mobile_android.ui.login;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.mobile_android.R;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 

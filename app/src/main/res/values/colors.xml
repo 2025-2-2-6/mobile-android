@@ -5,4 +5,19 @@
     <color name="login_bg1">#673AB7</color>
     <color name="login_bg2">#9C27B0</color>
     <color name="logout_btn">#4F85B8</color>
+
+    <!-- Notification Page Colors -->
+    <color name="notification_bg">#FFFFFF</color>
+    <color name="notification_title_text">#000000</color>
+    <color name="notification_subtitle_text">#8A8A8A</color>
+    <color name="notification_chip_bg">#F0F0F0</color>
+    <color name="notification_chip_text">#000000</color>
+    <color name="notification_item_bg">#F8F9FA</color>
+    <color name="notification_item_icon_ai_bg">#E3F2FD</color>
+    <color name="notification_item_icon_deadline_bg">#FCE4EC</color>
+    <color name="notification_item_icon_new_bg">#E8F5E9</color>
+    <color name="notification_item_icon_schedule_bg">#F3E5F5</color>
+    <color name="notification_item_title_text">#212121</color>
+    <color name="notification_item_time_text">#757575</color>
+    <color name="notification_item_unread_dot">#4285F4</color>
 </resources>
