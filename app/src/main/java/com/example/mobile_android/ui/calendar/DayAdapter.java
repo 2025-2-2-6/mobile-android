@@ -1,4 +1,4 @@
-package com.example.mobile_android.calendar;
+package com.example.mobile_android.ui.calendar;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;

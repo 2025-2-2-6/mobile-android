@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".calendar.CalendarActivity"
+            android:name=".ui.calendar.CalendarActivity"
             android:exported="true" />
     </application>
 
