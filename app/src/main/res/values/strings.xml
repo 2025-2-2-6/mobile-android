@@ -4,4 +4,17 @@
     <string name="title_home">Home</string>
     <string name="title_calendar">Calendar</string>
     <string name="title_mypage">MyPage</string>
+    <string name="category_prompt">카테고리 선택</string>
+    <string name="crawl_period_prompt">1시간마다</string>
+    <string name="add_site_title">새 사이트 등록</string>
+    <string name="add_site_description">자동으로 정보를 수집할 웹페이지를 등록하세요</string>
+    <string name="add_site_url_label">웹페이지 URL *</string>
+    <string name="add_site_url_hint">https://example.com/notice</string>
+    <string name="add_site_verify_button">검증</string>
+    <string name="add_site_name_label">사이트 이름</string>
+    <string name="add_site_name_hint">예: 컴퓨터공학과 공지사항</string>
+    <string name="add_site_category_label">카테고리 *</string>
+    <string name="add_site_crawl_period_label">크롤링 주기</string>
+    <string name="add_site_register_button">등록하기</string>
+    <string name="add_site_cancel_button">취소</string>
 </resources>

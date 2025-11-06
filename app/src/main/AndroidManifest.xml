@@ -20,6 +20,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".AddSiteActivity"
+            android:exported="true"/>
+        <activity
             android:name=".ui.login.ProfileActivity"
             android:exported="false" />
         <activity
