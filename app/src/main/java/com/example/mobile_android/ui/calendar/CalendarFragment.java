@@ -1,16 +1,20 @@
 package com.example.mobile_android.ui.calendar;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.example.mobile_android.R;
-import com.example.mobile_android.databinding.ActivityCalendarBinding;
+import com.example.mobile_android.databinding.FragmentCalendarBinding;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -19,43 +23,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CalendarActivity extends AppCompatActivity {
+public class CalendarFragment extends Fragment {
 
-    private ActivityCalendarBinding binding;
+    private FragmentCalendarBinding binding;
     private LocalDate selectedDate;
     private DayAdapter dayAdapter;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityCalendarBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentCalendarBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
-        // Header 제어
-        View header = findViewById(R.id.headerBar);
-        ImageButton btnMenu = header.findViewById(R.id.btn_menu);
-        ImageButton btnNotification = header.findViewById(R.id.btn_notification);
-        TextView toolbarTitle = header.findViewById(R.id.toolbar_title);
-
-        toolbarTitle.setText("캘린더");
-        btnMenu.setOnClickListener(v ->
-                Toast.makeText(this, "메뉴 버튼 클릭됨", Toast.LENGTH_SHORT).show()
-        );
-        btnNotification.setOnClickListener(v ->
-                Toast.makeText(this, "알림 버튼 클릭됨", Toast.LENGTH_SHORT).show()
-        );
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         // 날짜/어댑터 준비
         selectedDate = LocalDate.now();
 
-        // DayAdapter: (OnDayClick, LocalDate) 시그니처 가정
         dayAdapter = new DayAdapter(day -> {
-            // null 안 넘기니 별도 체크 불필요
             selectedDate = day;
             dayAdapter.setSelected(selectedDate);
         }, selectedDate);
 
-        binding.rvDays.setLayoutManager(new GridLayoutManager(this, 7));
+        binding.rvDays.setLayoutManager(new GridLayoutManager(getContext(), 7));
         binding.rvDays.setAdapter(dayAdapter);
 
         // 첫 렌더링
@@ -73,18 +66,15 @@ public class CalendarActivity extends AppCompatActivity {
         });
     }
 
-    /** 현재 달 헤더 갱신 + 그리드 데이터 주입 */
     private void refreshMonth() {
         DateTimeFormatter headerFmt = DateTimeFormatter.ofPattern("yyyy년 M월", Locale.KOREAN);
         binding.tvMonth.setText(selectedDate.format(headerFmt));
 
-        // ✅ null 없이 실제 날짜만 전달
         List<LocalDate> days = buildDaysOfMonthNoNulls(selectedDate);
         dayAdapter.submit(days);
         dayAdapter.setSelected(selectedDate);
     }
 
-    /** 해당 월의 '실제 날짜'들만 반환 (null 없음) */
     private List<LocalDate> buildDaysOfMonthNoNulls(LocalDate base) {
         List<LocalDate> result = new ArrayList<>();
         YearMonth ym = YearMonth.from(base);
@@ -93,5 +83,11 @@ public class CalendarActivity extends AppCompatActivity {
             result.add(LocalDate.of(base.getYear(), base.getMonth(), d));
         }
         return result;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // Prevent memory leaks
     }
 }

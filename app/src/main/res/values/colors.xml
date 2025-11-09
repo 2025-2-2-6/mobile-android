@@ -20,4 +20,21 @@
     <color name="notification_item_title_text">#212121</color>
     <color name="notification_item_time_text">#757575</color>
     <color name="notification_item_unread_dot">#4285F4</color>
+
+    <!-- Search Page Colors -->
+    <color name="chip_selected_bg">#0B0E18</color>          <!-- 진한 네이비/블랙 계열 -->
+    <color name="chip_unselected_bg">#FFFFFFFF</color>
+    <color name="chip_unselected_stroke">#22000000</color>
+    <color name="chip_badge_selected_bg">#2563EB</color>    <!-- 파란 배지 -->
+    <color name="chip_badge_unselected_bg">#F0F2F5</color>
+
+    <!-- Home Page Colors -->
+    <color name="stat_total_bg">#E6EEF5FF</color>      <!-- 연파랑 배경 (불투명도 약간 낮춤) -->
+    <color name="stat_total_stroke">#90A8D8FF</color>
+
+    <color name="stat_new_bg">#E6E8FBE8</color>       <!-- 연초록 배경 -->
+    <color name="stat_new_stroke">#9090D7B7</color>
+
+    <color name="stat_upcoming_bg">#F5EFFF</color>    <!-- 연보라 배경 -->
+    <color name="stat_upcoming_stroke">#B990F0</color>
 </resources>

@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_home"
-        android:icon="@android:drawable/ic_menu_help"
-        android:title="Home" />
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home"
+        android:title="홈" />
 
     <item
-        android:id="@+id/navigation_dashboard"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="Dashboard" />
+        android:id="@+id/nav_calendar"
+        android:icon="@drawable/ic_calendar"
+        android:title="캘린더" />
 
     <item
-        android:id="@+id/navigation_notifications"
-        android:icon="@android:drawable/ic_menu_send"
-        android:title="Notifications" />
+        android:id="@+id/nav_search"
+        android:icon="@drawable/ic_search"
+        android:title="검색" />
 
 </menu>
