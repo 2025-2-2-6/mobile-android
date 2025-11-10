@@ -1,5 +1,7 @@
 package com.example.mobile_android;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,13 +33,23 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
         holder.siteName.setText(site.getName());
         holder.categoryTag.setText(site.getCategory());
         holder.siteUrl.setText(site.getUrl());
-        //holder.lastUpdated.setText("• " + site.getUpdatedAt().toString());
+        holder.lastUpdated.setText("• " + site.getLastUpdated());
+
         if (site.getNewPosts() > 0) {
             holder.newPostBadge.setText(site.getNewPosts() + " 새글");
             holder.newPostBadge.setVisibility(View.VISIBLE);
         } else {
             holder.newPostBadge.setVisibility(View.GONE);
         }
+
+        // [추가] 각 아이템 뷰에 클릭 리스너 설정
+        holder.itemView.setOnClickListener(v -> {
+            Context context = v.getContext();
+            Intent intent = new Intent(context, PostListActivity.class);
+            // 다음 액티비티로 사이트 이름을 전달
+            intent.putExtra("SITE_NAME", site.getName());
+            context.startActivity(intent);
+        });
     }
 
     @Override

@@ -30,6 +30,7 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // 이 화면의 레이아웃 파일을 지정합니다.
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -37,18 +38,21 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Setup RecyclerView
+        // RecyclerView를 레이아웃에서 찾아 초기화합니다.
         sitesRecyclerView = view.findViewById(R.id.rv_sites);
         sitesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        siteList = new ArrayList<>();
-        // Add sample data
-        siteList.add(new Site("컴퓨터학과 공지사항", "학과", "https://cs.university.ac.kr/notice", "2024-05-23 10:00:00", 3));
-        siteList.add(new Site("씽굿 공모전", "공모전", "https://thinkgood.co.kr/contest", "2024-05-23 08:00:00", 1));
-        siteList.add(new Site("학생지원팀 장학금", "학교", "https://university.ac.kr/scholarship", "2024-05-22 15:30:00", 0));
 
+        // [복원] 예시 데이터를 저장할 리스트를 생성합니다.
+        siteList = new ArrayList<>();
+        siteList.add(new Site("컴퓨터학과 공지사항", "학과", "https://cs.university.ac.kr/notice", "2시간 전", 3));
+        siteList.add(new Site("씽굿 공모전", "공모전", "https://thinkgood.co.kr/contest", "5시간 전", 1));
+        siteList.add(new Site("학생지원팀 장학금", "학교", "https://university.ac.kr/scholarship", "1일 전", 0));
+
+        // 어댑터를 생성하고 RecyclerView에 연결합니다.
         siteAdapter = new SiteAdapter(siteList);
         sitesRecyclerView.setAdapter(siteAdapter);
 
+        // "새 사이트 등록하기" 버튼을 찾아 클릭 이벤트를 설정합니다.
         Button addSiteButton = view.findViewById(R.id.add_site_button);
         addSiteButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AddSiteActivity.class);
