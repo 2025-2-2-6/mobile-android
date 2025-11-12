@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mobile_android.MainActivity;
 import com.example.mobile_android.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -46,7 +47,7 @@ public class Login extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 // 로그인 성공 시 ProfileActivity로 이동
-                                Intent intent = new Intent(Login.this, ProfileActivity.class);
+                                Intent intent = new Intent(Login.this, MainActivity.class);
                                 startActivity(intent);
                                 finish(); // 현재 Login 액티비티 종료
                             } else {
@@ -64,6 +65,15 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        auth = FirebaseAuth.getInstance();
+
+        // 이미 로그인되어 있다면 바로 ProfileActivity로 이동
+        if (auth.getCurrentUser() != null) {
+            Intent intent = new Intent(Login.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
         setContentView(R.layout.login_first);
 
         GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
