@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     private static Retrofit retrofit = null;
     // TODO: 에뮬레이터는 10.0.2.2:8000, 실제 기기는 서버 IP 사용
-    private static final String BASE_URL = "http://10.0.2.2:8000"; 
+    public static final String BASE_URL = "http://10.0.2.2:8000"; 
 
     public static ApiService getApiService() {
         if (retrofit == null) {
