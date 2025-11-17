@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     private static Retrofit retrofit = null;
     // BuildConfig를 통해 환경별 BASE_URL 자동 설정
-    private static final String BASE_URL = BuildConfig.BASE_URL; 
+    public static final String BASE_URL = BuildConfig.BASE_URL;
 
     public static ApiService getApiService() {
         if (retrofit == null) {

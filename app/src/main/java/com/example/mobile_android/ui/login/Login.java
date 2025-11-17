@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobile_android.MainActivity;
 import com.example.mobile_android.R;
+import com.example.mobile_android.fcm.FcmTokenManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -46,6 +47,9 @@ public class Login extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+                                // FCM 토큰 초기화 및 서버 전송
+                                FcmTokenManager.initializeFcmToken(Login.this);
+
                                 // 로그인 성공 시 MainActivity로 이동
                                 Intent intent = new Intent(Login.this, MainActivity.class);
                                 startActivity(intent);
@@ -69,6 +73,9 @@ public class Login extends AppCompatActivity {
 
         // 이미 로그인되어 있다면 바로 MainActivity로 이동
         if (auth.getCurrentUser() != null) {
+            // FCM 토큰 초기화 (이미 로그인된 경우에도)
+            FcmTokenManager.initializeFcmToken(this);
+
             Intent intent = new Intent(Login.this, MainActivity.class);
             startActivity(intent);
             finish();
