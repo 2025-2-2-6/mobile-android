@@ -1,4 +1,4 @@
-package com.example.mobile_android;
+package com.example.mobile_android.ui.post;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.mobile_android.R;
 import com.example.mobile_android.model.Post;
 
 import java.util.List;

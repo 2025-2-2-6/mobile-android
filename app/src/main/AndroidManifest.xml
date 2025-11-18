@@ -22,14 +22,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddSiteActivity"
+            android:name=".ui.site.AddSiteActivity"
             android:exported="true"/>
         <activity
-            android:name=".PostListActivity"
+            android:name=".ui.post.PostListActivity"
             android:exported="false"/>
-        <activity
-            android:name=".ui.login.ProfileActivity"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

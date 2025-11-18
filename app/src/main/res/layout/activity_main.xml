@@ -60,7 +60,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start">
 
-        <include layout="@layout/mypage_drawer" />
+        <include layout="@layout/fragment_mypage" />
 
     </com.google.android.material.navigation.NavigationView>
 
