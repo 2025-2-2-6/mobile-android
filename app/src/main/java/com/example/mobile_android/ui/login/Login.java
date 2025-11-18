@@ -16,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobile_android.MainActivity;
 import com.example.mobile_android.R;
+import com.example.mobile_android.model.UserResponse;
+import com.example.mobile_android.network.AuthApi;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -29,6 +31,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.Objects;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Login extends AppCompatActivity {
     FirebaseAuth auth;
@@ -46,12 +53,42 @@ public class Login extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                // 로그인 성공 시 MainActivity로 이동
-                                Intent intent = new Intent(Login.this, MainActivity.class);
-                                startActivity(intent);
-                                finish(); // 현재 Login 액티비티 종료
-                            } else {
-                                Toast.makeText(Login.this, "Failed in Sign in: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+
+                                GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(Login.this);
+                                String idToken = account.getIdToken();
+
+                                if (idToken == null) {
+                                    Toast.makeText(Login.this, "ID Token 가져오기 실패", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                String bearer = "Bearer " + idToken;
+
+                                Retrofit retrofit = new Retrofit.Builder()
+                                        .baseUrl("http://10.0.2.2:8000/api/v1/auth/")
+                                        .addConverterFactory(GsonConverterFactory.create())
+                                        .build();
+
+                                AuthApi authApi = retrofit.create(AuthApi.class);
+
+                                authApi.googleLogin(bearer).enqueue(new Callback<UserResponse>() {
+                                    @Override
+                                    public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                                        if (response.isSuccessful()) {
+                                            // 백엔드 로그인 성공 → MainActivity로 이동
+                                            Intent intent = new Intent(Login.this, MainActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            Toast.makeText(Login.this, "백엔드 로그인 실패", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<UserResponse> call, Throwable t) {
+                                        Toast.makeText(Login.this, "서버 요청 실패", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
                         }
                     });
