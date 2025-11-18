@@ -13,10 +13,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mobile_android.AddSiteActivity;
+import com.example.mobile_android.ui.site.AddSiteActivity;
 import com.example.mobile_android.R;
-import com.example.mobile_android.Site;
-import com.example.mobile_android.SiteAdapter;
+import com.example.mobile_android.ui.site.Site;
+import com.example.mobile_android.ui.site.SiteAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

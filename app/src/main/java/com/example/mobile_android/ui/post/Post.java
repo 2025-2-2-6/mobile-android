@@ -1,4 +1,4 @@
-package com.example.mobile_android;
+package com.example.mobile_android.ui.post;
 
 // 새로운 API 응답 구조에 맞춘 예시 데이터 클래스
 public class Post {

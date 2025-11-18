@@ -1,5 +1,7 @@
 package com.example.mobile_android.network;
 
+import com.example.mobile_android.BuildConfig;
+
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -9,8 +11,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     private static Retrofit retrofit = null;
-    // TODO: 에뮬레이터는 10.0.2.2:8000, 실제 기기는 서버 IP 사용
-    private static final String BASE_URL = "http://10.0.2.2:8000"; 
+    // BuildConfig를 통해 환경별 BASE_URL 자동 설정
+    private static final String BASE_URL = BuildConfig.BASE_URL; 
 
     public static ApiService getApiService() {
         if (retrofit == null) {

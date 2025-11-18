@@ -1,5 +1,6 @@
 package com.example.mobile_android;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +23,10 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
+import com.example.mobile_android.ui.login.Login;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private View notificationView;
     private DrawerLayout drawerLayout;
     private ImageButton btnMenu, btnNotification;
+    private GoogleSignInClient googleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +110,29 @@ public class MainActivity extends AppCompatActivity {
         // Setup privacy policy button
         TextView privacyPolicyButton = navigationView.findViewById(R.id.privacy_policy_button);
         privacyPolicyButton.setOnClickListener(v -> showPrivacyPolicyDialog());
+
+        // Setup logout button
+        TextView logoutButton = navigationView.findViewById(R.id.logout_button);
+
+        // Configure Google Sign In
+        GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.client_id))
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(this, options);
+
+        logoutButton.setOnClickListener(v -> {
+            // Sign out from Firebase
+            FirebaseAuth.getInstance().signOut();
+            // Sign out from Google
+            googleSignInClient.signOut().addOnCompleteListener(this, task -> {
+                Toast.makeText(MainActivity.this, "로그아웃 하였습니다", Toast.LENGTH_SHORT).show();
+                // Go back to Login activity
+                Intent intent = new Intent(MainActivity.this, Login.class);
+                startActivity(intent);
+                finish();
+            });
+        });
     }
 
     private void showPrivacyPolicyDialog() {

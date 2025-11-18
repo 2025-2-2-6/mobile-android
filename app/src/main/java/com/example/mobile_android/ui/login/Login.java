@@ -46,7 +46,7 @@ public class Login extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                // 로그인 성공 시 ProfileActivity로 이동
+                                // 로그인 성공 시 MainActivity로 이동
                                 Intent intent = new Intent(Login.this, MainActivity.class);
                                 startActivity(intent);
                                 finish(); // 현재 Login 액티비티 종료
@@ -67,7 +67,7 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         auth = FirebaseAuth.getInstance();
 
-        // 이미 로그인되어 있다면 바로 ProfileActivity로 이동
+        // 이미 로그인되어 있다면 바로 MainActivity로 이동
         if (auth.getCurrentUser() != null) {
             Intent intent = new Intent(Login.this, MainActivity.class);
             startActivity(intent);

@@ -1,4 +1,4 @@
-package com.example.mobile_android;
+package com.example.mobile_android.ui.site;
 
 // 예시 데이터를 위한 임시 데이터 클래스
 public class Site {
