@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
+        <!-- 🔙 등록 사이트 관리에서만 보일 뒤로가기 버튼 -->
 
         <!-- 검색 바 -->
         <com.google.android.material.textfield.TextInputLayout

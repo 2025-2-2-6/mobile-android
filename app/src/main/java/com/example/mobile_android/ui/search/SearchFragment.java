@@ -19,6 +19,9 @@ import com.example.mobile_android.databinding.FragmentSearchBinding;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+
 
 public class SearchFragment extends Fragment {
 
@@ -34,6 +37,7 @@ public class SearchFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
 
         // Tag Chips
         binding.chips.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
@@ -53,9 +57,7 @@ public class SearchFragment extends Fragment {
         // Site List
         binding.rvSites.setLayoutManager(new LinearLayoutManager(getContext()));
         List<SearchFragment.SiteItem> siteData = Arrays.asList(
-                new SearchFragment.SiteItem("서울대학교 공지사항","전체 공지사항 및 소식","학교","1,250명 구독 중","등록됨"),
-                new SearchFragment.SiteItem("한국장학재단","국가장학금, 학자금대출 안내","장학금","8,920명 구독 중","+ 추가"),
-                new SearchFragment.SiteItem("씽굿 공모전","대학생 공모전/아이디어/디자인","공모전","2,340명 구독 중","등록됨")
+
         );
         binding.rvSites.setAdapter(new SearchFragment.Adapter(siteData));
     }

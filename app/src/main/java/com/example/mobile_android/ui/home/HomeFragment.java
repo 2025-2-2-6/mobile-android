@@ -44,9 +44,7 @@ public class HomeFragment extends Fragment {
 
         // [복원] 예시 데이터를 저장할 리스트를 생성합니다.
         siteList = new ArrayList<>();
-        siteList.add(new Site("컴퓨터학과 공지사항", "학과", "https://cs.university.ac.kr/notice", "2시간 전", 3));
-        siteList.add(new Site("씽굿 공모전", "공모전", "https://thinkgood.co.kr/contest", "5시간 전", 1));
-        siteList.add(new Site("학생지원팀 장학금", "학교", "https://university.ac.kr/scholarship", "1일 전", 0));
+
 
         // 어댑터를 생성하고 RecyclerView에 연결합니다.
         siteAdapter = new SiteAdapter(siteList);

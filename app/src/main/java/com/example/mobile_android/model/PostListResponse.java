@@ -1,21 +1,26 @@
 package com.example.mobile_android.model;
 
-import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class PostListResponse {
-    @SerializedName("total")
-    private int total;
-    @SerializedName("page")
-    private int page;
-    @SerializedName("page_size")
-    private int pageSize;
-    @SerializedName("items")
-    private List<Post> items;
 
-    // Getters
-    public int getTotal() { return total; }
-    public int getPage() { return page; }
-    public int getPageSize() { return pageSize; }
-    public List<Post> getItems() { return items; }
+    // 서버에서 오는 응답 필드들 (post.py의 PostListResponse 기준)
+    public int total;
+    public int page;
+    public int page_size;
+
+    // 🔥 여기! 이제 public 이라서 SiteDetailFragment 에서 바로 접근 가능
+    public List<PostItem> items;
+
+    // 리스트 안에 들어가는 게시글 하나
+    public static class PostItem {
+        public String id;
+        public String site_id;
+        public String title;
+        public String content;
+        public String source_url;
+        public String event_date;
+        public String created_at;
+        public String updated_at;
+    }
 }

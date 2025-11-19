@@ -20,9 +20,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="컴퓨터학과 공지사항"
+            android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,17 +31,17 @@
             android:id="@+id/tv_new_post_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="3 새글"
-            android:textColor="@android:color/white"
+            android:layout_marginStart="8dp"
             android:background="@drawable/bg_new_post_badge"
             android:paddingStart="8dp"
-            android:paddingEnd="8dp"
             android:paddingTop="2dp"
+            android:paddingEnd="8dp"
             android:paddingBottom="2dp"
+            android:text="3 새글"
+            android:textColor="@android:color/white"
             android:textSize="12sp"
-            android:layout_marginStart="8dp"
-            app:layout_constraintStart_toEndOf="@id/tv_site_name"
-            app:layout_constraintBaseline_toBaselineOf="@id/tv_site_name" />
+            app:layout_constraintBaseline_toBaselineOf="@id/tv_site_name"
+            app:layout_constraintStart_toEndOf="@id/tv_site_name" />
 
         <!-- Edit Icon -->
         <ImageView
@@ -51,20 +51,20 @@
             android:src="@drawable/ic_edit_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-        
+
         <!-- Category Tag -->
         <TextView
             android:id="@+id/tv_category_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="학과"
+            android:layout_marginTop="8dp"
             android:background="@drawable/bg_category_tag"
             android:paddingStart="8dp"
-            android:paddingEnd="8dp"
             android:paddingTop="2dp"
+            android:paddingEnd="8dp"
             android:paddingBottom="2dp"
+            android:text="학과"
             android:textSize="12sp"
-            android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_site_name" />
 
@@ -73,18 +73,18 @@
             android:id="@+id/tv_last_updated"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="• 2시간 전"
             android:layout_marginStart="8dp"
-            app:layout_constraintStart_toEndOf="@id/tv_category_tag"
-            app:layout_constraintBaseline_toBaselineOf="@id/tv_category_tag" />
+            android:text="• 2시간 전"
+            app:layout_constraintBaseline_toBaselineOf="@id/tv_category_tag"
+            app:layout_constraintStart_toEndOf="@id/tv_category_tag" />
 
         <!-- Site URL -->
         <TextView
             android:id="@+id/tv_site_url"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="https://cs.university.ac.kr/notice"
             android:layout_marginTop="4dp"
+            android:text="https://cs.university.ac.kr/notice"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_category_tag" />
 
@@ -93,8 +93,8 @@
             android:id="@+id/iv_delete"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_delete_24"
             android:layout_marginTop="8dp"
+            android:src="@drawable/ic_delete_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iv_edit" />
 

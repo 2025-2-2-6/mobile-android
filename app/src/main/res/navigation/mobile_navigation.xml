@@ -29,4 +29,20 @@
         android:label="마이페이지"
         tools:layout="@layout/profile" />
 
+    <fragment
+        android:id="@+id/nav_site_manage"
+        android:name="com.example.mobile_android.ui.mypage.SiteManageFragment"
+        android:label="사이트 관리"
+        tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/nav_site_detail"
+        android:name="com.example.mobile_android.ui.mypage.SiteDetailFragment"
+        android:label="사이트 상세"
+        tools:layout="@layout/fragment_site_detail" />
+
+    <argument
+        android:name="siteId"
+        app:argType="string" />
+
+
 </navigation>

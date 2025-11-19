@@ -238,6 +238,7 @@
                 android:paddingVertical="8dp">
 
                 <TextView
+                    android:id="@+id/manage_site_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="등록 사이트 관리"

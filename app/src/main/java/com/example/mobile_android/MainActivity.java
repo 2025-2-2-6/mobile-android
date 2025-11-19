@@ -25,7 +25,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
+import com.example.mobile_android.R;
 public class MainActivity extends AppCompatActivity {
 
     private View notificationView;
@@ -53,6 +53,31 @@ public class MainActivity extends AppCompatActivity {
 
         btnMenu = toolbar.findViewById(R.id.btn_menu);
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        // 🔹 목적지(fragment)에 따라 bottom nav, 메뉴 버튼 모양/동작 바꾸기
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            int destId = destination.getId();
+
+            if (destId == R.id.nav_site_manage) {
+                // 1) 하단 탭 숨기기
+                navView.setVisibility(View.GONE);
+
+                // 2) 왼쪽 버튼을 "뒤로가기" 아이콘으로 바꾸고
+                btnMenu.setImageResource(R.drawable.ic_arrow_back); // ↤ 적당한 아이콘으로 교체
+
+                // 3) 누르면 홈으로 이동
+                btnMenu.setOnClickListener(v -> {
+                    controller.navigateUp();     // 또는 controller.popBackStack();
+                });
+
+            } else {
+                // nav_site_manage가 아닐 때는 원래 상태로 복구
+
+                navView.setVisibility(View.VISIBLE);  // 하단 탭 다시 보이게
+
+                btnMenu.setImageResource(R.drawable.ic_menu);  // 햄버거 메뉴 아이콘
+                btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+            }
+        });
 
         btnNotification = toolbar.findViewById(R.id.btn_notification);
         btnNotification.setOnClickListener(v -> showNotificationView());
@@ -99,6 +124,17 @@ public class MainActivity extends AppCompatActivity {
                         .into(profileImage);
             }
         }
+        TextView manageSiteButton = navigationView.findViewById(R.id.manage_site_button);
+        manageSiteButton.setOnClickListener(v -> {
+            drawerLayout.closeDrawer(GravityCompat.START);
+
+            NavController navController =
+                    Navigation.findNavController(MainActivity.this,
+                            R.id.nav_host_fragment_activity_main);
+
+            navController.navigate(R.id.nav_site_manage);  // 🔥 새 화면으로 이동 (탭 안 바뀜)
+        });
+
 
         // Setup privacy policy button
         TextView privacyPolicyButton = navigationView.findViewById(R.id.privacy_policy_button);
@@ -126,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("확인", (dialog, which) -> dialog.dismiss());
         builder.create().show();
     }
+
 
     private void showNotificationView() {
         notificationView.setVisibility(View.VISIBLE);
