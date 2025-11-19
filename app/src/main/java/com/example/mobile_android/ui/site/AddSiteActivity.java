@@ -60,7 +60,7 @@ public class AddSiteActivity extends AppCompatActivity {
     private void registerSite(String url) {
         showLoading(true);
         String userId = null; // TODO: 실제 사용자 ID 가져오는 로직 구현
-        String siteName = extractDomainName(url);; // TODO: 필요하다면 사이트 이름 설정
+        String siteName = extractDomainName(url); // TODO: 필요하다면 사이트 이름 설정
 
         Log.d("AddSiteActivity", "Registering site with URL: " + url);
 
