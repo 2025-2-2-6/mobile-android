@@ -1,6 +1,7 @@
 package com.example.mobile_android.ui.site;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -59,7 +60,7 @@ public class AddSiteActivity extends AppCompatActivity {
     private void registerSite(String url) {
         showLoading(true);
         String userId = null; // TODO: 실제 사용자 ID 가져오는 로직 구현
-        String siteName = ""; // TODO: 필요하다면 사이트 이름 설정
+        String siteName = extractDomainName(url);; // TODO: 필요하다면 사이트 이름 설정
 
         Log.d("AddSiteActivity", "Registering site with URL: " + url);
 
@@ -127,6 +128,22 @@ public class AddSiteActivity extends AppCompatActivity {
             registerButton.setEnabled(true);
             cancelButton.setEnabled(true);
             siteUrlEditText.setEnabled(true);
+        }
+    }
+    private String extractDomainName(String url) {
+        try {
+            Uri uri = Uri.parse(url);
+            String host = uri.getHost();
+            if (host == null) return "사이트";
+
+            // www 제거
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
+            }
+
+            return host;
+        } catch (Exception e) {
+            return "사이트";
         }
     }
 }

@@ -29,6 +29,7 @@
             android:layout_marginEnd="8dp">
 
             <TextView
+                android:id="@+id/tv_total_items"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="12"
@@ -58,6 +59,7 @@
             android:layout_marginEnd="8dp">
 
             <TextView
+                android:id="@+id/tv_new_items"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="4"
@@ -86,6 +88,7 @@
             android:layout_marginStart="8dp">
 
             <TextView
+                android:id="@+id/tv_upcoming_items"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="8"
