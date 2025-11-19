@@ -23,7 +23,7 @@ android {
             // 개발용: localhost 사용 (ADB reverse로 PC의 localhost:8000과 연결)
             // 실제 디바이스: localhost 또는 127.0.0.1 사용
             // 에뮬레이터: 10.0.2.2 사용
-            buildConfigField("String", "BASE_URL", "\"http://localhost:8000\"")
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000\"")
             isDebuggable = true
         }
         release {

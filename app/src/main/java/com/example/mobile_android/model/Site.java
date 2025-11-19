@@ -22,7 +22,10 @@ public class Site {
     @SerializedName("created_at")
     private String createdAt;
 
-    // 필요한 모든 필드에 대해 getter를 추가할 수 있습니다.
+    @SerializedName("updated_at")
+    private String updatedAt;
+
+    // GETTERS
     public String getId() {
         return id;
     }
@@ -37,5 +40,17 @@ public class Site {
 
     public String getCategory() {
         return category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
     }
 }
