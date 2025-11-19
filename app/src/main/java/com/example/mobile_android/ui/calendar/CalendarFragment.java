@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.example.mobile_android.R;
 import com.example.mobile_android.databinding.FragmentCalendarBinding;
+import com.example.mobile_android.util.DateTimeUtils;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -41,7 +42,7 @@ public class CalendarFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // 날짜/어댑터 준비
-        selectedDate = LocalDate.now();
+        selectedDate = LocalDate.now(DateTimeUtils.getKstZoneId());
 
         dayAdapter = new DayAdapter(day -> {
             selectedDate = day;

@@ -19,24 +19,42 @@ public class Post implements Serializable, Parcelable {
     private String sourceUrl;
     @SerializedName("event_date")
     private String eventDate;
+    @SerializedName("event_start_date")
+    private String eventStartDate;
+    @SerializedName("event_end_date")
+    private String eventEndDate;
     @SerializedName("location")
     private String location;
     @SerializedName("created_at")
     private String createdAt;
     @SerializedName("updated_at")
     private String updatedAt;
+    @SerializedName("category_name")
+    private String categoryName;
+    @SerializedName("site_name")
+    private String siteName;
+    @SerializedName("is_new")
+    private Boolean isNew;
 
     // Constructors
-    public Post(String id, String siteId, String title, String content, String sourceUrl, String eventDate, String location, String createdAt, String updatedAt) {
+    public Post(String id, String siteId, String title, String content, String sourceUrl,
+                String eventDate, String eventStartDate, String eventEndDate,
+                String location, String createdAt, String updatedAt,
+                String categoryName, String siteName, Boolean isNew) {
         this.id = id;
         this.siteId = siteId;
         this.title = title;
         this.content = content;
         this.sourceUrl = sourceUrl;
         this.eventDate = eventDate;
+        this.eventStartDate = eventStartDate;
+        this.eventEndDate = eventEndDate;
         this.location = location;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.categoryName = categoryName;
+        this.siteName = siteName;
+        this.isNew = isNew;
     }
 
     protected Post(Parcel in) {
@@ -46,9 +64,15 @@ public class Post implements Serializable, Parcelable {
         content = in.readString();
         sourceUrl = in.readString();
         eventDate = in.readString();
+        eventStartDate = in.readString();
+        eventEndDate = in.readString();
         location = in.readString();
         createdAt = in.readString();
         updatedAt = in.readString();
+        categoryName = in.readString();
+        siteName = in.readString();
+        byte tmpIsNew = in.readByte();
+        isNew = tmpIsNew == 0 ? null : tmpIsNew == 1;
     }
 
     // Getters
@@ -58,9 +82,14 @@ public class Post implements Serializable, Parcelable {
     public String getContent() { return content; }
     public String getSourceUrl() { return sourceUrl; }
     public String getEventDate() { return eventDate; }
+    public String getEventStartDate() { return eventStartDate; }
+    public String getEventEndDate() { return eventEndDate; }
     public String getLocation() { return location; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
+    public String getCategoryName() { return categoryName; }
+    public String getSiteName() { return siteName; }
+    public Boolean getIsNew() { return isNew; }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -70,9 +99,14 @@ public class Post implements Serializable, Parcelable {
         dest.writeString(content);
         dest.writeString(sourceUrl);
         dest.writeString(eventDate);
+        dest.writeString(eventStartDate);
+        dest.writeString(eventEndDate);
         dest.writeString(location);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);
+        dest.writeString(categoryName);
+        dest.writeString(siteName);
+        dest.writeByte((byte) (isNew == null ? 0 : isNew ? 1 : 2));
     }
 
     @Override

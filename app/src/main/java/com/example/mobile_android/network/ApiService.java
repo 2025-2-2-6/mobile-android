@@ -1,14 +1,21 @@
 package com.example.mobile_android.network;
 
+import com.example.mobile_android.model.FcmTokenRequest;
+import com.example.mobile_android.model.Notification;
+import com.example.mobile_android.model.Post;
 import com.example.mobile_android.model.PostListResponse;
 import com.example.mobile_android.model.SiteRegisterRequest;
 import com.example.mobile_android.model.SiteRegisterResponse;
 
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
@@ -27,4 +34,23 @@ public interface ApiService {
             @Query("order_by") String orderBy,
             @Query("order") String order
     );
+
+    @GET("/api/v1/posts/{post_id}")
+    Call<Post> getPostDetail(@Path("post_id") String postId);
+
+    @GET("/api/v1/notifications")
+    Call<List<Notification>> getNotifications(
+            @Query("user_id") String userId,
+            @Query("type") String type,
+            @Query("is_read") Boolean isRead
+    );
+
+    @POST("/api/v1/notifications/{notification_id}/read")
+    Call<Void> markNotificationAsRead(@Path("notification_id") String notificationId);
+
+    @POST("/api/v1/fcm/register")
+    Call<Void> registerFcmToken(@Body FcmTokenRequest request);
+
+    @DELETE("/api/v1/fcm/unregister")
+    Call<Void> unregisterFcmToken(@Query("fcm_token") String fcmToken);
 }
