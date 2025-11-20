@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,8 +34,13 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private SiteAdapter siteAdapter;
     private List<Site> siteList = new ArrayList<>();
-    private TextView tvTotalItems, tvNewItems, tvUpcomingItems, tvSiteCount;
 
+    private TextView tvTotalItems, tvNewItems, tvUpcomingItems, tvSiteCount;
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadSiteList();  // 🔥 AddSiteActivity → 뒤로 오면 자동 새로고침
+    }
     @Nullable
     @Override
     public View onCreateView(
@@ -44,37 +50,52 @@ public class HomeFragment extends Fragment {
     ) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        // --- UI 요소 찾기 ---
         recyclerView = view.findViewById(R.id.rv_sites);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        siteAdapter = new SiteAdapter(siteList);
-        recyclerView.setAdapter(siteAdapter);
         tvTotalItems = view.findViewById(R.id.tv_total_items);
         tvNewItems = view.findViewById(R.id.tv_new_items);
         tvUpcomingItems = view.findViewById(R.id.tv_upcoming_items);
         tvSiteCount = view.findViewById(R.id.tv_site_count);
 
-        // ★★★ 새 사이트 등록 버튼 클릭 리스너 추가 ★★★
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // --- 어댑터 생성 ---
+        siteAdapter = new SiteAdapter(siteList);
+
+        // 🔥 삭제 버튼 리스너 추가
+        siteAdapter.setOnDeleteListener(site -> {
+            deleteSite(site);
+        });
+
+        recyclerView.setAdapter(siteAdapter);
+
+        // --- 새 사이트 등록 버튼 ---
         Button addSiteButton = view.findViewById(R.id.add_site_button);
         addSiteButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), AddSiteActivity.class);
             startActivity(intent);
         });
+
+        // --- 사이트 목록 로드 ---
         loadSiteList();
 
         return view;
     }
 
+    // ----------------------
+    // ★ 사이트 목록 로딩
+    // ----------------------
     private void loadSiteList() {
         ApiClient.getApiService().getSites().enqueue(new Callback<List<Site>>() {
             @Override
             public void onResponse(Call<List<Site>> call, Response<List<Site>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+
                     siteList.clear();
                     siteList.addAll(response.body());
                     siteAdapter.notifyDataSetChanged();
 
-                    // ★ 요약 정보 업데이트 ★
+                    // 요약 UI 갱신
                     updateSummary();
                 }
             }
@@ -85,23 +106,53 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
+    // ----------------------
+    // ★ 요약 정보 업데이트
+    // ----------------------
     private void updateSummary() {
         int totalSites = siteList.size();
 
         tvTotalItems.setText(String.valueOf(totalSites));
         tvSiteCount.setText(totalSites + "개");
 
-        // 새 항목 (백엔드에서 new_posts 받아올 경우 사용)
-        int newPosts = 0;
-//        for (Site site : siteList) {
-//            if (site.getNewPosts() != null) {
-//                newPosts += site.getNewPosts();
-//            }
-//        }
-        tvNewItems.setText(String.valueOf(newPosts));
+        // 새 항목 → 현재는 백엔드 구현 전입니다.
+        tvNewItems.setText("0");
 
-        // 다가오는 일정(백엔드 구현 전까지 0으로 처리)
+        // 다가오는 일정 → 추후 기능
         tvUpcomingItems.setText("0");
     }
 
+    // ------------------------
+    // ★ 사이트 삭제 기능
+    // ------------------------
+    private void deleteSite(Site site) {
+
+        ApiClient.getApiService().deleteSite(site.getId())
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+
+                        if (response.isSuccessful()) {
+
+                            siteList.remove(site);
+                            siteAdapter.notifyDataSetChanged();
+
+                            updateSummary();
+
+                            Toast.makeText(getContext(), "사이트 삭제됨", Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            Toast.makeText(getContext(),
+                                    "삭제 실패 (" + response.code() + ")",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(getContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 }
