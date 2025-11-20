@@ -1,76 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_notification"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#1A000000"
+    app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/iv_notification_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+        <FrameLayout
+            android:id="@+id/icon_container"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_notification_icon_circle"
+            android:padding="12dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_ai_summary" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/iv_notification_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                tools:src="@drawable/ic_notification_new" />
+        </FrameLayout>
 
         <TextView
-            android:id="@+id/tv_notification_title"
-            android:layout_width="0dp"
+            android:id="@+id/tv_notification_label"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:layout_marginStart="12dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_notification_label"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:text="새 항목 발견"
+            android:textColor="@android:color/black"
+            android:textSize="12sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/iv_new_badge"
-            app:layout_constraintStart_toEndOf="@id/iv_notification_icon"
-            app:layout_constraintTop_toTopOf="@+id/iv_notification_icon"
-            tools:text="AI 요약 완료" />
-
-        <TextView
-            android:id="@+id/tv_notification_body"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_notification_title"
-            app:layout_constraintStart_toStartOf="@+id/tv_notification_title"
-            app:layout_constraintTop_toBottomOf="@+id/tv_notification_title"
-            tools:text="재학생 장학금 신청 안내가 요약되었습니다." />
-
-        <TextView
-            android:id="@+id/tv_notification_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@android:color/darker_gray"
-            app:layout_constraintStart_toStartOf="@+id/tv_notification_title"
-            app:layout_constraintTop_toBottomOf="@+id/tv_notification_body"
-            tools:text="5분 전" />
-
-        <ImageView
-            android:id="@+id/iv_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_delete"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_notification_time"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_notification_time" />
+            app:layout_constraintBottom_toTopOf="@+id/tv_notification_title"
+            app:layout_constraintStart_toEndOf="@+id/icon_container"
+            app:layout_constraintTop_toTopOf="@+id/icon_container"
+            tools:text="새 항목 발견" />
 
         <ImageView
             android:id="@+id/iv_new_badge"
             android:layout_width="8dp"
             android:layout_height="8dp"
+            android:layout_marginStart="6dp"
             android:src="@drawable/bg_notification_unread_dot"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_notification_label"
+            app:layout_constraintStart_toEndOf="@+id/tv_notification_label"
+            app:layout_constraintTop_toTopOf="@+id/tv_notification_label"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/iv_delete"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/ic_delete"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tv_notification_title" />
+            app:layout_constraintTop_toTopOf="@+id/tv_notification_label"
+            app:tint="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/tv_notification_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/iv_delete"
+            app:layout_constraintStart_toEndOf="@+id/icon_container"
+            app:layout_constraintTop_toBottomOf="@+id/tv_notification_label"
+            tools:text="내일 마감 공모전" />
+
+        <TextView
+            android:id="@+id/tv_notification_body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#4D4D4D"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_notification_title"
+            app:layout_constraintStart_toEndOf="@+id/icon_container"
+            app:layout_constraintTop_toBottomOf="@+id/tv_notification_title"
+            tools:text="창업 아이디어 공모전 안내가 도착했습니다. 지금 바로 확인해 보세요." />
+
+        <TextView
+            android:id="@+id/tv_notification_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/icon_container"
+            app:layout_constraintTop_toBottomOf="@+id/tv_notification_body"
+            tools:text="5분 전" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

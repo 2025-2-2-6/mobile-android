@@ -6,6 +6,6 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 
 public interface AuthApi {
-    @POST("google-login")
+    @POST("/api/v1/auth/google-login")
     Call<UserResponse> googleLogin(@Header("Authorization") String token);
 }

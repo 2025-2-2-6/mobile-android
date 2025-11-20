@@ -18,10 +18,10 @@
         tools:layout="@layout/fragment_calendar" />
 
     <fragment
-        android:id="@+id/nav_search"
-        android:name="com.example.mobile_android.ui.search.SearchFragment"
-        android:label="검색"
-        tools:layout="@layout/fragment_search"/>
+        android:id="@+id/nav_post"
+        android:name="com.example.mobile_android.ui.post.PostManagementFragment"
+        android:label="게시물"
+        tools:layout="@layout/fragment_post_management"/>
 
     <fragment
         android:id="@+id/nav_mypage"

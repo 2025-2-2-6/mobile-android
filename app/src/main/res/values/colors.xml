@@ -20,6 +20,15 @@
     <color name="notification_item_title_text">#212121</color>
     <color name="notification_item_time_text">#757575</color>
     <color name="notification_item_unread_dot">#4285F4</color>
+    <color name="notification_card_blue">#E8F0FF</color>
+    <color name="notification_card_green">#E7F7EF</color>
+    <color name="notification_card_purple">#F2E9FF</color>
+    <color name="notification_label_blue_bg">#DDE8FF</color>
+    <color name="notification_label_green_bg">#DCF5E7</color>
+    <color name="notification_label_purple_bg">#EFE0FF</color>
+    <color name="notification_icon_blue_tint">#3478F6</color>
+    <color name="notification_icon_green_tint">#2AA876</color>
+    <color name="notification_icon_purple_tint">#7B4EDB</color>
 
     <!-- Search Page Colors -->
     <color name="chip_selected_bg">#0B0E18</color>          <!-- 진한 네이비/블랙 계열 -->

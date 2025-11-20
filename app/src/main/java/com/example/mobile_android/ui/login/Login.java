@@ -2,6 +2,7 @@ package com.example.mobile_android.ui.login;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -16,7 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobile_android.MainActivity;
 import com.example.mobile_android.R;
+import com.example.mobile_android.fcm.FcmTokenManager;
 import com.example.mobile_android.model.UserResponse;
+import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.network.AuthApi;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -29,15 +32,15 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Login extends AppCompatActivity {
+    private static final String TAG = "LoginActivity";
     FirebaseAuth auth;
     GoogleSignInClient googleSignInClient;
 
@@ -64,18 +67,23 @@ public class Login extends AppCompatActivity {
 
                                 String bearer = "Bearer " + idToken;
 
-                                Retrofit retrofit = new Retrofit.Builder()
-                                        .baseUrl("http://10.0.2.2:8000/api/v1/auth/")
-                                        .addConverterFactory(GsonConverterFactory.create())
-                                        .build();
-
+                                Retrofit retrofit = ApiClient.getClient();
                                 AuthApi authApi = retrofit.create(AuthApi.class);
 
                                 authApi.googleLogin(bearer).enqueue(new Callback<UserResponse>() {
                                     @Override
                                     public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                                         if (response.isSuccessful()) {
-                                            // 백엔드 로그인 성공 → MainActivity로 이동
+                                            FirebaseMessaging.getInstance().getToken()
+                                                    .addOnCompleteListener(task -> {
+                                                        if (task.isSuccessful() && task.getResult() != null) {
+                                                            FcmTokenManager.handleNewToken(getApplicationContext(), task.getResult());
+                                                        } else {
+                                                            Log.w(TAG, "Failed to fetch FCM token", task.getException());
+                                                            FcmTokenManager.registerTokenIfPossible(getApplicationContext());
+                                                        }
+                                                    });
+
                                             Intent intent = new Intent(Login.this, MainActivity.class);
                                             startActivity(intent);
                                             finish();
@@ -106,6 +114,7 @@ public class Login extends AppCompatActivity {
 
         // 이미 로그인되어 있다면 바로 MainActivity로 이동
         if (auth.getCurrentUser() != null) {
+            FcmTokenManager.registerTokenIfPossible(getApplicationContext());
             Intent intent = new Intent(Login.this, MainActivity.class);
             startActivity(intent);
             finish();
