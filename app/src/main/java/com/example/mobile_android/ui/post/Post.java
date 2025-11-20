@@ -1,8 +1,8 @@
 package com.example.mobile_android.ui.post;
-
+import android.os.Parcel;
+import android.os.Parcelable;
 // 새로운 API 응답 구조에 맞춘 예시 데이터 클래스
-// Note: This is a simplified version. Use com.example.mobile_android.model.Post for full functionality.
-public class Post {
+public class Post implements Parcelable {
     private String id;
     private String siteId;
     private String title;
@@ -33,52 +33,65 @@ public class Post {
         this.updatedAt = updatedAt;
     }
 
-    // Getter 메서드들
-    public String getId() {
-        return id;
+    protected Post(Parcel in) {
+        id = in.readString();
+        siteId = in.readString();
+        title = in.readString();
+        content = in.readString();
+        sourceUrl = in.readString();
+        eventDate = in.readString();
+        eventStartDate = in.readString();
+        eventEndDate = in.readString();
+        location = in.readString();
+        category = in.readString();
+        createdAt = in.readString();
+        updatedAt = in.readString();
     }
 
-    public String getSiteId() {
-        return siteId;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(siteId);
+        dest.writeString(title);
+        dest.writeString(content);
+        dest.writeString(sourceUrl);
+        dest.writeString(eventDate);
+        dest.writeString(eventStartDate);
+        dest.writeString(eventEndDate);
+        dest.writeString(location);
+        dest.writeString(category);
+        dest.writeString(createdAt);
+        dest.writeString(updatedAt);
     }
 
-    public String getTitle() {
-        return title;
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public String getContent() {
-        return content;
-    }
+    public static final Creator<Post> CREATOR = new Creator<Post>() {
+        @Override
+        public Post createFromParcel(Parcel in) {
+            return new Post(in);
+        }
 
-    public String getSourceUrl() {
-        return sourceUrl;
-    }
+        @Override
+        public Post[] newArray(int size) {
+            return new Post[size];
+        }
+    };
 
-    public String getEventDate() {
-        return eventDate;
-    }
-
-    public String getEventStartDate() {
-        return eventStartDate;
-    }
-
-    public String getEventEndDate() {
-        return eventEndDate;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
+    // Getter
+    public String getId() { return id; }
+    public String getSiteId() { return siteId; }
+    public String getTitle() { return title; }
+    public String getContent() { return content; }
+    public String getSourceUrl() { return sourceUrl; }
+    public String getEventDate() { return eventDate; }
+    public String getEventStartDate() { return eventStartDate; }
+    public String getEventEndDate() { return eventEndDate; }
+    public String getLocation() { return location; }
+    public String getCategory() { return category; }
+    public String getCreatedAt() { return createdAt; }
+    public String getUpdatedAt() { return updatedAt; }
 }

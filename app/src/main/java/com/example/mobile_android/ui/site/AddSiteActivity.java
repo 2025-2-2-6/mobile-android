@@ -1,6 +1,7 @@
 package com.example.mobile_android.ui.site;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,7 +30,7 @@ public class AddSiteActivity extends AppCompatActivity {
     private Button registerButton;
     private Button cancelButton;
     private ProgressBar loadingProgressBar;
-
+    private EditText siteNameEditText; // ← 추가
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +40,7 @@ public class AddSiteActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.btn_register);
         cancelButton = findViewById(R.id.btn_cancel);
         loadingProgressBar = findViewById(R.id.loadingProgressBar);
+        siteNameEditText = findViewById(R.id.et_site_name); // ← 반드시 추가해야 함!!
 
         registerButton.setOnClickListener(v -> {
             String siteUrl = siteUrlEditText.getText().toString().trim();
@@ -130,6 +132,22 @@ public class AddSiteActivity extends AppCompatActivity {
             registerButton.setEnabled(true);
             cancelButton.setEnabled(true);
             siteUrlEditText.setEnabled(true);
+        }
+    }
+    private String extractDomainName(String url) {
+        try {
+            Uri uri = Uri.parse(url);
+            String host = uri.getHost();
+            if (host == null) return "사이트";
+
+            // www 제거
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
+            }
+
+            return host;
+        } catch (Exception e) {
+            return "사이트";
         }
     }
 }

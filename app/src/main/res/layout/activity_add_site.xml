@@ -53,13 +53,7 @@
             android:background="@drawable/edittext_background"
             android:padding="12dp" />
 
-        <Button
-            android:id="@+id/btn_verify"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_site_verify_button"
-            android:textSize="15sp"
-            android:layout_marginStart="8dp" />
+
     </LinearLayout>
 
     <!-- 2. 사이트 이름 입력 필드 -->
@@ -80,7 +74,8 @@
         android:textSize="16sp"
         android:layout_marginTop="4dp"
         android:background="@drawable/edittext_background"
-        android:padding="12dp" />
+        android:padding="12dp"
+        android:inputType="textCapSentences"/>
 
     <!-- 3. 카테고리 선택 스피너 -->
     <TextView

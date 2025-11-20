@@ -17,11 +17,21 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import com.example.mobile_android.model.Site;
+
+import java.util.List;
 
 public interface ApiService {
+
     @Headers("Content-Type: application/json")
     @POST("/api/v1/sites/register")
     Call<SiteRegisterResponse> registerSite(@Body SiteRegisterRequest request);
+
+    // 📌 추가: 등록한 사이트 전체 불러오기
+    @GET("/api/v1/sites")
+    Call<List<Site>> getSites();
+    @DELETE("/api/v1/sites/{siteId}")
+    Call<Void> deleteSite(@Path("siteId") String siteId);
 
     @GET("/api/v1/posts/list")
     Call<PostListResponse> getPosts(

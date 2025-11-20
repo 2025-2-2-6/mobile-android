@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobile_android.R;
+import com.example.mobile_android.model.Site;
 import com.example.mobile_android.ui.post.PostListActivity;
 
 import java.util.List;
@@ -19,6 +21,14 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
 
     private List<Site> siteList;
 
+    public interface OnSiteDeleteListener {
+        void onDelete(Site site);
+    }
+    private OnSiteDeleteListener deleteListener;
+
+    public void setOnDeleteListener(OnSiteDeleteListener listener) {
+        this.deleteListener = listener;
+    }
     public SiteAdapter(List<Site> siteList) {
         this.siteList = siteList;
     }
@@ -33,26 +43,27 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
     @Override
     public void onBindViewHolder(@NonNull SiteViewHolder holder, int position) {
         Site site = siteList.get(position);
+
         holder.siteName.setText(site.getName());
-        holder.categoryTag.setText(site.getCategory());
         holder.siteUrl.setText(site.getUrl());
-        holder.lastUpdated.setText("• " + site.getLastUpdated());
+        holder.categoryTag.setText(site.getCategory());
+        holder.lastUpdated.setText("• " + site.getUpdatedAt());
 
-        if (site.getNewPosts() > 0) {
-            holder.newPostBadge.setText(site.getNewPosts() + " 새글");
-            holder.newPostBadge.setVisibility(View.VISIBLE);
-        } else {
-            holder.newPostBadge.setVisibility(View.GONE);
-        }
+        // newPosts 같은 값은 백엔드에 아직 없음 → 숨기기
+        holder.newPostBadge.setVisibility(View.GONE);
 
-        // [추가] 각 아이템 뷰에 클릭 리스너 설정
+        // 클릭 시 PostListActivity 로 이동
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, PostListActivity.class);
-            // 다음 액티비티로 사이트 이름을 전달
+            intent.putExtra("SITE_ID", site.getId());
             intent.putExtra("SITE_NAME", site.getName());
             context.startActivity(intent);
         });
+        holder.deleteButton.setOnClickListener(v -> {
+            if (deleteListener != null) deleteListener.onDelete(site);
+        });
+
     }
 
     @Override
@@ -61,15 +72,20 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
     }
 
     static class SiteViewHolder extends RecyclerView.ViewHolder {
-        TextView siteName, newPostBadge, categoryTag, lastUpdated, siteUrl;
+
+        TextView siteName, siteUrl, categoryTag, lastUpdated, newPostBadge;
+        ImageView editButton, deleteButton;
 
         public SiteViewHolder(@NonNull View itemView) {
             super(itemView);
+
             siteName = itemView.findViewById(R.id.tv_site_name);
-            newPostBadge = itemView.findViewById(R.id.tv_new_post_badge);
+            siteUrl = itemView.findViewById(R.id.tv_site_url);
             categoryTag = itemView.findViewById(R.id.tv_category_tag);
             lastUpdated = itemView.findViewById(R.id.tv_last_updated);
-            siteUrl = itemView.findViewById(R.id.tv_site_url);
+            newPostBadge = itemView.findViewById(R.id.tv_new_post_badge);
+            editButton = itemView.findViewById(R.id.iv_edit);
+            deleteButton = itemView.findViewById(R.id.iv_delete);
         }
     }
 }

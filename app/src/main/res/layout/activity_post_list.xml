@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:title="컴퓨터학과 공지사항"
+        app:title="크롤링 하는 중..."
         app:titleTextColor="@android:color/white"/>
 
     <androidx.recyclerview.widget.RecyclerView

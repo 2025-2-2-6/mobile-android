@@ -2,6 +2,7 @@ package com.example.mobile_android.ui.post;
 
 import android.os.Bundle;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -57,7 +58,7 @@ public class PostListActivity extends AppCompatActivity {
         if (postList == null) {
             postList = new ArrayList<>();
         }
-
+      
         postAdapter = new PostAdapter(this, postList);
         recyclerView.setAdapter(postAdapter);
 
@@ -78,7 +79,7 @@ public class PostListActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        finish();
         return true;
     }
 
@@ -112,4 +113,3 @@ public class PostListActivity extends AppCompatActivity {
         });
     }
 }
-
