@@ -45,12 +45,6 @@ public class NotificationViewModel extends AndroidViewModel {
         return unreadCount;
     }
 
-    public void refresh() {
-        if (userId != null) {
-            repository.refreshFromServer(userId);
-        }
-    }
-
     public void markAsRead(String notificationId) {
         repository.markAsRead(notificationId);
     }

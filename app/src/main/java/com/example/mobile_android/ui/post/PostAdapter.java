@@ -119,6 +119,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     }
 
     private String resolveCategory(Post post) {
+        // Priority: category > categoryName > siteName > app name
+        if (!TextUtils.isEmpty(post.getCategory())) {
+            return post.getCategory();
+        }
         if (!TextUtils.isEmpty(post.getCategoryName())) {
             return post.getCategoryName();
         }

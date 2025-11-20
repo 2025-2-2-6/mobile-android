@@ -115,9 +115,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (notificationViewModel != null) {
-            notificationViewModel.refresh();
-        }
+        // Room DB LiveData가 자동으로 관찰하므로 별도 refresh 불필요
     }
 
     private void setupNavigationView() {
@@ -195,9 +193,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotificationView() {
-        if (notificationViewModel != null) {
-            notificationViewModel.refresh();
-        }
+        // Room DB LiveData가 자동으로 관찰하므로 별도 refresh 불필요
         notificationView.setVisibility(View.VISIBLE);
         Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_right);
         notificationView.startAnimation(slideIn);
@@ -272,8 +268,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (notificationSwipeRefresh != null) {
             notificationSwipeRefresh.setOnRefreshListener(() -> {
-                if (notificationViewModel != null) {
-                    notificationViewModel.refresh();
+                // Room DB는 LiveData로 자동 관찰되므로 별도 새로고침 불필요
+                // 스와이프 제스처에 대한 피드백만 제공
+                if (notificationSwipeRefresh != null) {
+                    notificationSwipeRefresh.setRefreshing(false);
                 }
             });
         }

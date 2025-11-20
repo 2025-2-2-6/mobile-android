@@ -4,31 +4,22 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
 import com.example.mobile_android.data.local.AppDatabase;
 import com.example.mobile_android.data.local.NotificationDao;
 import com.example.mobile_android.data.local.NotificationEntity;
-import com.example.mobile_android.model.Notification;
-import com.example.mobile_android.network.ApiClient;
-import com.example.mobile_android.network.ApiService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 /**
- * Coordinates between Retrofit + Room for notifications.
+ * Room DB 기반 알림 관리 (로컬 전용)
  */
 public class NotificationRepository {
 
@@ -36,13 +27,11 @@ public class NotificationRepository {
     private static volatile NotificationRepository INSTANCE;
 
     private final NotificationDao notificationDao;
-    private final ApiService apiService;
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
 
     private NotificationRepository(Context context) {
         AppDatabase db = AppDatabase.getInstance(context);
         notificationDao = db.notificationDao();
-        apiService = ApiClient.getApiService();
     }
 
     public static NotificationRepository getInstance(Context context) {
@@ -64,29 +53,7 @@ public class NotificationRepository {
         return notificationDao.observeUnreadCount(userId);
     }
 
-    public void refreshFromServer(String userId) {
-        if (TextUtils.isEmpty(userId)) {
-            Log.w(TAG, "refreshFromServer: userId is empty");
-            return;
-        }
-
-        apiService.getNotifications(userId, null, null).enqueue(new Callback<List<Notification>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Notification>> call, @NonNull Response<List<Notification>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Notification> remote = response.body();
-                    ioExecutor.execute(() -> notificationDao.upsert(mapToEntities(remote, userId)));
-                } else {
-                    Log.w(TAG, "Failed to refresh notifications: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<Notification>> call, @NonNull Throwable t) {
-                Log.e(TAG, "refreshFromServer error", t);
-            }
-        });
-    }
+    // refreshFromServer 제거: 알림은 Room DB로만 관리
 
     public void markAsRead(String notificationId) {
         if (TextUtils.isEmpty(notificationId)) return;
@@ -133,32 +100,7 @@ public class NotificationRepository {
         ioExecutor.execute(() -> notificationDao.upsert(entity));
     }
 
-    private List<NotificationEntity> mapToEntities(List<Notification> remote, String userId) {
-        List<NotificationEntity> list = new ArrayList<>();
-        if (remote == null) {
-            return list;
-        }
-
-        for (Notification notification : remote) {
-            NotificationEntity entity = NotificationEntity.from(
-                    safeId(notification.getId()),
-                    userId,
-                    notification.getType(),
-                    notification.getTitle(),
-                    notification.getMessage(),
-                    notification.getPostId(),
-                    notification.getSiteId(),
-                    notification.isRead(),
-                    notification.getCreatedAt(),
-                    notification.getEventStartDate(),
-                    notification.getEventEndDate(),
-                    System.currentTimeMillis()
-            );
-            list.add(entity);
-        }
-
-        return list;
-    }
+    // mapToEntities 제거: 백엔드 조회를 사용하지 않음
 
     private String safeId(String id) {
         return TextUtils.isEmpty(id) ? UUID.randomUUID().toString() : id;

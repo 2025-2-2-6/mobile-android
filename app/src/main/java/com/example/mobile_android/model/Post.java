@@ -25,6 +25,8 @@ public class Post implements Serializable, Parcelable {
     private String eventEndDate;
     @SerializedName("location")
     private String location;
+    @SerializedName("category")
+    private String category;
     @SerializedName("created_at")
     private String createdAt;
     @SerializedName("updated_at")
@@ -39,7 +41,7 @@ public class Post implements Serializable, Parcelable {
     // Constructors
     public Post(String id, String siteId, String title, String content, String sourceUrl,
                 String eventDate, String eventStartDate, String eventEndDate,
-                String location, String createdAt, String updatedAt,
+                String location, String category, String createdAt, String updatedAt,
                 String categoryName, String siteName, Boolean isNew) {
         this.id = id;
         this.siteId = siteId;
@@ -50,6 +52,7 @@ public class Post implements Serializable, Parcelable {
         this.eventStartDate = eventStartDate;
         this.eventEndDate = eventEndDate;
         this.location = location;
+        this.category = category;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.categoryName = categoryName;
@@ -67,6 +70,7 @@ public class Post implements Serializable, Parcelable {
         eventStartDate = in.readString();
         eventEndDate = in.readString();
         location = in.readString();
+        category = in.readString();
         createdAt = in.readString();
         updatedAt = in.readString();
         categoryName = in.readString();
@@ -85,6 +89,7 @@ public class Post implements Serializable, Parcelable {
     public String getEventStartDate() { return eventStartDate; }
     public String getEventEndDate() { return eventEndDate; }
     public String getLocation() { return location; }
+    public String getCategory() { return category; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
     public String getCategoryName() { return categoryName; }
@@ -102,6 +107,7 @@ public class Post implements Serializable, Parcelable {
         dest.writeString(eventStartDate);
         dest.writeString(eventEndDate);
         dest.writeString(location);
+        dest.writeString(category);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);
         dest.writeString(categoryName);
