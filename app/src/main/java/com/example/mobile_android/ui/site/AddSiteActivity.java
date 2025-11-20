@@ -32,7 +32,7 @@ public class AddSiteActivity extends AppCompatActivity {
     private Button registerButton;
     private Button cancelButton;
     private ProgressBar loadingProgressBar;
-
+    private EditText siteNameEditText; // ← 추가
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +42,7 @@ public class AddSiteActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.btn_register);
         cancelButton = findViewById(R.id.btn_cancel);
         loadingProgressBar = findViewById(R.id.loadingProgressBar);
+        siteNameEditText = findViewById(R.id.et_site_name); // ← 반드시 추가해야 함!!
 
         registerButton.setOnClickListener(v -> {
             String siteUrl = siteUrlEditText.getText().toString().trim();
@@ -60,8 +61,11 @@ public class AddSiteActivity extends AppCompatActivity {
     private void registerSite(String url) {
         showLoading(true);
         String userId = null; // TODO: 실제 사용자 ID 가져오는 로직 구현
-        String siteName = extractDomainName(url); // TODO: 필요하다면 사이트 이름 설정
-
+        String siteName = siteNameEditText.getText().toString().trim();
+        // 사이트 이름이 비어 있으면 URL에서 domain 추출
+        if (siteName.isEmpty()) {
+            siteName = extractDomainName(url);
+        }
         Log.d("AddSiteActivity", "Registering site with URL: " + url);
 
         SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId);
@@ -82,12 +86,6 @@ public class AddSiteActivity extends AppCompatActivity {
 
                     Toast.makeText(AddSiteActivity.this, body.getMessage(), Toast.LENGTH_LONG).show();
 
-                    // Navigate to PostListActivity and pass posts
-                    Intent intent = new Intent(AddSiteActivity.this, PostListActivity.class);
-                    if (posts != null) {
-                        intent.putParcelableArrayListExtra("posts", new ArrayList<>(posts));
-                    }
-                    startActivity(intent);
                     finish();
                 } else {
                     String errorMsg = "사이트 등록 실패: " + response.code() + " " + response.message();

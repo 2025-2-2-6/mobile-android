@@ -21,6 +21,14 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
 
     private List<Site> siteList;
 
+    public interface OnSiteDeleteListener {
+        void onDelete(Site site);
+    }
+    private OnSiteDeleteListener deleteListener;
+
+    public void setOnDeleteListener(OnSiteDeleteListener listener) {
+        this.deleteListener = listener;
+    }
     public SiteAdapter(List<Site> siteList) {
         this.siteList = siteList;
     }
@@ -52,6 +60,10 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
             intent.putExtra("SITE_NAME", site.getName());
             context.startActivity(intent);
         });
+        holder.deleteButton.setOnClickListener(v -> {
+            if (deleteListener != null) deleteListener.onDelete(site);
+        });
+
     }
 
     @Override
