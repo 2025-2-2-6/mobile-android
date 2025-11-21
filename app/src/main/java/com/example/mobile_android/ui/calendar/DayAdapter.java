@@ -65,7 +65,8 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
-        holder.bind(days.get(position), listener, selectedDate, eventDates.contains(days.get(position)));
+        LocalDate date = days.get(position);
+        holder.bind(date, listener, selectedDate, eventDates.contains(date));
     }
 
     @Override
