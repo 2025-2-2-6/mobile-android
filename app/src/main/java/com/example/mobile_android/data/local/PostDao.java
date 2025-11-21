@@ -52,18 +52,27 @@ public abstract class PostDao {
 
     /**
      * 특정 Post가 저장되어 있는지 확인합니다.
+     * @return 저장되어 있다면 true, 아니거나 없으면 false 또는 null
      */
-    @Query("SELECT isSaved FROM post WHERE id = :postId")
-    public abstract boolean isPostSaved(String postId);
+    @Query("SELECT isSaved FROM post WHERE id = :postId LIMIT 1")
+    public abstract Boolean isPostSaved(String postId);
 
     /**
      * 네트워크에서 가져온 Post 목록을 데이터베이스에 삽입/업데이트(upsert)합니다.
+     * 만약 Post가 이미 존재하면, 기존의 isSaved 상태를 유지한 채 나머지 정보만 업데이트합니다.
      */
     @Transaction
     public void upsert(List<Post> posts) {
+        // posts 리스트가 null이거나 비어있으면 아무것도 하지 않음 (NPE 방지)
+        if (posts == null || posts.isEmpty()) {
+            return;
+        }
+
         for (Post post : posts) {
-            boolean isSaved = isPostSaved(post.getId());
-            post.setSaved(isSaved);
+            // 기존 저장 상태를 확인 (결과가 없으면 null)
+            Boolean isSaved = isPostSaved(post.getId());
+            // isSaved가 null이면 false로 처리하여 안전하게 set
+            post.setSaved(Boolean.TRUE.equals(isSaved));
             insert(post);
         }
     }
