@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import com.example.mobile_android.MainActivity;
 import com.example.mobile_android.fcm.CrawlStatus;
-import com.example.mobile_android.ui.post.PostDetailActivity;
 
 import java.util.Map;
 
@@ -14,25 +13,17 @@ public class CrawlNewPostsHandler extends BaseNotificationHandler {
     @Override
     public Intent getIntent(Context context, Map<String, String> data) {
         CrawlStatus status = CrawlStatus.fromString(data.get("status"));
-
-        switch (status) {
-            case NEW_POST:
-                String postId = data.get("post_id");
-                if (postId != null) {
-                    Intent intent = new Intent(context, PostDetailActivity.class);
-                    intent.putExtra("POST_ID", postId);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    return intent;
-                }
-                break;
-
-            case SUCCESS:
-            case FAILED:
-            default:
-                break;
-        }
+        String siteId = data.get("site_id");
 
         Intent intent = new Intent(context, MainActivity.class);
+
+        // new_post 또는 success일 때 사이트 상세로 이동 가능
+        if ((status == CrawlStatus.NEW_POST || status == CrawlStatus.SUCCESS)
+                && siteId != null && !siteId.isEmpty()) {
+            intent.putExtra("NAVIGATE_TO", "site");
+            intent.putExtra("SITE_ID", siteId);
+        }
+
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         return intent;
     }
@@ -40,14 +31,15 @@ public class CrawlNewPostsHandler extends BaseNotificationHandler {
     @Override
     public String getTitle(Map<String, String> data) {
         CrawlStatus status = CrawlStatus.fromString(data.get("status"));
+        String siteName = data.get("site_name");
 
         switch (status) {
             case SUCCESS:
                 return "사이트 등록 완료";
             case FAILED:
-                return "사이트 등록 실패";
+                return "크롤링 실패";
             case NEW_POST:
-                return data.getOrDefault("title", "새 게시물");
+                return siteName != null ? siteName : "새 게시물";
             default:
                 return "알림";
         }
@@ -55,18 +47,7 @@ public class CrawlNewPostsHandler extends BaseNotificationHandler {
 
     @Override
     public String getMessage(Map<String, String> data) {
-        CrawlStatus status = CrawlStatus.fromString(data.get("status"));
-
-        switch (status) {
-            case SUCCESS:
-                String siteName = data.get("site_name");
-                return siteName != null ? siteName + " 사이트가 등록되었습니다." : "사이트가 등록되었습니다.";
-            case FAILED:
-                return data.getOrDefault("message", "사이트 등록 또는 크롤링에 실패했습니다.");
-            case NEW_POST:
-                return data.getOrDefault("message", "");
-            default:
-                return data.getOrDefault("message", "");
-        }
+        // 백엔드에서 자동 생성된 message 사용
+        return data.getOrDefault("message", "");
     }
 }
