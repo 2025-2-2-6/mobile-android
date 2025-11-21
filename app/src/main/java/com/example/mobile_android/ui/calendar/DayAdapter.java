@@ -37,9 +37,18 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     public void setSelected(LocalDate newSelectedDate) {
         LocalDate oldSelectedDate = this.selectedDate;
         this.selectedDate = newSelectedDate;
-        days.indexOf(oldSelectedDate);
-        notifyItemChanged(days.indexOf(oldSelectedDate));
-        notifyItemChanged(days.indexOf(newSelectedDate));
+
+        // 기존 선택된 날짜의 인덱스를 안전하게 확인
+        int oldIndex = days.indexOf(oldSelectedDate);
+        if (oldIndex >= 0) {
+            notifyItemChanged(oldIndex);
+        }
+
+        // 새로 선택된 날짜의 인덱스를 안전하게 확인
+        int newIndex = days.indexOf(newSelectedDate);
+        if (newIndex >= 0) {
+            notifyItemChanged(newIndex);
+        }
     }
 
     public void setEventDates(List<LocalDate> eventDates) {
