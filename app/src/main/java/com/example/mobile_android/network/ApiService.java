@@ -28,7 +28,7 @@ public interface ApiService {
     Call<SiteRegisterResponse> registerSite(@Body SiteRegisterRequest request);
 
     // 📌 추가: 등록한 사이트 전체 불러오기
-    @GET("/api/v1/sites")
+    @GET("/api/v1/sites/")
     Call<List<Site>> getSites();
     @DELETE("/api/v1/sites/{siteId}")
     Call<Void> deleteSite(@Path("siteId") String siteId);

@@ -9,57 +9,85 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.mobile_android.R;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class DayAdapter extends RecyclerView.Adapter<DayAdapter.VH> {
-    public interface OnDayClick { void onClick(LocalDate day); }
-    private final List<LocalDate> items = new ArrayList<>();
-    private final OnDayClick onDayClick;
-    private final LocalDate today;
-    private LocalDate monthAnchor;
-    private LocalDate selected;
+public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
 
-    public DayAdapter(OnDayClick onDayClick, LocalDate today) {
-        this.onDayClick = onDayClick;
-        this.today = today;
+    private final OnDayClickListener listener;
+    private List<LocalDate> days = Collections.emptyList();
+    private List<LocalDate> eventDates = Collections.emptyList();
+    private LocalDate selectedDate;
+
+    public interface OnDayClickListener {
+        void onDayClick(LocalDate date);
     }
 
-    public void submit(List<LocalDate> days) {
-        items.clear(); items.addAll(days);
-        if (!items.isEmpty()) monthAnchor = items.get(15);
+    public DayAdapter(OnDayClickListener listener, LocalDate selectedDate) {
+        this.listener = listener;
+        this.selectedDate = selectedDate;
+    }
+
+    public void submit(List<LocalDate> newDays) {
+        this.days = newDays;
         notifyDataSetChanged();
     }
-    public void setSelected(LocalDate selected) { this.selected = selected; notifyDataSetChanged(); }
 
-    @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_day, parent, false);
-        return new VH(v);
+    public void setSelected(LocalDate newSelectedDate) {
+        LocalDate oldSelectedDate = this.selectedDate;
+        this.selectedDate = newSelectedDate;
+        days.indexOf(oldSelectedDate);
+        notifyItemChanged(days.indexOf(oldSelectedDate));
+        notifyItemChanged(days.indexOf(newSelectedDate));
     }
 
-    @Override public void onBindViewHolder(@NonNull VH h, int position) {
-        LocalDate d = items.get(position);
-        boolean inMonth = d.getMonth() == monthAnchor.getMonth();
-        boolean isToday = d.equals(today);
-        boolean isSelected = selected != null && d.equals(selected);
+    public void setEventDates(List<LocalDate> eventDates) {
+        this.eventDates = eventDates.stream().distinct().collect(Collectors.toList());
+        notifyDataSetChanged();
+    }
 
-        h.tv.setText(String.valueOf(d.getDayOfMonth()));
-        if (isSelected) {
-            h.tv.setBackgroundResource(R.drawable.bg_day_selected);
-            h.tv.setTextColor(Color.parseColor("#1A73E8"));
-        } else if (isToday && inMonth) {
-            h.tv.setBackgroundResource(R.drawable.bg_day_today);
-            h.tv.setTextColor(Color.parseColor("#1A73E8"));
-        } else {
-            h.tv.setBackgroundResource(android.R.color.transparent);
-            h.tv.setTextColor(inMonth ? Color.parseColor("#202124") : Color.parseColor("#BDC1C6"));
+    @NonNull
+    @Override
+    public DayViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_day, parent, false);
+        return new DayViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
+        holder.bind(days.get(position), listener, selectedDate, eventDates.contains(days.get(position)));
+    }
+
+    @Override
+    public int getItemCount() {
+        return days.size();
+    }
+
+    static class DayViewHolder extends RecyclerView.ViewHolder {
+        private final TextView tvDay;
+        private final View eventIndicator;
+
+        public DayViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvDay = itemView.findViewById(R.id.tv_day);
+            eventIndicator = itemView.findViewById(R.id.event_indicator);
         }
-        h.itemView.setOnClickListener(v -> { if (inMonth) { selected = d; notifyDataSetChanged(); onDayClick.onClick(d);} });
-    }
 
-    @Override public int getItemCount() { return items.size(); }
+        public void bind(LocalDate date, OnDayClickListener listener, LocalDate selectedDate, boolean hasEvent) {
+            tvDay.setText(String.valueOf(date.getDayOfMonth()));
 
-    static class VH extends RecyclerView.ViewHolder {
-        TextView tv; VH(@NonNull View itemView) { super(itemView); tv = itemView.findViewById(R.id.tvDay); }
+            if (date.equals(selectedDate)) {
+                itemView.setBackgroundResource(R.drawable.bg_day_selected);
+                tvDay.setTextColor(Color.WHITE);
+            } else {
+                itemView.setBackgroundResource(0);
+                tvDay.setTextColor(Color.BLACK);
+            }
+
+            eventIndicator.setVisibility(hasEvent ? View.VISIBLE : View.GONE);
+
+            itemView.setOnClickListener(v -> listener.onDayClick(date));
+        }
     }
 }

@@ -13,20 +13,24 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobile_android.R;
+import com.example.mobile_android.data.local.AppDatabase;
+import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.model.Post;
-import com.example.mobile_android.util.CalendarManager;
 import com.example.mobile_android.util.DateTimeUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
     private final Context context;
     private final List<Post> postList;
-    private final CalendarManager calendarManager;
+    private final PostDao postDao;
+    private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
     private OnPostClickListener listener;
 
     public interface OnPostClickListener {
@@ -36,7 +40,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public PostAdapter(Context context, List<Post> postList) {
         this.context = context;
         this.postList = postList;
-        this.calendarManager = new CalendarManager(context);
+        this.postDao = AppDatabase.getInstance(context).postDao();
     }
 
     public void setOnPostClickListener(OnPostClickListener listener) {
@@ -84,18 +88,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         String calendarAnchor = resolveCalendarAnchor(post);
         if (!TextUtils.isEmpty(calendarAnchor)) {
             holder.switchCalendar.setEnabled(true);
-            holder.switchCalendar.setChecked(calendarManager.isEventRegistered(post.getId()));
+            // 이제 데이터베이스의 isSaved 필드를 사용해 토글 상태를 결정
+            holder.switchCalendar.setChecked(post.isSaved());
             holder.switchCalendar.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    calendarManager.addEventToCalendar(
-                            post.getId(),
-                            post.getTitle(),
-                            calendarAnchor,
-                            post.getLocation()
-                    );
-                } else {
-                    calendarManager.removeEventFromCalendar(post.getId());
-                }
+                // UI를 즉시 업데이트하고, DB 작업은 백그라운드에서 처리
+                post.setSaved(isChecked);
+                databaseExecutor.execute(() -> {
+                    postDao.updateSaveState(post.getId(), isChecked);
+                });
             });
         } else {
             holder.switchCalendar.setEnabled(false);
