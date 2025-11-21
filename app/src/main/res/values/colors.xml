@@ -2,8 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="login_bg1">#673AB7</color>
-    <color name="login_bg2">#9C27B0</color>
+    <color name="login_bg1">#0B0E18</color>
+    <color name="login_bg2">#673AB7</color>
     <color name="logout_btn">#4F85B8</color>
 
     <!-- Notification Page Colors -->

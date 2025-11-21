@@ -20,7 +20,7 @@
 
             <include
                 android:id="@+id/header"
-                layout="@layout/header_bar" />
+                layout="@layout/layout_header_bar" />
 
             <fragment
                 android:id="@+id/nav_host_fragment_activity_main"
@@ -36,7 +36,7 @@
 
             <include
                 android:id="@+id/nav_view"
-                layout="@layout/bottom_nav_bar"
+                layout="@layout/layout_bottom_nav_bar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"

@@ -9,7 +9,7 @@
 
     <!-- Header -->
     <include
-        layout="@layout/header_bar"
+        layout="@layout/layout_header_bar"
         android:id="@+id/headerBar" />
 
     <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0"/>
@@ -95,6 +95,6 @@
 
     <!-- Bottom nav -->
     <include
-        layout="@layout/bottom_nav_bar"
+        layout="@layout/layout_bottom_nav_bar"
         android:id="@+id/bottomNav" />
 </LinearLayout>
