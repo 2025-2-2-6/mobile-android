@@ -106,3 +106,15 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:2.6.1")
 // EncryptedSharedPreferences
 }
+
+// 앱 설치 후 adb reverse 자동 실행
+tasks.whenTaskAdded {
+    if (name == "installDebug") {
+        finalizedBy("adbReverse")
+    }
+}
+
+tasks.register<Exec>("adbReverse") {
+    commandLine("adb", "reverse", "tcp:8000", "tcp:8000")
+    isIgnoreExitValue = true
+}

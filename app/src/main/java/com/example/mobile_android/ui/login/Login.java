@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
+import androidx.cardview.widget.CardView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -56,6 +56,7 @@ public class Login extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+                                Log.d(TAG, "Firebase 로그인 성공");
 
                                 GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(Login.this);
                                 String idToken = account.getIdToken();
@@ -66,6 +67,7 @@ public class Login extends AppCompatActivity {
                                 }
 
                                 String bearer = "Bearer " + idToken;
+                                Log.d(TAG, "백엔드 API 호출 시작");
 
                                 Retrofit retrofit = ApiClient.getClient();
                                 AuthApi authApi = retrofit.create(AuthApi.class);
@@ -73,7 +75,9 @@ public class Login extends AppCompatActivity {
                                 authApi.googleLogin(bearer).enqueue(new Callback<UserResponse>() {
                                     @Override
                                     public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                                        Log.d(TAG, "백엔드 응답 코드: " + response.code());
                                         if (response.isSuccessful()) {
+                                            Log.d(TAG, "백엔드 로그인 성공, MainActivity로 이동");
                                             FirebaseMessaging.getInstance().getToken()
                                                     .addOnCompleteListener(task -> {
                                                         if (task.isSuccessful() && task.getResult() != null) {
@@ -88,19 +92,36 @@ public class Login extends AppCompatActivity {
                                             startActivity(intent);
                                             finish();
                                         } else {
-                                            Toast.makeText(Login.this, "백엔드 로그인 실패", Toast.LENGTH_SHORT).show();
+                                            Log.e(TAG, "백엔드 로그인 실패: " + response.code() + " - " + response.message());
+                                            try {
+                                                Log.e(TAG, "에러 바디: " + response.errorBody().string());
+                                            } catch (Exception e) {
+                                                Log.e(TAG, "에러 바디 읽기 실패");
+                                            }
+                                            // 백엔드 실패 시 Firebase 로그아웃
+                                            auth.signOut();
+                                            googleSignInClient.signOut();
+                                            Toast.makeText(Login.this, "백엔드 로그인 실패: " + response.code(), Toast.LENGTH_SHORT).show();
                                         }
                                     }
 
                                     @Override
                                     public void onFailure(Call<UserResponse> call, Throwable t) {
-                                        Toast.makeText(Login.this, "서버 요청 실패", Toast.LENGTH_SHORT).show();
+                                        Log.e(TAG, "서버 요청 실패", t);
+                                        // 서버 요청 실패 시 Firebase 로그아웃
+                                        auth.signOut();
+                                        googleSignInClient.signOut();
+                                        Toast.makeText(Login.this, "서버 요청 실패: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 });
+                            } else {
+                                Log.e(TAG, "Firebase 로그인 실패", task.getException());
+                                Toast.makeText(Login.this, "Firebase 로그인 실패", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
                 } catch (ApiException e) {
+                    Log.e(TAG, "Google 로그인 ApiException", e);
                     e.printStackTrace();
                 }
             }
@@ -120,7 +141,7 @@ public class Login extends AppCompatActivity {
             finish();
             return;
         }
-        setContentView(R.layout.login_first);
+        setContentView(R.layout.activity_login);
 
         GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.client_id))
@@ -129,7 +150,7 @@ public class Login extends AppCompatActivity {
         googleSignInClient = GoogleSignIn.getClient(this, options);
         auth = FirebaseAuth.getInstance();
 
-        ImageView googleLoginButton = findViewById(R.id.google_login_button);
+        androidx.cardview.widget.CardView googleLoginButton = findViewById(R.id.google_login_button);
         googleLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

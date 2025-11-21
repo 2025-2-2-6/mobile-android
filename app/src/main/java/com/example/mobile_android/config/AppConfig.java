@@ -1,5 +1,7 @@
 package com.example.mobile_android.config;
 
+import android.os.Build;
+
 import com.example.mobile_android.BuildConfig;
 
 /**
@@ -32,10 +34,9 @@ public class AppConfig {
 
     /**
      * 실제 디바이스용 Base URL (필요시 사용)
-     * 같은 네트워크에 연결된 경우 PC의 IP 주소 사용
-     * 예: http://192.168.0.10:8000
+     * 예: http://localhost:8000
      */
-    public static final String DEVICE_BASE_URL = "http://192.168.0.10:8000";
+    public static final String DEVICE_BASE_URL = "http://localhost:8000";
 
     /**
      * 운영 서버 URL
@@ -45,9 +46,9 @@ public class AppConfig {
     /**
      * API 타임아웃 설정 (초 단위)
      */
-    public static final int CONNECT_TIMEOUT = 120;
-    public static final int READ_TIMEOUT = 120;
-    public static final int WRITE_TIMEOUT = 120;
+    public static final int CONNECT_TIMEOUT = 10;
+    public static final int READ_TIMEOUT = 30;
+    public static final int WRITE_TIMEOUT = 30;
 
     /**
      * FCM 관련 설정
@@ -63,21 +64,29 @@ public class AppConfig {
     public static final String PREF_FCM = "FCMPrefs";
 
     /**
+     * 에뮬레이터 여부 감지
+     */
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || Build.PRODUCT.contains("sdk")
+                || Build.PRODUCT.contains("emulator");
+    }
+
+    /**
      * 현재 사용 중인 Base URL 반환
-     * 필요에 따라 동적으로 URL을 변경하려면 이 메서드를 수정하세요
+     * 에뮬레이터/실제 기기 자동 감지
      */
     public static String getBaseUrl() {
-        // BuildConfig의 BASE_URL 사용
-        return BASE_URL;
-
-        // 필요시 아래처럼 동적으로 변경 가능:
-        // if (에뮬레이터 감지 로직) {
-        //     return EMULATOR_BASE_URL;
-        // } else if (개발 모드) {
-        //     return DEVICE_BASE_URL;
-        // } else {
-        //     return PRODUCTION_URL;
-        // }
+        if (!BuildConfig.DEBUG) {
+            return PRODUCTION_URL;
+        }
+        // 디버그 모드: 에뮬레이터면 10.0.2.2, 실제 기기면 localhost (adb reverse 필요)
+        return isEmulator() ? EMULATOR_BASE_URL : DEVICE_BASE_URL;
     }
 
     /**
