@@ -51,7 +51,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         }
     }
 
-    public void setEventDates(List<LocalDate> eventDates) {
+    public void setEventDates(@NonNull List<LocalDate> eventDates) {
         this.eventDates = eventDates.stream().distinct().collect(Collectors.toList());
         notifyDataSetChanged();
     }
