@@ -1,8 +1,6 @@
 package com.example.mobile_android.ui.post;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,23 +12,19 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
 
 import com.example.mobile_android.R;
+import com.example.mobile_android.data.local.AppDatabase;
+import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.model.Post;
-import com.example.mobile_android.network.ApiClient;
-import com.example.mobile_android.network.ApiService;
-import com.example.mobile_android.util.CalendarManager;
 import com.example.mobile_android.util.DateTimeUtils;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PostDetailActivity extends AppCompatActivity {
-
-    private static final int REQUEST_CALENDAR_PERMISSION = 1001;
 
     private TextView tvPostTitle;
     private TextView tvPostCategory;
@@ -44,9 +38,11 @@ public class PostDetailActivity extends AppCompatActivity {
     private Button btnAddToCalendar;
     private ImageButton btnBack;
 
-    private ApiService apiService;
-    private CalendarManager calendarManager;
+    private PostDao postDao;
+    private ExecutorService databaseExecutor;
+    private LiveData<Post> postLiveData;
     private Post currentPost;
+    private String postId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +50,11 @@ public class PostDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post_detail);
 
         initViews();
-        calendarManager = new CalendarManager(this);
-        apiService = ApiClient.getClient().create(ApiService.class);
+        initDatabase();
 
-        String postId = getIntent().getStringExtra("POST_ID");
+        postId = getIntent().getStringExtra("POST_ID");
         if (postId != null) {
-            loadPostDetail(postId);
+            observePost();
         } else {
             Toast.makeText(this, "게시물 ID가 없습니다.", Toast.LENGTH_SHORT).show();
             finish();
@@ -82,6 +77,21 @@ public class PostDetailActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btn_back);
     }
 
+    private void initDatabase() {
+        postDao = AppDatabase.getInstance(this).postDao();
+        databaseExecutor = Executors.newSingleThreadExecutor();
+    }
+
+    private void observePost() {
+        postLiveData = postDao.getPostById(postId);
+        postLiveData.observe(this, post -> {
+            if (post != null) {
+                currentPost = post;
+                displayPostDetail(post);
+            }
+        });
+    }
+
     private void setupClickListeners() {
         btnBack.setOnClickListener(v -> finish());
 
@@ -94,42 +104,16 @@ public class PostDetailActivity extends AppCompatActivity {
         btnAddToCalendar.setOnClickListener(v -> handleCalendarToggle());
     }
 
-    private void loadPostDetail(String postId) {
-        Call<Post> call = apiService.getPostDetail(postId);
-        call.enqueue(new Callback<Post>() {
-            @Override
-            public void onResponse(@NonNull Call<Post> call, @NonNull Response<Post> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    currentPost = response.body();
-                    displayPostDetail(currentPost);
-                } else {
-                    Toast.makeText(PostDetailActivity.this,
-                            "게시물을 불러오지 못했습니다. (" + response.code() + ")",
-                            Toast.LENGTH_LONG).show();
-                    finish();
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Post> call, @NonNull Throwable t) {
-                Toast.makeText(PostDetailActivity.this,
-                        "네트워크 오류: " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                finish();
-            }
-        });
-    }
-
     private void displayPostDetail(Post post) {
         tvPostTitle.setText(post.getTitle());
         tvPostCategory.setText(resolveCategory(post));
         tvPostContent.setText(post.getContent());
-
         tvPostCreatedAt.setText(formatDateTime(post.getCreatedAt(), "yyyy년 MM월 dd일 a hh:mm"));
 
         bindEventSection(post);
         bindLocation(post);
         bindSource(post);
+        updateCalendarButtonUI(post.isSaved());
     }
 
     private void bindEventSection(Post post) {
@@ -138,14 +122,12 @@ public class PostDetailActivity extends AppCompatActivity {
             tvPostEventDate.setVisibility(View.GONE);
             tvCalendarInfo.setVisibility(View.GONE);
             btnAddToCalendar.setVisibility(View.GONE);
-            return;
+        } else {
+            tvPostEventDate.setVisibility(View.VISIBLE);
+            tvPostEventDate.setText("📅 " + eventLabel);
+            tvCalendarInfo.setVisibility(View.VISIBLE);
+            btnAddToCalendar.setVisibility(View.VISIBLE);
         }
-
-        tvPostEventDate.setVisibility(View.VISIBLE);
-        tvPostEventDate.setText("📅 " + eventLabel);
-        tvCalendarInfo.setVisibility(View.VISIBLE);
-        btnAddToCalendar.setVisibility(View.VISIBLE);
-        updateCalendarButtonText();
     }
 
     private void bindLocation(Post post) {
@@ -171,66 +153,19 @@ public class PostDetailActivity extends AppCompatActivity {
         if (currentPost == null) {
             return;
         }
-
-        String calendarAnchor = resolveCalendarAnchor(currentPost);
-        if (TextUtils.isEmpty(calendarAnchor)) {
-            Toast.makeText(this, "등록 가능한 이벤트 날짜가 없습니다.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (!calendarManager.hasCalendarPermission()) {
-            requestCalendarPermission();
-            return;
-        }
-
-        if (calendarManager.isEventRegistered(currentPost.getId())) {
-            calendarManager.removeEventFromCalendar(currentPost.getId());
-        } else {
-            calendarManager.addEventToCalendar(
-                    currentPost.getId(),
-                    currentPost.getTitle(),
-                    calendarAnchor,
-                    currentPost.getLocation()
-            );
-        }
-        updateCalendarButtonText();
+        boolean newState = !currentPost.isSaved();
+        databaseExecutor.execute(() -> {
+            postDao.updateSaveState(currentPost.getId(), newState);
+        });
     }
 
-    private void updateCalendarButtonText() {
-        if (currentPost != null && calendarManager.isEventRegistered(currentPost.getId())) {
+    private void updateCalendarButtonUI(boolean isSaved) {
+        if (isSaved) {
             btnAddToCalendar.setText("캘린더에서 삭제");
-            btnAddToCalendar.setBackgroundTintList(
-                    ContextCompat.getColorStateList(this, android.R.color.holo_red_light)
-            );
+            btnAddToCalendar.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
         } else {
             btnAddToCalendar.setText("캘린더에 추가");
-            btnAddToCalendar.setBackgroundTintList(
-                    ContextCompat.getColorStateList(this, android.R.color.holo_purple)
-            );
-        }
-    }
-
-    private void requestCalendarPermission() {
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{
-                        Manifest.permission.READ_CALENDAR,
-                        Manifest.permission.WRITE_CALENDAR
-                },
-                REQUEST_CALENDAR_PERMISSION
-        );
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CALENDAR_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                handleCalendarToggle();
-            } else {
-                Toast.makeText(this, "캘린더 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
-            }
+            btnAddToCalendar.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_purple));
         }
     }
 
@@ -241,40 +176,17 @@ public class PostDetailActivity extends AppCompatActivity {
     private String resolveCategory(Post post) {
         if (!TextUtils.isEmpty(post.getCategoryName())) {
             return post.getCategoryName();
-        }
-        if (!TextUtils.isEmpty(post.getSiteName())) {
+        } else if (!TextUtils.isEmpty(post.getSiteName())) {
             return post.getSiteName();
         }
         return getString(R.string.app_name);
     }
 
     private String buildEventLabel(Post post) {
-        String start = formatDateTime(post.getEventStartDate(), "yyyy년 MM월 dd일 (E) HH:mm");
-        String end = formatDateTime(post.getEventEndDate(), "yyyy년 MM월 dd일 (E) HH:mm");
-        String single = formatDateTime(post.getEventDate(), "yyyy년 MM월 dd일 (E) HH:mm");
-
-        if (!TextUtils.isEmpty(start) && !TextUtils.isEmpty(end)) {
-            return start + " ~ " + end;
+        String eventDateStr = post.getCalendarAnchorDate();
+        if (TextUtils.isEmpty(eventDateStr)) {
+            return "";
         }
-        if (!TextUtils.isEmpty(start)) {
-            return start;
-        }
-        if (!TextUtils.isEmpty(single)) {
-            return single;
-        }
-        return end;
-    }
-
-    private String resolveCalendarAnchor(Post post) {
-        if (!TextUtils.isEmpty(post.getEventStartDate())) {
-            return post.getEventStartDate();
-        }
-        if (!TextUtils.isEmpty(post.getEventDate())) {
-            return post.getEventDate();
-        }
-        if (!TextUtils.isEmpty(post.getEventEndDate())) {
-            return post.getEventEndDate();
-        }
-        return null;
+        return formatDateTime(eventDateStr, "yyyy년 MM월 dd일 (E) HH:mm");
     }
 }

@@ -47,14 +47,19 @@ public class TagChipAdapter extends RecyclerView.Adapter<TagChipAdapter.VH> {
         h.tvCount.setSelected(it.selected);
 
         h.root.setOnClickListener(v -> {
-            if (selectedPos != RecyclerView.NO_POSITION && selectedPos != position) {
+            int currentPosition = h.getAdapterPosition();
+            if (currentPosition == RecyclerView.NO_POSITION) {
+                return;
+            }
+            
+            if (selectedPos != RecyclerView.NO_POSITION && selectedPos != currentPosition) {
                 items.get(selectedPos).selected = false;
                 notifyItemChanged(selectedPos);
             }
             it.selected = true;
-            notifyItemChanged(position);
-            selectedPos = position;
-            if (listener != null) listener.onClick(position, it);
+            notifyItemChanged(currentPosition);
+            selectedPos = currentPosition;
+            if (listener != null) listener.onClick(currentPosition, it);
         });
     }
 
