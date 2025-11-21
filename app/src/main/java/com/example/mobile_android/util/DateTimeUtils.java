@@ -24,6 +24,7 @@ public final class DateTimeUtils {
             "yyyy-MM-dd HH:mm:ss"
     };
 
+    private static final TimeZone UTC_TIME_ZONE = TimeZone.getTimeZone("UTC");
     private static final TimeZone KST_TIME_ZONE = TimeZone.getTimeZone("Asia/Seoul");
     private static final ZoneId KST_ZONE_ID = ZoneId.of("Asia/Seoul");
     private static final Locale KOREA = Locale.KOREA;
@@ -32,8 +33,11 @@ public final class DateTimeUtils {
 
     private static SimpleDateFormat formatter(String pattern) {
         SimpleDateFormat sdf = new SimpleDateFormat(pattern, KOREA);
-        // 'Z'가 포함된 패턴은 UTC(Zulu)로 해석해야 하므로, KST를 강제하지 않음
-        if (!pattern.endsWith("'Z'")) {
+        // 'Z'(Zulu)로 끝나는 패턴은 UTC 타임존으로 명시적으로 지정합니다.
+        if (pattern.endsWith("'Z'")) {
+            sdf.setTimeZone(UTC_TIME_ZONE);
+        } else {
+            // 그 외의 경우는 KST를 기준으로 해석합니다.
             sdf.setTimeZone(KST_TIME_ZONE);
         }
         return sdf;
