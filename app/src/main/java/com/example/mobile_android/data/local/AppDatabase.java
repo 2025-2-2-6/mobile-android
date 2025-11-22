@@ -7,6 +7,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import com.example.mobile_android.model.Post;
+import com.example.mobile_android.model.Site;
 
 /**
  * Room database entry point.
@@ -14,9 +15,10 @@ import com.example.mobile_android.model.Post;
 @Database(
         entities = {
                 NotificationEntity.class,
-                Post.class // Post 저장을 위해 추가
+                Post.class,
+                Site.class
         },
-        version = 2, // 데이터베이스 스키마 변경으로 버전 업데이트
+        version = 3, // 데이터베이스 스키마 변경으로 버전 업데이트
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -27,6 +29,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NotificationDao notificationDao();
 
     public abstract PostDao postDao(); // Post 데이터 관리를 위한 DAO 추가
+
+    public abstract SiteDao siteDao();
 
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {

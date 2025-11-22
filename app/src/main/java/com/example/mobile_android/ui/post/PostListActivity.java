@@ -1,6 +1,11 @@
 package com.example.mobile_android.ui.post;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,15 +36,18 @@ public class PostListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private PostAdapter postAdapter;
     private List<Post> currentPostList = new ArrayList<>();
+    private List<Post> allPostList = new ArrayList<>();
     private ApiService apiService;
     private PostDao postDao;
     private ExecutorService databaseExecutor;
     private String siteId;
+    private EditText searchEditText;
+    private ImageButton clearSearchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post_list);
+        setContentView(R.layout.activity_site_detail);
 
         initDatabase();
         apiService = ApiClient.getClient().create(ApiService.class);
@@ -49,6 +58,7 @@ public class PostListActivity extends AppCompatActivity {
 
         setupToolbar(siteName);
         setupRecyclerView();
+        setupSearchView();
 
         if (siteId != null) {
             observePostsBySite();
@@ -80,12 +90,58 @@ public class PostListActivity extends AppCompatActivity {
         recyclerView.setAdapter(postAdapter);
     }
 
+    private void setupSearchView() {
+        searchEditText = findViewById(R.id.searchEditText);
+        clearSearchButton = findViewById(R.id.clearSearchButton);
+
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterPosts(s.toString());
+                clearSearchButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        clearSearchButton.setOnClickListener(v -> {
+            searchEditText.setText("");
+            searchEditText.clearFocus();
+        });
+    }
+
+    private void filterPosts(String query) {
+        if (query.isEmpty()) {
+            currentPostList.clear();
+            currentPostList.addAll(allPostList);
+        } else {
+            String lowerQuery = query.toLowerCase();
+            List<Post> filtered = allPostList.stream()
+                    .filter(post -> {
+                        String title = post.getTitle() != null ? post.getTitle().toLowerCase() : "";
+                        String content = post.getContent() != null ? post.getContent().toLowerCase() : "";
+                        return title.contains(lowerQuery) || content.contains(lowerQuery);
+                    })
+                    .collect(Collectors.toList());
+            currentPostList.clear();
+            currentPostList.addAll(filtered);
+        }
+        postAdapter.notifyDataSetChanged();
+    }
+
     private void observePostsBySite() {
         LiveData<List<Post>> postsLiveData = postDao.getPostsBySite(siteId);
         postsLiveData.observe(this, posts -> {
-            currentPostList.clear();
-            currentPostList.addAll(posts);
-            postAdapter.notifyDataSetChanged();
+            allPostList.clear();
+            allPostList.addAll(posts);
+
+            // 검색어가 있으면 필터링, 없으면 전체 표시
+            String query = searchEditText.getText().toString();
+            filterPosts(query);
         });
     }
 
@@ -97,7 +153,8 @@ public class PostListActivity extends AppCompatActivity {
             public void onResponse(Call<PostListResponse> call, Response<PostListResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     databaseExecutor.execute(() -> {
-                        postDao.upsert(response.body().getItems());
+                        // 특정 사이트의 게시물만 덮어쓰기 (전체 DB를 지우지 않음)
+                        postDao.upsertBySite(siteId, response.body().getItems());
                     });
                 }
             }

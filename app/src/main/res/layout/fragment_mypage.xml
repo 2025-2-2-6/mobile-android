@@ -1,329 +1,431 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    마이페이지 Fragment (Drawer에서 표시)
+    - Drawer는 slide 애니메이션이므로 상단 여백 유지
+    - 최대 너비 600dp로 제한하여 가운데 정렬 (태블릿 대응)
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
-    android:scrollbars="none">
+    android:background="@color/screen_background"
+    android:scrollbars="none"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <!-- Profile Section -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
-
-                <ImageView
-                    android:id="@+id/profile_image"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:src="@drawable/ic_launcher_background"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-
-                <TextView
-                    android:id="@+id/user_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="홍길동"
-                    android:textColor="#333333"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="16dp"
-                    app:layout_constraintStart_toEndOf="@id/profile_image"
-                    app:layout_constraintTop_toTopOf="@id/profile_image"
-                    app:layout_constraintBottom_toTopOf="@+id/user_email"/>
-
-                <TextView
-                    android:id="@+id/user_email"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="gildong.hong@example.com"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="14sp"
-                    app:layout_constraintStart_toStartOf="@id/user_name"
-                    app:layout_constraintTop_toBottomOf="@id/user_name"
-                    app:layout_constraintBottom_toBottomOf="@id/profile_image" />
-
-                <TextView
-                    android:id="@+id/edit_profile_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="수정"
-                    android:textColor="#4C84FF"
-                    android:textSize="14sp"
-                    android:background="?attr/selectableItemBackground"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- My Activity Section -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:weightSum="3">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="12"
-                        android:textColor="#4C84FF"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="수집 항목"
-                        android:textColor="@android:color/darker_gray" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="8"
-                        android:textColor="#4C84FF"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="일정"
-                        android:textColor="@android:color/darker_gray" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3"
-                        android:textColor="#4C84FF"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="등록 사이트"
-                        android:textColor="@android:color/darker_gray" />
-                </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Notification Settings -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="새로운 항목 알림"
-                        android:textColor="#333333"
-                        android:textSize="16sp"
-                        android:layout_centerVertical="true"/>
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:checked="true"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="마감 임박 알림"
-                        android:textColor="#333333"
-                        android:textSize="16sp"
-                        android:layout_centerVertical="true"/>
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:checked="true"/>
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="AI 요약 알림"
-                        android:textColor="@android:color/darker_gray"
-                        android:textSize="16sp"
-                        android:layout_centerVertical="true"/>
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:enabled="false"/>
-                </RelativeLayout>
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Menu Section -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@android:color/white">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingVertical="8dp">
-
-                <!-- 🔥 여기 id 추가 -->
-                <TextView
-                    android:id="@+id/manage_site_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="등록 사이트 관리"
-                    android:textColor="#333333"
-                    android:textSize="16sp"
-                    android:padding="12dp"
-                    android:drawableEnd="@drawable/ic_arrow_forward"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"/>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#eeeeee"
-                    android:layout_marginHorizontal="12dp"/>
-
-                <TextView
-                    android:id="@+id/privacy_policy_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="개인정보 처리방침"
-                    android:textColor="#333333"
-                    android:textSize="16sp"
-                    android:padding="12dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"/>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#eeeeee"
-                    android:layout_marginHorizontal="12dp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="도움말 및 문의"
-                    android:textColor="#333333"
-                    android:textSize="16sp"
-                    android:padding="12dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Footer -->
+    <!-- 가운데 정렬 컨테이너 -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:maxWidth="@dimen/mypage_max_width"
+            android:gravity="center_vertical"
             android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:paddingTop="24dp"
-            android:paddingBottom="16dp">
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <TextView
-                android:id="@+id/logout_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="로그아웃"
-                android:textColor="#FF4C4C"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"/>
+            <!-- 상단 여백 (Drawer slide 애니메이션이므로 유지) -->
 
-            <TextView
-                android:id="@+id/app_version"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="mop v1.0.0"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="12sp"
-                android:layout_marginTop="16dp"/>
 
-            <TextView
-                android:id="@+id/copyright"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="© 2025 mop Team. All rights reserved."
-                android:textColor="@android:color/darker_gray"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"/>
+                android:orientation="vertical"
+                android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+            <!-- Profile Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/card_margin_vertical"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/profile_image_container"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        app:cardCornerRadius="30dp"
+                        app:cardElevation="2dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent">
+
+                        <ImageView
+                            android:id="@+id/profile_image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_launcher_background" />
+
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/user_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="사용자"
+                        android:textColor="#1A1A1A"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@id/user_email"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/profile_image_container"
+                        app:layout_constraintTop_toTopOf="@id/profile_image_container"
+                        app:layout_constraintVertical_chainStyle="packed" />
+
+                    <TextView
+                        android:id="@+id/user_email"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="user@example.com"
+                        android:textColor="#888888"
+                        android:textSize="13sp"
+                        app:layout_constraintBottom_toBottomOf="@id/profile_image_container"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/user_name"
+                        app:layout_constraintTop_toBottomOf="@id/user_name" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- My Activity Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/item_spacing"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:weightSum="3">
+
+                    <!-- 등록 사이트 -->
+                    <LinearLayout
+                        android:id="@+id/menu_registered_sites"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="4dp">
+
+                        <TextView
+                            android:id="@+id/registered_sites_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#4C84FF"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="등록 사이트"
+                            android:textColor="#666666"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#EEEEEE" />
+
+                    <!-- 새 게시물 -->
+                    <LinearLayout
+                        android:id="@+id/menu_new_posts"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="4dp">
+
+                        <TextView
+                            android:id="@+id/new_posts_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#FF6B6B"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="새 게시물"
+                            android:textColor="#666666"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#EEEEEE" />
+
+                    <!-- 알림 설정한 일정 -->
+                    <LinearLayout
+                        android:id="@+id/menu_saved_events"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="4dp">
+
+                        <TextView
+                            android:id="@+id/saved_events_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#50C878"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="알림 일정"
+                            android:textColor="#666666"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Notification Settings -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/item_spacing"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="알림 설정"
+                        android:textColor="#1A1A1A"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="4dp"
+                        android:gravity="">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@+id/switch_new_post_notification"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="새로운 항목 알림"
+                                android:textColor="#333333"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="크롤링된 새 게시물 알림 받기"
+                                android:textColor="#999999"
+                                android:textSize="11sp"
+                                android:layout_marginTop="1dp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_new_post_notification"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:clickable="true"
+                            android:focusable="true" />
+                    </RelativeLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="12dp"
+                        android:background="#F0F0F0" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="4dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@+id/switch_calendar_notification"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="일정 알림"
+                                android:textColor="#333333"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="저장한 일정 리마인더 받기"
+                                android:textColor="#999999"
+                                android:textSize="11sp"
+                                android:layout_marginTop="1dp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch_calendar_notification"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:clickable="true"
+                            android:focusable="true" />
+                    </RelativeLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Menu Section -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/item_spacing"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingVertical="4dp">
+
+                    <TextView
+                        android:id="@+id/menu_site_management"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_arrow_forward"
+                        android:focusable="true"
+                        android:padding="14dp"
+                        android:text="사이트 관리"
+                        android:textColor="#333333"
+                        android:textSize="14sp"
+                        android:gravity="center_vertical"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="14dp"
+                        android:background="#F0F0F0" />
+
+                    <TextView
+                        android:id="@+id/menu_privacy_policy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_arrow_forward"
+                        android:focusable="true"
+                        android:padding="14dp"
+                        android:text="개인정보 처리방침"
+                        android:textColor="#333333"
+                        android:textSize="14sp"
+                        android:gravity="center_vertical"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Footer -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/item_spacing">
+
+                <TextView
+                    android:id="@+id/logout_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="10dp"
+                    android:text="로그아웃"
+                    android:textColor="#FF5252"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/app_version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="mop v1.0.0"
+                    android:textColor="#BBBBBB"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/copyright"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="© 2025 mop Team. All rights reserved."
+                    android:textColor="#BBBBBB"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
         </LinearLayout>
 
-    </LinearLayout>
-</ScrollView>
+        </LinearLayout>
+</LinearLayout>

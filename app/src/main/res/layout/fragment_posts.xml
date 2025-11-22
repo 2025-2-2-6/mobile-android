@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    게시물 관리 Fragment
+    - MainActivity에서 20dp 상단 여백이 이미 적용되어 있음
+    - Fragment 자체는 상하 여백 없음
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/screen_background"
+    tools:context=".ui.post.PostManagementFragment">
+
+    <!-- 검색창 영역 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_search"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_horizontal_padding"
+        android:layout_marginEnd="@dimen/screen_horizontal_padding"
+        android:layout_marginTop="@dimen/item_spacing"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="2dp"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_search"
+                android:tint="#999999" />
+
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="제목 또는 내용으로 검색"
+                android:padding="12dp"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:imeOptions="actionSearch"
+                android:inputType="text" />
+
+            <ImageButton
+                android:id="@+id/btn_clear_search"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="#999999"
+                android:visibility="gone"
+                android:contentDescription="검색 지우기" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- 탭 레이아웃 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_tab_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_horizontal_padding"
+        android:layout_marginEnd="@dimen/screen_horizontal_padding"
+        android:layout_marginTop="@dimen/item_spacing"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintTop_toBottomOf="@+id/card_search"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        app:tabIndicatorColor="#4C84FF"
+        app:tabIndicatorHeight="3dp"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="#4C84FF"
+        app:tabTextColor="#666666"
+        app:tabRippleColor="#E3F2FD">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="전체" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="새 게시물" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="저장됨" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- 게시물 리스트 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/postRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:clipChildren="false"
+        android:paddingTop="@dimen/item_spacing"
+        android:paddingBottom="@dimen/screen_bottom_padding"
+        android:paddingStart="@dimen/screen_horizontal_padding"
+        android:paddingEnd="@dimen/screen_horizontal_padding"
+        android:background="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_tab_layout"
+        app:layout_constraintVertical_bias="0.0"
+        tools:listitem="@layout/item_post" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,10 +5,6 @@
     <!-- 기본 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- 캘린더 권한 -->
-    <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
-
     <!-- 알림 권한 (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -34,6 +30,11 @@
         <activity
             android:name=".ui.site.AddSiteActivity"
             android:exported="true"/>
+        <activity
+            android:name=".ui.site.SiteManagementActivity"
+            android:exported="false"
+            android:theme="@style/Theme.mobile_android.ModalDialog"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ui.post.PostListActivity"
             android:exported="false"/>

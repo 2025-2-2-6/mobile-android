@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 
@@ -20,6 +21,8 @@ import com.example.mobile_android.data.local.AppDatabase;
 import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.model.Post;
 import com.example.mobile_android.util.DateTimeUtils;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,12 +30,15 @@ import java.util.concurrent.Executors;
 public class PostDetailActivity extends AppCompatActivity {
 
     private TextView tvPostTitle;
-    private TextView tvPostCategory;
+    private ChipGroup chipGroupCategories;
+    private Chip chipCategory;
     private TextView tvPostCreatedAt;
     private TextView tvPostEventDate;
     private TextView tvPostLocation;
+    private CardView cardAiSummary;
+    private TextView tvAiSummary;
     private TextView tvPostContent;
-    private TextView tvSourceInfo;
+    private CardView cardViewSource;
     private Button btnViewSource;
     private TextView tvCalendarInfo;
     private Button btnAddToCalendar;
@@ -65,12 +71,15 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private void initViews() {
         tvPostTitle = findViewById(R.id.tv_post_title);
-        tvPostCategory = findViewById(R.id.tv_post_category);
+        chipGroupCategories = findViewById(R.id.chip_group_categories);
+        chipCategory = findViewById(R.id.chip_category);
         tvPostCreatedAt = findViewById(R.id.tv_post_created_at);
         tvPostEventDate = findViewById(R.id.tv_post_event_date);
         tvPostLocation = findViewById(R.id.tv_post_location);
+        cardAiSummary = findViewById(R.id.card_ai_summary);
+        tvAiSummary = findViewById(R.id.tv_ai_summary);
         tvPostContent = findViewById(R.id.tv_post_content);
-        tvSourceInfo = findViewById(R.id.tv_source_info);
+        cardViewSource = findViewById(R.id.card_view_source);
         btnViewSource = findViewById(R.id.btn_view_source);
         tvCalendarInfo = findViewById(R.id.tv_calendar_info);
         btnAddToCalendar = findViewById(R.id.btn_add_to_calendar);
@@ -106,9 +115,18 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private void displayPostDetail(Post post) {
         tvPostTitle.setText(post.getTitle());
-        tvPostCategory.setText(resolveCategory(post));
+
+        // 카테고리 Chip 설정
+        String category = resolveCategory(post);
+        if (!TextUtils.isEmpty(category)) {
+            chipCategory.setText(category);
+            chipCategory.setVisibility(View.VISIBLE);
+        } else {
+            chipCategory.setVisibility(View.GONE);
+        }
+
         tvPostContent.setText(post.getContent());
-        tvPostCreatedAt.setText(formatDateTime(post.getCreatedAt(), "yyyy년 MM월 dd일 a hh:mm"));
+        tvPostCreatedAt.setText(formatDateTime(post.getCreatedAt(), "yyyy년 M월 d일 a h시 mm분"));
 
         bindEventSection(post);
         bindLocation(post);
@@ -141,11 +159,9 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private void bindSource(Post post) {
         if (!TextUtils.isEmpty(post.getSourceUrl())) {
-            tvSourceInfo.setVisibility(View.VISIBLE);
-            btnViewSource.setVisibility(View.VISIBLE);
+            cardViewSource.setVisibility(View.VISIBLE);
         } else {
-            tvSourceInfo.setVisibility(View.GONE);
-            btnViewSource.setVisibility(View.GONE);
+            cardViewSource.setVisibility(View.GONE);
         }
     }
 

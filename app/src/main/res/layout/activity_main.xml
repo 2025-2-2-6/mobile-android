@@ -62,7 +62,11 @@
         android:layout_height="match_parent"
         android:layout_gravity="start">
 
-        <include layout="@layout/fragment_mypage" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/drawer_fragment_container"
+            android:name="com.example.mobile_android.ui.mypage.MyPageFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </com.google.android.material.navigation.NavigationView>
 

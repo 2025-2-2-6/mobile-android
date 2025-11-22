@@ -33,6 +33,20 @@ public abstract class PostDao {
     public abstract LiveData<List<Post>> getAllPosts();
 
     /**
+     * is_new가 true인 게시물 개수를 조회합니다.
+     * 주의: 실제 "새 게시물" 판단은 Post.isActuallyNew() 메서드를 사용하는 것을 권장합니다.
+     */
+    @Query("SELECT COUNT(*) FROM post WHERE isNew = 1")
+    public abstract LiveData<Integer> getNewPostCount();
+
+    /**
+     * 모든 게시물을 조회합니다 (is_new 필터링 없이).
+     * 애플리케이션 레벨에서 Post.isActuallyNew()로 필터링할 수 있습니다.
+     */
+    @Query("SELECT * FROM post ORDER BY createdAt DESC")
+    public abstract LiveData<List<Post>> getAllPostsForNewFilter();
+
+    /**
      * 캘린더에 저장된 모든 Post를 조회합니다.
      */
     @Query("SELECT * FROM post WHERE isSaved = 1 ORDER BY eventStartDate DESC")
@@ -58,22 +72,45 @@ public abstract class PostDao {
     public abstract Boolean isPostSaved(String postId);
 
     /**
-     * 네트워크에서 가져온 Post 목록을 데이터베이스에 삽입/업데이트(upsert)합니다.
-     * 만약 Post가 이미 존재하면, 기존의 isSaved 상태를 유지한 채 나머지 정보만 업데이트합니다.
+     * 모든 Post를 삭제합니다.
+     */
+    @Query("DELETE FROM post")
+    public abstract void deleteAll();
+
+    /**
+     * 특정 사이트의 모든 Post를 삭제합니다.
+     */
+    @Query("DELETE FROM post WHERE siteId = :siteId")
+    public abstract void deletePostsBySite(String siteId);
+
+    /**
+     * 여러 Post를 한번에 삽입합니다.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public abstract void insertAll(List<Post> posts);
+
+    /**
+     * 네트워크에서 가져온 Post 목록을 데이터베이스에 덮어씁니다.
+     * 오프라인 상태에서 데이터 보존을 위한 캐시로 사용됩니다.
+     * 기존 데이터를 모두 삭제하고 새 데이터로 교체합니다.
      */
     @Transaction
     public void upsert(List<Post> posts) {
-        // posts 리스트가 null이거나 비어있으면 아무것도 하지 않음 (NPE 방지)
-        if (posts == null || posts.isEmpty()) {
-            return;
+        deleteAll();
+        if (posts != null && !posts.isEmpty()) {
+            insertAll(posts);
         }
+    }
 
-        for (Post post : posts) {
-            // 기존 저장 상태를 확인 (결과가 없으면 null)
-            Boolean isSaved = isPostSaved(post.getId());
-            // isSaved가 null이면 false로 처리하여 안전하게 set
-            post.setSaved(Boolean.TRUE.equals(isSaved));
-            insert(post);
+    /**
+     * 특정 사이트의 Post 목록을 덮어씁니다.
+     */
+    @Transaction
+    public void upsertBySite(String siteId, List<Post> posts) {
+        // 해당 사이트의 기존 데이터 삭제 후 새 데이터 삽입
+        deletePostsBySite(siteId);
+        if (posts != null && !posts.isEmpty()) {
+            insertAll(posts);
         }
     }
 }

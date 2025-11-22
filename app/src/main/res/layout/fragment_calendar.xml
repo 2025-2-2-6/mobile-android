@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    캘린더 Fragment
+    - MainActivity에서 20dp 상단 여백이 이미 적용되어 있음
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/screen_background"
     tools:context=".ui.calendar.CalendarFragment">
 
     <!-- Month Header -->
@@ -13,7 +18,9 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:paddingHorizontal="@dimen/screen_horizontal_padding"
+        android:paddingVertical="@dimen/item_spacing"
+        android:background="#FFFFFF">
 
         <ImageButton
             android:id="@+id/btn_prev"
@@ -44,8 +51,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp">
+        android:paddingHorizontal="@dimen/screen_horizontal_padding"
+        android:paddingVertical="@dimen/item_spacing_small"
+        android:background="#FFFFFF">
 
         <TextView
             style="@style/DayOfWeekText"
@@ -75,14 +83,17 @@
         android:id="@+id/rv_days"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp" />
+        android:paddingHorizontal="@dimen/screen_horizontal_padding"
+        android:paddingBottom="@dimen/item_spacing"
+        android:background="#FFFFFF"
+        android:clipChildren="false"
+        android:clipToPadding="false" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/darker_gray" />
+        android:layout_marginTop="@dimen/item_spacing_small"
+        android:background="#E0E0E0" />
 
     <!-- Events List -->
     <FrameLayout
@@ -94,6 +105,11 @@
             android:id="@+id/rv_events"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:paddingHorizontal="@dimen/screen_horizontal_padding"
+            android:paddingTop="@dimen/item_spacing"
+            android:paddingBottom="@dimen/screen_bottom_padding"
             tools:listitem="@layout/item_calendar_event" />
 
         <TextView

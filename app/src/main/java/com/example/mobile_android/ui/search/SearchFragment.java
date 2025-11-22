@@ -1,101 +1,266 @@
 package com.example.mobile_android.ui.search;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.mobile_android.R;
-import com.example.mobile_android.databinding.FragmentSearchBinding;
+import com.example.mobile_android.data.local.AppDatabase;
+import com.example.mobile_android.data.local.SiteDao;
+import com.example.mobile_android.model.Site;
+import com.example.mobile_android.network.ApiClient;
+import com.example.mobile_android.ui.site.AddSiteActivity;
+import com.example.mobile_android.ui.site.SiteAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SearchFragment extends Fragment {
 
-    private FragmentSearchBinding binding;
+    private EditText etSearch;
+    private RecyclerView rvCategoryChips;
+    private RecyclerView rvSites;
+    private SwipeRefreshLayout swipeRefresh;
+    private LinearLayout emptyView;
+    private TextView tvSiteCount;
+    private TextView tvSort;
+    private FloatingActionButton fabAddSite;
+
+    private SiteAdapter siteAdapter;
+    private TagChipAdapter categoryAdapter;
+    private List<Site> siteList = new ArrayList<>();
+    private List<Site> filteredList = new ArrayList<>();
+    private String currentCategory = "전체";
+    private String currentSearchQuery = "";
+    private SiteDao siteDao;
+    private ExecutorService siteDbExecutor;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentSearchBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+        return inflater.inflate(R.layout.fragment_sites, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Tag Chips
-        binding.chips.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
-        binding.chips.addItemDecoration(new SpaceItemDecoration(dp(6)));
+        initViews(view);
+        initSiteCache();
+        setupCategoryChips();
+        setupSiteList();
+        setupListeners();
+        observeSites();
+        loadSites();
+    }
 
-        List<TagChip> tagData = new ArrayList<>();
-        tagData.add(new TagChip("전체", 24, true));
-        tagData.add(new TagChip("학교", 8, false));
-        tagData.add(new TagChip("장학금", 5, false));
-        tagData.add(new TagChip("공모전", 12, false));
+    private void initViews(View view) {
+        etSearch = view.findViewById(R.id.et_search);
+        rvCategoryChips = view.findViewById(R.id.rv_category_chips);
+        rvSites = view.findViewById(R.id.rv_sites);
+        swipeRefresh = view.findViewById(R.id.swipe_refresh);
+        emptyView = view.findViewById(R.id.empty_view);
+        tvSiteCount = view.findViewById(R.id.tv_site_count);
+        tvSort = view.findViewById(R.id.tv_sort);
+        fabAddSite = view.findViewById(R.id.fab_add_site);
+    }
 
-        TagChipAdapter tagAdapter = new TagChipAdapter(tagData, (pos, item) -> {
-            // Handle tag selection
+    private void setupCategoryChips() {
+        rvCategoryChips.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
+        rvCategoryChips.addItemDecoration(new SpaceItemDecoration(dp(8)));
+
+        List<TagChip> categories = new ArrayList<>();
+        categories.add(new TagChip("전체", 0, true));
+        categories.add(new TagChip("학교", 0, false));
+        categories.add(new TagChip("장학금", 0, false));
+        categories.add(new TagChip("공모전", 0, false));
+        categories.add(new TagChip("취업", 0, false));
+        categories.add(new TagChip("기타", 0, false));
+
+        categoryAdapter = new TagChipAdapter(categories, (position, item) -> {
+            currentCategory = item.label;
+            for (int i = 0; i < categories.size(); i++) {
+                categories.get(i).selected = (i == position);
+            }
+            categoryAdapter.notifyDataSetChanged();
+            filterSites();
         });
-        binding.chips.setAdapter(tagAdapter);
-
-        // Site List
-        binding.rvSites.setLayoutManager(new LinearLayoutManager(getContext()));
-        List<SearchFragment.SiteItem> siteData = Arrays.asList(
-                new SearchFragment.SiteItem("서울대학교 공지사항","전체 공지사항 및 소식","학교","1,250명 구독 중","등록됨"),
-                new SearchFragment.SiteItem("한국장학재단","국가장학금, 학자금대출 안내","장학금","8,920명 구독 중","+ 추가"),
-                new SearchFragment.SiteItem("씽굿 공모전","대학생 공모전/아이디어/디자인","공모전","2,340명 구독 중","등록됨")
-        );
-        binding.rvSites.setAdapter(new SearchFragment.Adapter(siteData));
+        rvCategoryChips.setAdapter(categoryAdapter);
     }
 
-    static class SiteItem {
-        String title, desc, badge, stats, btnText;
-        SiteItem(String t, String d, String b, String s, String bt) {
-            title=t; desc=d; badge=b; stats=s; btnText=bt;
-        }
+    private void setupSiteList() {
+        rvSites.setLayoutManager(new LinearLayoutManager(getContext()));
+        siteAdapter = new SiteAdapter(filteredList);
+
+        // 삭제 리스너
+        siteAdapter.setOnDeleteListener(this::showDeleteConfirmDialog);
+
+        // 수정 리스너
+        siteAdapter.setOnEditListener(site -> {
+            Intent intent = new Intent(requireContext(), AddSiteActivity.class);
+            intent.putExtra("EDIT_MODE", true);
+            intent.putExtra("SITE_ID", site.getId());
+            intent.putExtra("SITE_NAME", site.getName());
+            intent.putExtra("SITE_URL", site.getUrl());
+            intent.putExtra("SITE_CATEGORY", site.getCategory());
+            startActivity(intent);
+        });
+
+        rvSites.setAdapter(siteAdapter);
     }
 
-    static class VH extends RecyclerView.ViewHolder {
-        TextView t, d, b, s;
-        Button btn;
-        VH(@NonNull View v) {
-            super(v);
-            t=v.findViewById(R.id.tv_title);
-            d=v.findViewById(R.id.tv_desc);
-            b=v.findViewById(R.id.tv_badge);
-            s=v.findViewById(R.id.tv_stats);
-            btn=v.findViewById(R.id.btn_primary);
-        }
+    private void showDeleteConfirmDialog(Site site) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("사이트 삭제")
+                .setMessage("'" + site.getName() + "' 사이트를 삭제하시겠습니까?\n수집된 게시물도 함께 삭제됩니다.")
+                .setPositiveButton("삭제", (dialog, which) -> deleteSite(site))
+                .setNegativeButton("취소", null)
+                .show();
     }
 
-    static class Adapter extends RecyclerView.Adapter<VH> {
-        private final List<SiteItem> data;
-        Adapter(List<SiteItem> d){ data=d; }
-        @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup p, int vType){
-            View v=LayoutInflater.from(p.getContext()).inflate(R.layout.item_site_card, p, false);
-            return new VH(v);
+    private void deleteSite(Site site) {
+        ApiClient.getApiService().deleteSite(site.getId()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    siteList.remove(site);
+                    filterSites();
+                    Toast.makeText(requireContext(), "사이트가 삭제되었습니다", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "삭제 실패: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(requireContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setupListeners() {
+        // 검색
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString().trim();
+                filterSites();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // 새로고침
+        swipeRefresh.setOnRefreshListener(this::loadSites);
+
+        // 사이트 추가
+        fabAddSite.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), AddSiteActivity.class);
+            startActivity(intent);
+        });
+
+        // 정렬
+        tvSort.setOnClickListener(v -> {
+            // TODO: 정렬 옵션 다이얼로그
+        });
+    }
+
+    private void loadSites() {
+        swipeRefresh.setRefreshing(true);
+
+        ApiClient.getApiService().getSites().enqueue(new Callback<List<Site>>() {
+            @Override
+            public void onResponse(Call<List<Site>> call, Response<List<Site>> response) {
+                swipeRefresh.setRefreshing(false);
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Site> remoteSites = response.body();
+                    siteDbExecutor.execute(() -> siteDao.replaceAll(remoteSites));
+                } else {
+                    Log.e("SearchFragment", "사이트 목록 로드 실패: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Site>> call, Throwable t) {
+                swipeRefresh.setRefreshing(false);
+                Log.e("SearchFragment", "네트워크 오류", t);
+            }
+        });
+    }
+
+    private void filterSites() {
+        filteredList.clear();
+
+        for (Site site : siteList) {
+            boolean matchesCategory = currentCategory.equals("전체") ||
+                    (site.getCategory() != null && site.getCategory().equals(currentCategory));
+            boolean matchesSearch = currentSearchQuery.isEmpty() ||
+                    (site.getName() != null && site.getName().toLowerCase().contains(currentSearchQuery.toLowerCase())) ||
+                    (site.getUrl() != null && site.getUrl().toLowerCase().contains(currentSearchQuery.toLowerCase()));
+
+            if (matchesCategory && matchesSearch) {
+                filteredList.add(site);
+            }
         }
-        @Override public void onBindViewHolder(@NonNull VH h, int i){
-            SiteItem x=data.get(i);
-            h.t.setText(x.title);
-            h.d.setText(x.desc);
-            h.b.setText(x.badge);
-            h.s.setText(x.stats);
-            h.btn.setText(x.btnText);
+
+        siteAdapter.notifyDataSetChanged();
+        updateUI();
+    }
+
+    private void initSiteCache() {
+        AppDatabase database = AppDatabase.getInstance(requireContext());
+        siteDao = database.siteDao();
+        siteDbExecutor = Executors.newSingleThreadExecutor();
+    }
+
+    private void observeSites() {
+        siteDao.observeAll().observe(getViewLifecycleOwner(), sites -> {
+            siteList.clear();
+            if (sites != null) {
+                siteList.addAll(sites);
+            }
+            filterSites();
+        });
+    }
+
+    private void updateUI() {
+        tvSiteCount.setText(filteredList.size() + "개의 사이트");
+
+        if (filteredList.isEmpty()) {
+            rvSites.setVisibility(View.GONE);
+            emptyView.setVisibility(View.VISIBLE);
+        } else {
+            rvSites.setVisibility(View.VISIBLE);
+            emptyView.setVisibility(View.GONE);
         }
-        @Override public int getItemCount(){ return data.size(); }
     }
 
     private int dp(int v) {
@@ -104,8 +269,16 @@ public class SearchFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        loadSites();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        if (siteDbExecutor != null) {
+            siteDbExecutor.shutdown();
+        }
     }
 }

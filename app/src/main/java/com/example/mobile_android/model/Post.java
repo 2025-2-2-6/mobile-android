@@ -160,6 +160,46 @@ public class Post implements Serializable, Parcelable {
         return eventEndDate;
     }
 
+    /**
+     * 게시물이 24시간 이내에 생성되었는지 확인합니다.
+     * 백엔드의 is_new 필드를 우선 사용하고, null이면 created_at 기준으로 판단합니다.
+     * @return 24시간 이내 게시물이면 true
+     */
+    @Ignore
+    public boolean isActuallyNew() {
+        // 백엔드에서 is_new를 제공하면 그것을 우선 사용
+        if (isNew != null) {
+            return isNew;
+        }
+
+        // is_new가 null이면 created_at 기준으로 판단 (24시간)
+        if (TextUtils.isEmpty(createdAt)) {
+            return false;
+        }
+
+        try {
+            // ISO 8601 형식 파싱 (예: "2025-11-22T10:30:00Z")
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US);
+            sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Date createdDate = sdf.parse(createdAt);
+
+            if (createdDate == null) {
+                return false;
+            }
+
+            long currentTime = System.currentTimeMillis();
+            long createdTime = createdDate.getTime();
+            long timeDiff = currentTime - createdTime;
+
+            // 24시간 = 24 * 60 * 60 * 1000 밀리초
+            long twentyFourHours = 24 * 60 * 60 * 1000L;
+            return timeDiff <= twentyFourHours;
+        } catch (Exception e) {
+            // 파싱 실패시 false 반환
+            return false;
+        }
+    }
+
     // ... Parcelable implementation ...
     @Override
     public void writeToParcel(Parcel dest, int flags) {

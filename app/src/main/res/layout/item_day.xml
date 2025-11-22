@@ -1,29 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  날짜 셀 레이아웃
+  - 정사각형 비율을 유지하며 클릭 영역이 정확한 원형이 되도록 개선
+  - 터치 피드백 추가
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center"
-    android:minHeight="48dp"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_width="0dp"
+    android:layout_height="56dp"
+    android:layout_weight="1"
+    android:padding="4dp">
 
-    <TextView
-        android:id="@+id/tv_day"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        tools:text="20" />
+        android:orientation="vertical"
+        android:background="?attr/selectableItemBackgroundBorderless">
 
-    <View
-        android:id="@+id/event_indicator"
-        android:layout_width="4dp"
-        android:layout_height="4dp"
-        android:layout_marginTop="2dp"
-        android:background="@drawable/bg_event_indicator"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        <TextView
+            android:id="@+id/tv_day"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            tools:text="20" />
 
-</LinearLayout>
+        <View
+            android:id="@+id/event_indicator"
+            android:layout_width="5dp"
+            android:layout_height="5dp"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/bg_event_indicator"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+</FrameLayout>
