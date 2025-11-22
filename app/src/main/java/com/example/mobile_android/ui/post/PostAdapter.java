@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import com.example.mobile_android.data.local.AppDatabase;
 import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.model.Post;
 import com.example.mobile_android.util.DateTimeUtils;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,7 +81,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         if (!TextUtils.isEmpty(post.getLocation())) {
             holder.tvLocation.setVisibility(View.VISIBLE);
-            holder.tvLocation.setText("📍 " + post.getLocation());
+            holder.tvLocation.setText(post.getLocation());
         } else {
             holder.tvLocation.setVisibility(View.GONE);
         }
@@ -90,9 +92,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             holder.switchCalendar.setEnabled(true);
             // 이제 데이터베이스의 isSaved 필드를 사용해 토글 상태를 결정
             holder.switchCalendar.setChecked(post.isSaved());
+            bindCalendarStatus(holder, post.isSaved());
             holder.switchCalendar.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 // UI를 즉시 업데이트하고, DB 작업은 백그라운드에서 처리
                 post.setSaved(isChecked);
+                bindCalendarStatus(holder, isChecked);
                 databaseExecutor.execute(() -> {
                     postDao.updateSaveState(post.getId(), isChecked);
                 });
@@ -100,6 +104,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         } else {
             holder.switchCalendar.setEnabled(false);
             holder.switchCalendar.setChecked(false);
+            bindCalendarStatus(holder, false);
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -153,13 +158,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     }
 
     private boolean shouldShowNewBadge(Post post) {
-        if (post.getIsNew() != null) {
-            return post.getIsNew();
-        }
-        Date created = DateTimeUtils.parseServerDate(post.getCreatedAt());
-        if (created == null) return false;
-        long diff = System.currentTimeMillis() - created.getTime();
-        return TimeUnit.MILLISECONDS.toHours(diff) <= 24;
+        // Post 모델의 isActuallyNew() 메서드를 사용하여 일관성 유지
+        return post.isActuallyNew();
     }
 
     private String resolveDdaySource(Post post) {
@@ -207,6 +207,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return DateTimeUtils.formatServerDate(dateTimeStr, format);
     }
 
+    private void bindCalendarStatus(PostViewHolder holder, boolean isSaved) {
+        // notification bell 아이콘 사용: 활성화는 파란색, 비활성화는 회색
+        holder.calendarStatusIcon.setImageResource(isSaved ? R.drawable.ic_bell_enabled : R.drawable.ic_bell_disabled);
+        // 아이콘 자체에 색상이 포함되어 있으므로 ColorFilter는 제거
+        holder.calendarStatusIcon.setColorFilter(null);
+
+        // 텍스트 색상 및 내용 업데이트
+        int textColor = ContextCompat.getColor(context, isSaved ? R.color.calendar_status_on : R.color.calendar_status_off);
+        holder.calendarStatusText.setText(isSaved ? "알림 켜짐" : "알림 켜기");
+        holder.calendarStatusText.setTextColor(textColor);
+    }
+
     public static class PostViewHolder extends RecyclerView.ViewHolder {
         TextView tvCategory;
         TextView tvTitle;
@@ -214,6 +226,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         TextView tvLocation;
         TextView badgeNew;
         TextView badgeDday;
+        ImageView calendarStatusIcon;
+        TextView calendarStatusText;
         SwitchCompat switchCalendar;
 
         public PostViewHolder(@NonNull View itemView) {
@@ -224,6 +238,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             tvLocation = itemView.findViewById(R.id.tv_post_location);
             badgeNew = itemView.findViewById(R.id.badge_new);
             badgeDday = itemView.findViewById(R.id.badge_dday);
+            calendarStatusIcon = itemView.findViewById(R.id.iv_notification_icon);
+            calendarStatusText = itemView.findViewById(R.id.tv_calendar_status);
             switchCalendar = itemView.findViewById(R.id.switch_calendar);
         }
     }

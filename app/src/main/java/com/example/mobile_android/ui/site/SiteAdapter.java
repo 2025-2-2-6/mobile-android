@@ -2,6 +2,7 @@ package com.example.mobile_android.ui.site;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,11 @@ import com.example.mobile_android.R;
 import com.example.mobile_android.model.Site;
 import com.example.mobile_android.ui.post.PostListActivity;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder> {
 
@@ -24,11 +29,22 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
     public interface OnSiteDeleteListener {
         void onDelete(Site site);
     }
+
+    public interface OnSiteEditListener {
+        void onEdit(Site site);
+    }
+
     private OnSiteDeleteListener deleteListener;
+    private OnSiteEditListener editListener;
 
     public void setOnDeleteListener(OnSiteDeleteListener listener) {
         this.deleteListener = listener;
     }
+
+    public void setOnEditListener(OnSiteEditListener listener) {
+        this.editListener = listener;
+    }
+
     public SiteAdapter(List<Site> siteList) {
         this.siteList = siteList;
     }
@@ -47,7 +63,13 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
         holder.siteName.setText(site.getName());
         holder.siteUrl.setText(site.getUrl());
         holder.categoryTag.setText(site.getCategory());
-        holder.lastUpdated.setText("• " + site.getUpdatedAt());
+
+        String formattedDate = formatDate(site.getUpdatedAt());
+        if (TextUtils.isEmpty(formattedDate)) {
+            holder.lastUpdated.setText("업데이트 정보 없음");
+        } else {
+            holder.lastUpdated.setText("업데이트 · " + formattedDate);
+        }
 
         // newPosts 같은 값은 백엔드에 아직 없음 → 숨기기
         holder.newPostBadge.setVisibility(View.GONE);
@@ -64,6 +86,9 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
             if (deleteListener != null) deleteListener.onDelete(site);
         });
 
+        holder.editButton.setOnClickListener(v -> {
+            if (editListener != null) editListener.onEdit(site);
+        });
     }
 
     @Override
@@ -71,9 +96,38 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
         return siteList.size();
     }
 
+    /**
+     * ISO 8601 날짜를 "년월일 시분초" 형식으로 포맷합니다.
+     * 예: "2025-11-22T10:30:00Z" -> "2025년 11월 22일 10:30:00"
+     */
+    private String formatDate(String isoDate) {
+        if (TextUtils.isEmpty(isoDate)) {
+            return "";
+        }
+
+        try {
+            // ISO 8601 형식 파싱
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.KOREA);
+            inputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            Date date = inputFormat.parse(isoDate);
+
+            if (date == null) {
+                return "";
+            }
+
+            // 한국 시간대로 변환하여 포맷
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy년 M월 d일 HH시 mm분", Locale.KOREA);
+            outputFormat.setTimeZone(java.util.TimeZone.getDefault());
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
     static class SiteViewHolder extends RecyclerView.ViewHolder {
 
-        TextView siteName, siteUrl, categoryTag, lastUpdated, newPostBadge;
+        TextView siteName, siteUrl, categoryTag, totalPosts, lastUpdated, newPostBadge;
         ImageView editButton, deleteButton;
 
         public SiteViewHolder(@NonNull View itemView) {
@@ -82,10 +136,11 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
             siteName = itemView.findViewById(R.id.tv_site_name);
             siteUrl = itemView.findViewById(R.id.tv_site_url);
             categoryTag = itemView.findViewById(R.id.tv_category_tag);
+            totalPosts = itemView.findViewById(R.id.tv_total_posts);
             lastUpdated = itemView.findViewById(R.id.tv_last_updated);
-            newPostBadge = itemView.findViewById(R.id.tv_new_post_badge);
-            editButton = itemView.findViewById(R.id.iv_edit);
-            deleteButton = itemView.findViewById(R.id.iv_delete);
+            newPostBadge = itemView.findViewById(R.id.tv_new_posts_badge);
+            editButton = itemView.findViewById(R.id.btn_edit);
+            deleteButton = itemView.findViewById(R.id.btn_delete);
         }
     }
 }

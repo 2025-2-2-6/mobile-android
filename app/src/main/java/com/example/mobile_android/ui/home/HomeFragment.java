@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobile_android.R;
+import com.example.mobile_android.data.local.AppDatabase;
+import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.site.AddSiteActivity;
@@ -34,6 +36,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private SiteAdapter siteAdapter;
     private List<Site> siteList = new ArrayList<>();
+    private PostDao postDao;
 
     private TextView tvTotalItems, tvNewItems, tvUpcomingItems, tvSiteCount;
     @Override
@@ -59,6 +62,9 @@ public class HomeFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // --- 데이터베이스 초기화 ---
+        postDao = AppDatabase.getInstance(requireContext()).postDao();
+
         // --- 어댑터 생성 ---
         siteAdapter = new SiteAdapter(siteList);
 
@@ -78,6 +84,9 @@ public class HomeFragment extends Fragment {
 
         // --- 사이트 목록 로드 ---
         loadSiteList();
+
+        // --- 새 게시물 개수 관찰 ---
+        observeNewPostCount();
 
         return view;
     }
@@ -116,11 +125,25 @@ public class HomeFragment extends Fragment {
         tvTotalItems.setText(String.valueOf(totalSites));
         tvSiteCount.setText(totalSites + "개");
 
-        // 새 항목 → 현재는 백엔드 구현 전입니다.
-        tvNewItems.setText("0");
-
         // 다가오는 일정 → 추후 기능
         tvUpcomingItems.setText("0");
+    }
+
+    // ----------------------
+    // ★ 새 게시물 개수 관찰
+    // ----------------------
+    private void observeNewPostCount() {
+        // 모든 게시물을 가져와서 isActuallyNew()로 필터링
+        postDao.getAllPostsForNewFilter().observe(getViewLifecycleOwner(), posts -> {
+            if (posts != null) {
+                long newCount = posts.stream()
+                        .filter(post -> post.isActuallyNew())
+                        .count();
+                tvNewItems.setText(String.valueOf(newCount));
+            } else {
+                tvNewItems.setText("0");
+            }
+        });
     }
 
     // ------------------------

@@ -13,7 +13,7 @@
 
     <ImageButton
         android:id="@+id/btn_menu"
-        android:layout_width="50dp"
+        android:layout_width="60dp"
         android:layout_height="match_parent"
         android:src="@drawable/ic_menu"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -30,15 +30,14 @@
 
     <FrameLayout
         android:id="@+id/btn_notification_container"
-        android:layout_width="50dp"
+        android:layout_width="60dp"
         android:layout_height="match_parent"
         android:layout_gravity="center|end">
 
         <ImageButton
             android:id="@+id/btn_notification"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="center|center|end"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_notifications" />

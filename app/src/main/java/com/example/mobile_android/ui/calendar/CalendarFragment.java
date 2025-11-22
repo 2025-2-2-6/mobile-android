@@ -114,13 +114,31 @@ public class CalendarFragment extends Fragment {
         filterEventsForSelectedDate();
     }
 
+    /**
+     * 실제 달력처럼 요일에 맞춰 날짜를 배치합니다.
+     * 이전 달과 다음 달의 날짜를 null로 채워서 그리드가 올바르게 표시되도록 합니다.
+     */
     private List<LocalDate> buildDaysOfMonthNoNulls(LocalDate base) {
         List<LocalDate> result = new ArrayList<>();
         YearMonth ym = YearMonth.from(base);
+        LocalDate firstDayOfMonth = LocalDate.of(base.getYear(), base.getMonth(), 1);
+
+        // 월의 첫날이 무슨 요일인지 확인 (1 = 월요일, 7 = 일요일)
+        // getDayOfWeek().getValue()는 1(월) ~ 7(일)을 반환
+        // 우리는 일요일(0) ~ 토요일(6)으로 변환
+        int firstDayOfWeek = firstDayOfMonth.getDayOfWeek().getValue() % 7; // 일요일=0, 월요일=1, ..., 토요일=6
+
+        // 첫 주의 빈 칸을 null로 채우기
+        for (int i = 0; i < firstDayOfWeek; i++) {
+            result.add(null);
+        }
+
+        // 실제 날짜 채우기
         int daysInMonth = ym.lengthOfMonth();
         for (int d = 1; d <= daysInMonth; d++) {
             result.add(LocalDate.of(base.getYear(), base.getMonth(), d));
         }
+
         return result;
     }
 

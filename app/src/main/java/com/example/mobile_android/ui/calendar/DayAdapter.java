@@ -66,7 +66,8 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
         LocalDate date = days.get(position);
-        holder.bind(date, listener, selectedDate, eventDates.contains(date));
+        boolean hasEvent = date != null && eventDates.contains(date);
+        holder.bind(date, listener, selectedDate, hasEvent);
     }
 
     @Override
@@ -85,8 +86,21 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         }
 
         public void bind(LocalDate date, OnDayClickListener listener, LocalDate selectedDate, boolean hasEvent) {
-            tvDay.setText(String.valueOf(date.getDayOfMonth()));
+            // null 날짜 처리 (빈 칸)
+            if (date == null) {
+                tvDay.setText("");
+                itemView.setBackgroundResource(0);
+                eventIndicator.setVisibility(View.GONE);
+                itemView.setOnClickListener(null);
+                itemView.setClickable(false);
+                return;
+            }
 
+            // 날짜 표시
+            tvDay.setText(String.valueOf(date.getDayOfMonth()));
+            itemView.setClickable(true);
+
+            // 선택된 날짜 스타일
             if (date.equals(selectedDate)) {
                 itemView.setBackgroundResource(R.drawable.bg_day_selected);
                 tvDay.setTextColor(Color.WHITE);
@@ -95,8 +109,10 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
                 tvDay.setTextColor(Color.BLACK);
             }
 
+            // 이벤트 표시
             eventIndicator.setVisibility(hasEvent ? View.VISIBLE : View.GONE);
 
+            // 클릭 리스너
             itemView.setOnClickListener(v -> listener.onDayClick(date));
         }
     }

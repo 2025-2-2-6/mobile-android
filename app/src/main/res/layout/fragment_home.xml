@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    홈 Fragment
+    - MainActivity에서 20dp 상단 여백이 이미 적용되어 있음
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/screen_background"
     tools:context=".ui.home.HomeFragment">
 
     <LinearLayout
@@ -11,7 +16,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:paddingHorizontal="@dimen/screen_horizontal_padding"
+        android:paddingTop="@dimen/item_spacing"
+        android:paddingBottom="@dimen/item_spacing"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -116,9 +123,9 @@
         app:layout_constraintTop_toBottomOf="@id/summary_section"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginStart="@dimen/screen_horizontal_padding"
+        android:layout_marginEnd="@dimen/screen_horizontal_padding"
+        android:layout_marginTop="@dimen/item_spacing_small"/>
 
     <TextView
         android:id="@+id/tv_registered_sites_title"
@@ -127,9 +134,9 @@
         android:text="등록한 사이트"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:textColor="#1A1A1A"
+        android:layout_marginStart="@dimen/screen_horizontal_padding"
+        android:layout_marginTop="@dimen/item_spacing"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/add_site_button" />
 
@@ -138,8 +145,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="3개"
-        android:textColor="@android:color/darker_gray"
-        android:layout_marginEnd="16dp"
+        android:textColor="#666666"
+        android:layout_marginEnd="@dimen/screen_horizontal_padding"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBaseline_toBaselineOf="@id/tv_registered_sites_title" />
 
@@ -147,7 +154,11 @@
         android:id="@+id/rv_sites"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/item_spacing"
+        android:clipToPadding="false"
+        android:clipChildren="false"
+        android:paddingHorizontal="@dimen/screen_horizontal_padding"
+        android:paddingBottom="@dimen/screen_bottom_padding"
         app:layout_constraintTop_toBottomOf="@+id/tv_registered_sites_title"
         app:layout_constraintBottom_toBottomOf="parent" />
 

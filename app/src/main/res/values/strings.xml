@@ -99,13 +99,19 @@ mop(이하 ‘앱’)은 이용자의 개인정보를 중요하게 생각하며,
 시행일자: 2025년 1월 1일
     </string>
     <string name="notification_unread_count">읽지 않은 알림 %1$d개</string>
-    <string name="notification_filter_button">필터</string>
     <string name="notification_filter_all">전체</string>
-    <string name="notification_filter_deadline">마감</string>
-    <string name="notification_filter_new">새 학습</string>
+    <string name="notification_filter_deadline">일정</string>
+    <string name="notification_filter_new">크롤링</string>
     <string name="notification_tip_title">알림 사용 팁</string>
     <string name="notification_tip_body">· 알림을 탭하면 해당 내용으로 바로 이동합니다.\n· 필요 없는 알림은 카드 우측 메뉴로 삭제할 수 있습니다.\n· 캘린더와 연동된 일정 알림을 놓치지 말아요.</string>
-    <string name="notification_label_new_post">새 항목 발견</string>
-    <string name="notification_label_crawling">크롤링 완료</string>
-    <string name="notification_label_schedule">일정 리마인더</string>
+    <string name="notification_label_calendar">일정 알림</string>
+    <string name="notification_label_crawl_success">크롤링 완료</string>
+    <string name="notification_label_crawl_failed">크롤링 실패</string>
+    <string name="notification_label_crawl_new">새 게시물</string>
+    <string name="notification_label_default">알림</string>
+    <string name="calendar_status_saved">캘린더 등록됨</string>
+    <string name="calendar_status_off">알림 꺼짐</string>
+    <string name="notification_topic_new_posts">새로운 항목 알림</string>
+    <string name="notification_topic_calendar">일정 알림</string>
+    <string name="notification_topic_update_failed">알림 설정 변경에 실패했습니다. 잠시 후 다시 시도해주세요.</string>
 </resources>

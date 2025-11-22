@@ -30,6 +30,7 @@
 
     <!-- 1. 웹페이지 URL 입력 필드 -->
     <TextView
+        android:id="@+id/tv_site_url_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/add_site_url_label"
@@ -51,16 +52,28 @@
             android:hint="@string/add_site_url_hint"
             android:textSize="16sp"
             android:background="@drawable/edittext_background"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:maxLength="@integer/site_url_max_length"
+            android:inputType="textUri" />
 
 
     </LinearLayout>
 
-    <!-- 2. 사이트 이름 입력 필드 -->
     <TextView
+        android:id="@+id/tv_url_counter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_site_name_label"
+        android:layout_marginTop="4dp"
+        android:textColor="#888888"
+        android:textSize="12sp"
+        android:text="0/255" />
+
+    <!-- 2. 사이트 이름 입력 필드 -->
+    <TextView
+        android:id="@+id/tv_site_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="사이트 제목 *"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
@@ -79,6 +92,7 @@
 
     <!-- 3. 카테고리 선택 스피너 -->
     <TextView
+        android:id="@+id/tv_category_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/add_site_category_label"
@@ -97,25 +111,39 @@
         android:padding="4dp"
         android:prompt="@string/category_prompt" />
 
-    <!-- 4. 크롤링 주기 선택 스피너 -->
+    <!-- 4. 메모 (선택사항) -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:prompt="@string/add_site_crawl_period_label"
+        android:text="메모 (선택사항)"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
         android:layout_marginTop="12dp" />
 
-    <Spinner
-        android:id="@+id/spinner_crawl_period"
+    <EditText
+        android:id="@+id/et_memo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
+        android:hint="사이트에 대한 메모를 입력하세요"
+        android:textSize="16sp"
         android:layout_marginTop="4dp"
         android:background="@drawable/edittext_background"
-        android:padding="4dp"
-        android:prompt="@string/crawl_period_prompt" />
+        android:padding="12dp"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:maxLines="4"
+        android:gravity="top"/>
+
+    <!-- Loading Indicator (버튼 위로 이동) -->
+    <ProgressBar
+        android:id="@+id/loadingProgressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="24dp"
+        android:visibility="gone" />
 
     <!-- 빈 공간을 채워 버튼을 하단에 고정 -->
     <View
@@ -143,15 +171,5 @@
         android:textColor="@android:color/darker_gray"
         android:textSize="15sp"
         android:layout_marginTop="8dp" />
-
-    <!-- Loading Indicator -->
-    <ProgressBar
-        android:id="@+id/loadingProgressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:visibility="gone" />
 
 </LinearLayout>

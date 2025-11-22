@@ -14,6 +14,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,10 +25,9 @@ import com.example.mobile_android.util.DateTimeUtils;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -37,8 +37,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private final Context context;
     private final List<NotificationEntity> notifications = new ArrayList<>();
-    private final Map<String, NotificationStyle> styleMap = new HashMap<>();
-    private final NotificationStyle defaultStyle;
+    private final EnumMap<NotificationVariant, NotificationStyle> styleMap = new EnumMap<>(NotificationVariant.class);
 
     private OnNotificationClickListener listener;
 
@@ -49,37 +48,36 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public NotificationAdapter(Context context) {
         this.context = context;
-        defaultStyle = new NotificationStyle(
-                R.string.notification_label_crawling,
-                R.drawable.ic_notification_new,
-                R.color.notification_card_blue,
-                R.color.notification_label_blue_bg,
-                R.color.notification_icon_blue_tint
-        );
-        styleMap.put(Notification.Type.NEW_POST, new NotificationStyle(
-                R.string.notification_label_new_post,
-                R.drawable.ic_notification_post,
-                R.color.notification_card_green,
-                R.color.notification_label_green_bg,
-                R.color.notification_icon_green_tint
+        styleMap.put(NotificationVariant.CALENDAR, new NotificationStyle(
+                R.string.notification_label_calendar,
+                android.R.drawable.ic_menu_my_calendar,
+                R.color.notification_unread_calendar,
+                R.color.notification_icon_calendar
         ));
-        styleMap.put(Notification.Type.CRAWLING_COMPLETE, new NotificationStyle(
-                R.string.notification_label_crawling,
-                R.drawable.ic_notification_new,
-                R.color.notification_card_blue,
-                R.color.notification_label_blue_bg,
-                R.color.notification_icon_blue_tint
+        styleMap.put(NotificationVariant.CRAWL_SUCCESS, new NotificationStyle(
+                R.string.notification_label_crawl_success,
+                android.R.drawable.checkbox_on_background,
+                R.color.notification_unread_crawl_success,
+                R.color.notification_icon_success
         ));
-        NotificationStyle scheduleStyle = new NotificationStyle(
-                R.string.notification_label_schedule,
-                R.drawable.ic_notification_calendar,
-                R.color.notification_card_purple,
-                R.color.notification_label_purple_bg,
-                R.color.notification_icon_purple_tint
-        );
-        styleMap.put(Notification.Type.SCHEDULE_REMINDER, scheduleStyle);
-        styleMap.put(Notification.Type.EVENT_REMINDER, scheduleStyle);
-        styleMap.put(Notification.Type.DEADLINE, scheduleStyle);
+        styleMap.put(NotificationVariant.CRAWL_FAILED, new NotificationStyle(
+                R.string.notification_label_crawl_failed,
+                android.R.drawable.ic_delete,
+                R.color.notification_unread_crawl_failed,
+                R.color.notification_icon_failed
+        ));
+        styleMap.put(NotificationVariant.CRAWL_NEW_POST, new NotificationStyle(
+                R.string.notification_label_crawl_new,
+                android.R.drawable.ic_input_add,
+                R.color.notification_unread_crawl_new,
+                R.color.notification_icon_new
+        ));
+        styleMap.put(NotificationVariant.DEFAULT, new NotificationStyle(
+                R.string.notification_label_default,
+                android.R.drawable.ic_dialog_info,
+                R.color.notification_unread_default,
+                R.color.notification_icon_default
+        ));
     }
 
     public void setOnNotificationClickListener(OnNotificationClickListener listener) {
@@ -95,6 +93,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     @Override
+    public int getItemCount() {
+        return notifications.size() + 1; // include tip card
+    }
+
+    @Override
     public int getItemViewType(int position) {
         return position == notifications.size() ? VIEW_TYPE_TIP : VIEW_TYPE_NOTIFICATION;
     }
@@ -106,16 +109,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (viewType == VIEW_TYPE_TIP) {
             View view = inflater.inflate(R.layout.item_notification_tip, parent, false);
             return new TipViewHolder(view);
-        } else {
-            View view = inflater.inflate(R.layout.item_notification, parent, false);
-            return new NotificationViewHolder(view);
         }
+        View view = inflater.inflate(R.layout.item_notification, parent, false);
+        return new NotificationViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == VIEW_TYPE_TIP) {
-            // static content handled in layout
             return;
         }
 
@@ -125,21 +126,34 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         vh.tvTitle.setText(notification.getTitle());
         vh.tvBody.setText(notification.getMessage());
         vh.tvTime.setText(getRelativeTimeString(notification));
-        vh.ivNewBadge.setVisibility(notification.isRead() ? View.GONE : View.VISIBLE);
 
         NotificationStyle style = resolveStyle(notification.getType());
+        int accentColor = ContextCompat.getColor(context, style.accentColorRes);
+        int unreadColor = ContextCompat.getColor(context, style.unreadColorRes);
+        int cardColor = notification.isRead()
+                ? ContextCompat.getColor(context, R.color.notification_bg_read)
+                : unreadColor;
+
+        vh.cardView.setCardBackgroundColor(cardColor);
+        vh.cardView.setStrokeColor(notification.isRead()
+                ? ContextCompat.getColor(context, R.color.notification_icon_default)
+                : ColorUtils.setAlphaComponent(accentColor, 80));
+        vh.cardView.setStrokeWidth(notification.isRead() ? dpToPx(1) : 0);
+
         vh.tvLabel.setText(context.getString(style.labelTextRes));
-        vh.cardView.setCardBackgroundColor(ContextCompat.getColor(context, style.cardColorRes));
         Drawable labelBg = DrawableCompat.wrap(vh.tvLabel.getBackground().mutate());
-        DrawableCompat.setTint(labelBg, ContextCompat.getColor(context, style.labelColorRes));
+        DrawableCompat.setTint(labelBg, ColorUtils.setAlphaComponent(accentColor, 70));
         vh.tvLabel.setBackground(labelBg);
+        vh.tvLabel.setTextColor(accentColor);
 
         Drawable iconBg = DrawableCompat.wrap(vh.iconContainer.getBackground().mutate());
-        DrawableCompat.setTint(iconBg, ContextCompat.getColor(context, style.labelColorRes));
+        DrawableCompat.setTint(iconBg, ColorUtils.setAlphaComponent(accentColor, notification.isRead() ? 40 : 90));
         vh.iconContainer.setBackground(iconBg);
 
         vh.ivIcon.setImageResource(style.iconRes);
-        vh.ivIcon.setColorFilter(ContextCompat.getColor(context, style.iconTintRes));
+        vh.ivIcon.setColorFilter(notification.isRead()
+                ? ContextCompat.getColor(context, R.color.notification_icon_default)
+                : accentColor);
 
         vh.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -154,24 +168,47 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         });
     }
 
-    @Override
-    public int getItemCount() {
-        // Always show tip card at the bottom
-        return notifications.size() + 1;
+    private NotificationStyle resolveStyle(String rawType) {
+        NotificationVariant variant = resolveVariant(rawType);
+        NotificationStyle style = styleMap.get(variant);
+        return style != null ? style : styleMap.get(NotificationVariant.DEFAULT);
     }
 
-    private NotificationStyle resolveStyle(String type) {
-        if (type == null) {
-            return defaultStyle;
+    private NotificationVariant resolveVariant(String rawType) {
+        if (rawType == null) {
+            return NotificationVariant.DEFAULT;
         }
-        NotificationStyle style = styleMap.get(type);
-        return style != null ? style : defaultStyle;
+        String type = rawType.toLowerCase(Locale.ROOT);
+        if (type.contains("calendar") || type.contains("schedule") || type.contains("deadline")) {
+            return NotificationVariant.CALENDAR;
+        }
+        if (type.startsWith("crawl_new_posts")) {
+            if (type.contains("failed") || type.contains("failure") || type.contains("error")) {
+                return NotificationVariant.CRAWL_FAILED;
+            }
+            if (type.contains("success")) {
+                return NotificationVariant.CRAWL_SUCCESS;
+            }
+            return NotificationVariant.CRAWL_NEW_POST;
+        }
+        if (Notification.Type.CRAWLING_COMPLETE.equals(rawType)) {
+            return NotificationVariant.CRAWL_SUCCESS;
+        }
+        if (Notification.Type.NEW_POST.equals(rawType)) {
+            return NotificationVariant.CRAWL_NEW_POST;
+        }
+        if (Notification.Type.SCHEDULE_REMINDER.equals(rawType)
+                || Notification.Type.EVENT_REMINDER.equals(rawType)
+                || Notification.Type.DEADLINE.equals(rawType)) {
+            return NotificationVariant.CALENDAR;
+        }
+        return NotificationVariant.DEFAULT;
     }
 
     private String getRelativeTimeString(NotificationEntity notification) {
         long reference = notification.getReceivedAt();
         if (notification.getCreatedAt() != null) {
-            Date created = DateTimeUtils.parseServerDate(notification.getCreatedAt());
+            java.util.Date created = DateTimeUtils.parseServerDate(notification.getCreatedAt());
             if (created != null) {
                 reference = created.getTime();
             }
@@ -194,8 +231,14 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         } else if (days < 7) {
             return days + "일 전";
         } else {
-            return DateTimeUtils.formatServerDate(notification.getCreatedAt(), "MM월 dd일");
+            String formatted = DateTimeUtils.formatServerDate(notification.getCreatedAt(), "M월 d일");
+            return formatted != null ? formatted : "";
         }
+    }
+
+    private int dpToPx(int dp) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 
     static class NotificationViewHolder extends RecyclerView.ViewHolder {
@@ -207,7 +250,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         TextView tvBody;
         TextView tvTime;
         ImageView ivDelete;
-        ImageView ivNewBadge;
 
         NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -219,7 +261,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             tvBody = itemView.findViewById(R.id.tv_notification_body);
             tvTime = itemView.findViewById(R.id.tv_notification_time);
             ivDelete = itemView.findViewById(R.id.iv_delete);
-            ivNewBadge = itemView.findViewById(R.id.iv_new_badge);
         }
     }
 
@@ -232,20 +273,25 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static class NotificationStyle {
         @StringRes final int labelTextRes;
         @DrawableRes final int iconRes;
-        @ColorRes final int cardColorRes;
-        @ColorRes final int labelColorRes;
-        @ColorRes final int iconTintRes;
+        @ColorRes final int unreadColorRes;
+        @ColorRes final int accentColorRes;
 
         NotificationStyle(@StringRes int labelTextRes,
                           @DrawableRes int iconRes,
-                          @ColorRes int cardColorRes,
-                          @ColorRes int labelColorRes,
-                          @ColorRes int iconTintRes) {
+                          @ColorRes int unreadColorRes,
+                          @ColorRes int accentColorRes) {
             this.labelTextRes = labelTextRes;
             this.iconRes = iconRes;
-            this.cardColorRes = cardColorRes;
-            this.labelColorRes = labelColorRes;
-            this.iconTintRes = iconTintRes;
+            this.unreadColorRes = unreadColorRes;
+            this.accentColorRes = accentColorRes;
         }
+    }
+
+    private enum NotificationVariant {
+        CALENDAR,
+        CRAWL_SUCCESS,
+        CRAWL_FAILED,
+        CRAWL_NEW_POST,
+        DEFAULT
     }
 }

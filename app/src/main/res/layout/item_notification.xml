@@ -52,18 +52,6 @@
             tools:text="새 항목 발견" />
 
         <ImageView
-            android:id="@+id/iv_new_badge"
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:layout_marginStart="6dp"
-            android:src="@drawable/bg_notification_unread_dot"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_notification_label"
-            app:layout_constraintStart_toEndOf="@+id/tv_notification_label"
-            app:layout_constraintTop_toTopOf="@+id/tv_notification_label"
-            tools:visibility="visible" />
-
-        <ImageView
             android:id="@+id/iv_delete"
             android:layout_width="32dp"
             android:layout_height="32dp"

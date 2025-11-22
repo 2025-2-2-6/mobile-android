@@ -1,14 +1,25 @@
 package com.example.mobile_android.ui.site;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,37 +37,146 @@ import retrofit2.Response;
 
 public class AddSiteActivity extends AppCompatActivity {
 
+    private static final int MAX_URL_LENGTH = 255;
+    private static final int REQUIRED_MARK_COLOR = Color.parseColor("#FF3B30");
+
     private EditText siteUrlEditText;
+    private EditText siteNameEditText;
+    private Spinner categorySpinner;
+    private EditText memoEditText;
     private Button registerButton;
     private Button cancelButton;
     private ProgressBar loadingProgressBar;
-    private EditText siteNameEditText; // ← 추가
+    private String selectedCategory = "";
+    private TextView urlCounterTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_site);
 
         siteUrlEditText = findViewById(R.id.et_url);
+        siteNameEditText = findViewById(R.id.et_site_name);
+        categorySpinner = findViewById(R.id.spinner_category);
+        memoEditText = findViewById(R.id.et_memo);
         registerButton = findViewById(R.id.btn_register);
         cancelButton = findViewById(R.id.btn_cancel);
         loadingProgressBar = findViewById(R.id.loadingProgressBar);
-        siteNameEditText = findViewById(R.id.et_site_name); // ← 반드시 추가해야 함!!
+        urlCounterTextView = findViewById(R.id.tv_url_counter);
+
+        setupRequiredLabels();
+        setupUrlLengthWatcher();
+        setupCategorySpinner();
 
         registerButton.setOnClickListener(v -> {
             String siteUrl = siteUrlEditText.getText().toString().trim();
+            String siteName = siteNameEditText.getText().toString().trim();
+
             if (siteUrl.isEmpty()) {
                 siteUrlEditText.setError("URL을 입력해주세요.");
                 return;
             }
-            registerSite(siteUrl);
+
+            if (siteName.isEmpty()) {
+                siteNameEditText.setError("사이트 제목을 입력해주세요.");
+                return;
+            }
+
+            if (selectedCategory.isEmpty() || selectedCategory.equals("카테고리 선택")) {
+                Toast.makeText(this, "카테고리를 선택해주세요.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            registerSite(siteUrl, siteName);
         });
 
         cancelButton.setOnClickListener(v -> {
-            finish(); // Close the activity and go back to the previous one
+            finish();
         });
     }
 
-    private void registerSite(String url) {
+    private void setupRequiredLabels() {
+        applyRequiredMark((TextView) findViewById(R.id.tv_site_url_label));
+        applyRequiredMark((TextView) findViewById(R.id.tv_site_name_label));
+        applyRequiredMark((TextView) findViewById(R.id.tv_category_label));
+    }
+
+    private void applyRequiredMark(TextView label) {
+        if (label == null) return;
+        String original = label.getText() != null ? label.getText().toString().trim() : "";
+        if (!original.contains("*")) {
+            original = original + " *";
+        }
+        SpannableString spannableString = new SpannableString(original);
+        int asteriskIndex = original.indexOf("*");
+        if (asteriskIndex != -1) {
+            spannableString.setSpan(
+                    new ForegroundColorSpan(REQUIRED_MARK_COLOR),
+                    asteriskIndex,
+                    asteriskIndex + 1,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+        }
+        label.setText(spannableString);
+    }
+
+    private void setupUrlLengthWatcher() {
+        siteUrlEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(MAX_URL_LENGTH)});
+        updateUrlCounter(siteUrlEditText.getText().length());
+        siteUrlEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateUrlCounter(s.length());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
+    private void updateUrlCounter(int currentLength) {
+        if (urlCounterTextView != null) {
+            urlCounterTextView.setText(currentLength + "/" + MAX_URL_LENGTH);
+        }
+    }
+
+    private void setupCategorySpinner() {
+        String[] categories = {
+                "카테고리 선택",
+                "학교 공지",
+                "장학금/지원금",
+                "채용/인턴십",
+                "공모전/대외활동",
+                "할인/혜택",
+                "이벤트",
+                "뉴스",
+                "날씨/교통"
+        };
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                categories
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categorySpinner.setAdapter(adapter);
+
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedCategory = categories[position];
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedCategory = "";
+            }
+        });
+    }
+
+    private void registerSite(String url, String siteName) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null || TextUtils.isEmpty(currentUser.getUid())) {
             Toast.makeText(this, "로그인 상태를 확인할 수 없습니다. 다시 로그인해 주세요.", Toast.LENGTH_LONG).show();
@@ -65,11 +185,10 @@ public class AddSiteActivity extends AppCompatActivity {
 
         showLoading(true);
         String userId = currentUser.getUid();
-        String siteName = ""; // TODO: 필요한 경우 사이트 이름 입력
 
-        Log.d("AddSiteActivity", "Registering site with URL: " + url);
+        Log.d("AddSiteActivity", "Registering site - URL: " + url + ", Name: " + siteName + ", Category: " + selectedCategory);
 
-        SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId);
+        SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId, selectedCategory);
         Call<SiteRegisterResponse> call = ApiClient.getApiService().registerSite(request);
 
         call.enqueue(new Callback<SiteRegisterResponse>() {

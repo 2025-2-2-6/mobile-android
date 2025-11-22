@@ -9,10 +9,19 @@ public class SiteRegisterRequest {
     private String name;
     @SerializedName("user_id")
     private String userId;
+    @SerializedName("category")
+    private String category;
 
     public SiteRegisterRequest(String url, String name, String userId) {
         this.url = url;
         this.name = name;
         this.userId = userId;
+    }
+
+    public SiteRegisterRequest(String url, String name, String userId, String category) {
+        this.url = url;
+        this.name = name;
+        this.userId = userId;
+        this.category = category;
     }
 }

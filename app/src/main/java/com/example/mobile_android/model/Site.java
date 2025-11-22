@@ -1,11 +1,18 @@
 package com.example.mobile_android.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "site")
 public class Site {
 
+    @PrimaryKey
+    @NonNull
     @SerializedName("id")
-    private String id;
+    private String id = "";
 
     @SerializedName("name")
     private String name;
@@ -26,6 +33,7 @@ public class Site {
     private String updatedAt;
 
     // GETTERS
+    @NonNull
     public String getId() {
         return id;
     }
@@ -52,5 +60,34 @@ public class Site {
 
     public String getUpdatedAt() {
         return updatedAt;
+    }
+
+    // SETTERS (Room + Gson)
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
