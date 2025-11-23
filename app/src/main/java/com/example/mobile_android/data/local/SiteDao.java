@@ -25,6 +25,7 @@ public abstract class SiteDao {
 
     @Transaction
     public void replaceAll(List<Site> sites) {
+        // 전체 사이트를 삭제하고 서버에서 받은 데이터로 덮어씀
         deleteAll();
         if (sites != null && !sites.isEmpty()) {
             insertAll(sites);

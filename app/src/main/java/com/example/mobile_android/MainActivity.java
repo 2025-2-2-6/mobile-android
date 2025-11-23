@@ -52,8 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private ChipGroup notificationFilterChips;
     private final List<NotificationEntity> cachedNotifications = new ArrayList<>();
     private NotificationFilter currentNotificationFilter = NotificationFilter.ALL;
-    private View permissionRequiredLayout;
-    private MaterialButton btnGrantPermission;
+    private ImageButton btnGrantPermission;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,14 +124,9 @@ public class MainActivity extends AppCompatActivity {
     private void updateNotificationPermissionUI() {
         boolean hasPermission = NotificationPermissionHelper.hasNotificationPermission(this);
 
-        if (permissionRequiredLayout != null) {
-            permissionRequiredLayout.setVisibility(hasPermission ? View.GONE : View.VISIBLE);
-        }
-        if (notificationSwipeRefresh != null) {
-            notificationSwipeRefresh.setVisibility(hasPermission ? View.VISIBLE : View.GONE);
-        }
-        if (notificationEmptyView != null && hasPermission) {
-            // 권한이 있을 때만 empty view 표시 로직 적용
+        // 권한이 없을 때만 툴바 버튼 표시
+        if (btnGrantPermission != null) {
+            btnGrantPermission.setVisibility(hasPermission ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -207,7 +201,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 알림 권한 관련 UI 설정
-        permissionRequiredLayout = notificationView.findViewById(R.id.layout_permission_required);
         btnGrantPermission = notificationView.findViewById(R.id.btn_grant_permission);
         if (btnGrantPermission != null) {
             btnGrantPermission.setOnClickListener(v ->
@@ -268,11 +261,10 @@ public class MainActivity extends AppCompatActivity {
         }
         notificationAdapter.submitList(filtered);
 
-        // 권한이 있을 때만 empty view 표시
-        boolean hasPermission = NotificationPermissionHelper.hasNotificationPermission(this);
+        // empty view 표시
         if (notificationEmptyView != null) {
             notificationEmptyView.setVisibility(
-                    (hasPermission && filtered.isEmpty()) ? View.VISIBLE : View.GONE
+                    filtered.isEmpty() ? View.VISIBLE : View.GONE
             );
         }
     }

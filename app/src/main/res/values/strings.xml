@@ -17,8 +17,8 @@
     <string name="add_site_crawl_period_label">크롤링 주기</string>
     <string name="add_site_register_button">등록하기</string>
     <string name="add_site_cancel_button">취소</string>
-    <string name="back_button_desc">Back Button</string>
-    <string name="notifications_title">Notifications</string>
+    <string name="back_button_desc">뒤로가기</string>
+    <string name="notifications_title">알림</string>
     <string name="notification_empty_message">새 알림이 없습니다.</string>
     <string name="privacy_policy_text">
 &lt;개인정보 처리방침&gt;
@@ -109,9 +109,25 @@ mop(이하 ‘앱’)은 이용자의 개인정보를 중요하게 생각하며,
     <string name="notification_label_crawl_failed">크롤링 실패</string>
     <string name="notification_label_crawl_new">새 게시물</string>
     <string name="notification_label_default">알림</string>
+    <string name="notification_label">알림 라벨</string>
+    <string name="notification_title">알림 제목</string>
+    <string name="notification_body">알림 내용</string>
+    <string name="notification_time">2시간 전</string>
     <string name="calendar_status_saved">캘린더 등록됨</string>
     <string name="calendar_status_off">알림 꺼짐</string>
     <string name="notification_topic_new_posts">새로운 항목 알림</string>
     <string name="notification_topic_calendar">일정 알림</string>
     <string name="notification_topic_update_failed">알림 설정 변경에 실패했습니다. 잠시 후 다시 시도해주세요.</string>
+    <plurals name="notification_days_ago">
+        <item quantity="one">%d일 전</item>
+        <item quantity="other">%d일 전</item>
+    </plurals>
+    <plurals name="notification_hours_ago">
+        <item quantity="one">%d시간 전</item>
+        <item quantity="other">%d시간 전</item>
+    </plurals>
+    <plurals name="notification_minutes_ago">
+        <item quantity="one">%d분 전</item>
+        <item quantity="other">%d분 전</item>
+    </plurals>
 </resources>

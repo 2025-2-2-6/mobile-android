@@ -92,25 +92,49 @@ public abstract class PostDao {
     /**
      * 네트워크에서 가져온 Post 목록을 데이터베이스에 덮어씁니다.
      * 오프라인 상태에서 데이터 보존을 위한 캐시로 사용됩니다.
-     * 기존 데이터를 모두 삭제하고 새 데이터로 교체합니다.
+     * 기존 게시물의 isSaved 상태를 유지하면서 전체 삭제 후 덮어씁니다.
      */
     @Transaction
     public void upsert(List<Post> posts) {
-        deleteAll();
-        if (posts != null && !posts.isEmpty()) {
-            insertAll(posts);
+        if (posts == null || posts.isEmpty()) {
+            deleteAll();
+            return;
         }
+
+        // 기존 게시물의 저장 상태를 먼저 백업
+        for (Post newPost : posts) {
+            Boolean savedState = isPostSaved(newPost.getId());
+            if (savedState != null && savedState) {
+                newPost.setSaved(true);
+            }
+        }
+
+        // 전체 삭제 후 새 데이터 삽입
+        deleteAll();
+        insertAll(posts);
     }
 
     /**
      * 특정 사이트의 Post 목록을 덮어씁니다.
+     * 기존 게시물의 isSaved 상태를 유지하면서 해당 사이트 게시물만 삭제 후 덮어씁니다.
      */
     @Transaction
     public void upsertBySite(String siteId, List<Post> posts) {
+        if (posts == null || posts.isEmpty()) {
+            deletePostsBySite(siteId);
+            return;
+        }
+
+        // 기존 게시물의 저장 상태를 먼저 백업
+        for (Post newPost : posts) {
+            Boolean savedState = isPostSaved(newPost.getId());
+            if (savedState != null && savedState) {
+                newPost.setSaved(true);
+            }
+        }
+
         // 해당 사이트의 기존 데이터 삭제 후 새 데이터 삽입
         deletePostsBySite(siteId);
-        if (posts != null && !posts.isEmpty()) {
-            insertAll(posts);
-        }
+        insertAll(posts);
     }
 }

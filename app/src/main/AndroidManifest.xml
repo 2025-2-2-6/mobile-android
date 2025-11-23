@@ -31,11 +31,6 @@
             android:name=".ui.site.AddSiteActivity"
             android:exported="true"/>
         <activity
-            android:name=".ui.site.SiteManagementActivity"
-            android:exported="false"
-            android:theme="@style/Theme.mobile_android.ModalDialog"
-            android:parentActivityName=".MainActivity" />
-        <activity
             android:name=".ui.post.PostListActivity"
             android:exported="false"/>
         <activity

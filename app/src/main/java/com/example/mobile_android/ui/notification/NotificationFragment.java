@@ -4,7 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -16,16 +17,22 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.mobile_android.R;
 import com.example.mobile_android.util.NotificationPermissionHelper;
-import com.google.android.material.button.MaterialButton;
+
+import java.util.List;
+import com.example.mobile_android.data.local.NotificationEntity;
 
 public class NotificationFragment extends Fragment {
 
-    private LinearLayout layoutPermissionRequired;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
-    private MaterialButton btnGrantPermission;
+    private ImageButton btnGrantPermission;
+    private TextView tvUnreadCount;
 
     private ActivityResultLauncher<String> notificationPermissionLauncher;
+
+    private NotificationAdapter notificationAdapter;
+    private NotificationViewModel notificationViewModel;
+    private List<NotificationEntity> notificationList = new java.util.ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,23 +51,50 @@ public class NotificationFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_notification, container, false);
+        View root = inflater.inflate(R.layout.fragment_notification, container, false);
+        tvUnreadCount = root.findViewById(R.id.tv_notification_unread_count);
+        return root;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        notificationViewModel = new androidx.lifecycle.ViewModelProvider(this).get(NotificationViewModel.class);
+        notificationViewModel.getUnreadCount().observe(getViewLifecycleOwner(), count -> {
+            tvUnreadCount.setText("읽지 않은 알림 " + count + "개");
+        });
+        notificationViewModel.getNotifications().observe(getViewLifecycleOwner(), list -> {
+            notificationList.clear();
+            notificationList.addAll(list);
+            notificationAdapter.submitList(new java.util.ArrayList<>(notificationList));
+        });
         initViews(view);
         setupPermissionButton();
         updateUIBasedOnPermission();
     }
 
     private void initViews(View view) {
-        layoutPermissionRequired = view.findViewById(R.id.layout_permission_required);
         swipeRefreshLayout = view.findViewById(R.id.notification_swipe_refresh);
         recyclerView = view.findViewById(R.id.notifications_recycler_view);
         btnGrantPermission = view.findViewById(R.id.btn_grant_permission);
+
+        notificationAdapter = new NotificationAdapter(requireContext());
+        recyclerView.setAdapter(notificationAdapter);
+        notificationAdapter.setOnNotificationClickListener(new NotificationAdapter.OnNotificationClickListener() {
+            @Override
+            public void onNotificationClick(com.example.mobile_android.data.local.NotificationEntity notification) {
+                if (!notification.isRead()) {
+                    notification.setRead(true);
+                    // 리스트에서 해당 알림만 갱신
+                    notificationAdapter.submitList(new java.util.ArrayList<>(notificationList));
+                }
+            }
+            @Override
+            public void onDeleteClick(com.example.mobile_android.data.local.NotificationEntity notification) {
+                notificationList.remove(notification);
+                notificationAdapter.submitList(new java.util.ArrayList<>(notificationList));
+            }
+        });
     }
 
     private void setupPermissionButton() {
@@ -78,15 +112,9 @@ public class NotificationFragment extends Fragment {
     private void updateUIBasedOnPermission() {
         boolean hasPermission = NotificationPermissionHelper.hasNotificationPermission(requireContext());
 
-        if (hasPermission) {
-            // 권한이 있으면 알림 리스트 표시
-            layoutPermissionRequired.setVisibility(View.GONE);
-            swipeRefreshLayout.setVisibility(View.VISIBLE);
-            // TODO: 알림 목록 로드
-        } else {
-            // 권한이 없으면 권한 요청 화면 표시
-            layoutPermissionRequired.setVisibility(View.VISIBLE);
-            swipeRefreshLayout.setVisibility(View.GONE);
+        // 권한이 없을 때만 툴바의 버튼 표시
+        if (btnGrantPermission != null) {
+            btnGrantPermission.setVisibility(hasPermission ? View.GONE : View.VISIBLE);
         }
     }
 

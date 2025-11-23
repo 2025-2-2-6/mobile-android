@@ -20,6 +20,7 @@ import com.example.mobile_android.model.Post;
 import com.example.mobile_android.model.PostListResponse;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.network.ApiService;
+import com.example.mobile_android.util.TokenManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,7 +147,8 @@ public class PostListActivity extends AppCompatActivity {
     }
 
     private void loadPostsFromServer() {
-        Call<PostListResponse> call = apiService.getPosts(1, 100, null, siteId, null, null, "created_at", "desc");
+        String token = TokenManager.getBearerToken(this);
+        Call<PostListResponse> call = apiService.getPosts(token, 1, 100, null, siteId, null, null, "created_at", "desc");
 
         call.enqueue(new Callback<PostListResponse>() {
             @Override

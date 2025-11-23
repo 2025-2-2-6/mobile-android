@@ -29,6 +29,9 @@ public class NotificationViewModel extends AndroidViewModel {
         if (userId != null) {
             notifications = repository.getNotifications(userId);
             unreadCount = repository.getUnreadCount(userId);
+
+            // 임시: 더미 데이터 자동 삽입 (테스트용)
+            repository.insertDummyNotifications(userId);
         } else {
             MutableLiveData<List<NotificationEntity>> emptyNotifications = new MutableLiveData<>();
             emptyNotifications.setValue(java.util.Collections.emptyList());

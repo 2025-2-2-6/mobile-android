@@ -28,6 +28,7 @@ import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.site.AddSiteActivity;
 import com.example.mobile_android.ui.site.SiteAdapter;
+import com.example.mobile_android.util.TokenManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -143,7 +144,8 @@ public class SearchFragment extends Fragment {
     }
 
     private void deleteSite(Site site) {
-        ApiClient.getApiService().deleteSite(site.getId()).enqueue(new Callback<Void>() {
+        String token = TokenManager.getBearerToken(requireContext());
+        ApiClient.getApiService().deleteSite(token, site.getId()).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
@@ -195,8 +197,8 @@ public class SearchFragment extends Fragment {
 
     private void loadSites() {
         swipeRefresh.setRefreshing(true);
-
-        ApiClient.getApiService().getSites().enqueue(new Callback<List<Site>>() {
+        String token = TokenManager.getBearerToken(requireContext());
+        ApiClient.getApiService().getSites(token).enqueue(new Callback<List<Site>>() {
             @Override
             public void onResponse(Call<List<Site>> call, Response<List<Site>> response) {
                 swipeRefresh.setRefreshing(false);

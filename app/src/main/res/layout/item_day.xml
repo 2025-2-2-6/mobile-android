@@ -1,41 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  날짜 셀 레이아웃
-  - 정사각형 비율을 유지하며 클릭 영역이 정확한 원형이 되도록 개선
-  - 터치 피드백 추가
+  날짜 셀 레이아웃 - 인스타그램 스타일
+  - 명확한 날짜 표시와 부드러운 터치 피드백
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="0dp"
-    android:layout_height="56dp"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
     android:layout_weight="1"
-    android:padding="4dp">
+    android:padding="2dp">
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:layout_margin="3dp"
         android:background="?attr/selectableItemBackgroundBorderless">
 
+        <!-- 날짜 텍스트 -->
         <TextView
             android:id="@+id/tv_day"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            tools:text="20" />
+            android:textColor="#222222"
+            android:textSize="15sp"
+            android:textStyle="normal"
+            tools:text="15" />
 
+        <!-- 이벤트 표시 점 -->
         <View
             android:id="@+id/event_indicator"
-            android:layout_width="5dp"
-            android:layout_height="5dp"
-            android:layout_marginTop="2dp"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="6dp"
             android:background="@drawable/bg_event_indicator"
             android:visibility="gone"
             tools:visibility="visible" />
 
-    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </FrameLayout>
