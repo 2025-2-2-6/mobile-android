@@ -106,7 +106,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
                 tvDay.setTextColor(Color.WHITE);
             } else {
                 itemView.setBackgroundResource(0);
-                tvDay.setTextColor(Color.BLACK);
+                tvDay.setTextColor(Color.parseColor("#222222"));
             }
 
             // 이벤트 표시

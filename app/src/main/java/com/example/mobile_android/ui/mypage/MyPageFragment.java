@@ -26,9 +26,9 @@ import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.login.Login;
 import com.example.mobile_android.ui.post.PostListActivity;
-import com.example.mobile_android.ui.site.SiteManagementActivity;
 import com.example.mobile_android.util.NotificationPermissionHelper;
 import com.example.mobile_android.util.NotificationTopicManager;
+import com.example.mobile_android.util.TokenManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 
 import java.util.List;
@@ -64,7 +64,6 @@ public class MyPageFragment extends Fragment {
     private LinearLayout menuRegisteredSites;
     private LinearLayout menuNewPosts;
     private LinearLayout menuSavedEvents;
-    private TextView menuSiteManagement;
     private TextView menuPrivacyPolicy;
     private TextView logoutButton;
 
@@ -145,7 +144,6 @@ public class MyPageFragment extends Fragment {
             android.util.Log.d("MyPageFragment", "Switch found and clickable: " + switchNewPostNotification.isClickable());
         }
 
-        menuSiteManagement = view.findViewById(R.id.menu_site_management);
         menuPrivacyPolicy = view.findViewById(R.id.menu_privacy_policy);
         logoutButton = view.findViewById(R.id.logout_button);
     }
@@ -346,9 +344,6 @@ public class MyPageFragment extends Fragment {
             startActivity(intent);
         });
 
-        // 사이트 관리 메뉴
-        menuSiteManagement.setOnClickListener(v -> navigateToSiteManagement());
-
         // 개인정보 처리방침
         menuPrivacyPolicy.setOnClickListener(v -> showPrivacyPolicyDialog());
 
@@ -357,18 +352,13 @@ public class MyPageFragment extends Fragment {
     }
 
     private void navigateToSiteManagement() {
-        // 드로어 닫기
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).closeDrawer();
-        }
-        // SiteManagementActivity로 이동
-        Intent intent = new Intent(requireContext(), SiteManagementActivity.class);
-        startActivity(intent);
+        // 사이트 관리 기능 제거됨
+        // TODO: 필요시 다른 기능으로 대체
     }
 
     private void loadActivityCounts() {
-        // 등록 사이트 수 로드
-        ApiClient.getApiService().getSites().enqueue(new Callback<List<Site>>() {
+        String token = TokenManager.getBearerToken(requireContext());
+        ApiClient.getApiService().getSites(token).enqueue(new Callback<List<Site>>() {
             @Override
             public void onResponse(Call<List<Site>> call, Response<List<Site>> response) {
                 if (response.isSuccessful() && response.body() != null) {

@@ -23,6 +23,7 @@ public class ApiClient {
 
     /**
      * Retrofit 인스턴스 생성 및 반환 (싱글톤)
+     * Google ID Token을 각 API에서 직접 전달
      */
     public static Retrofit getClient() {
         if (retrofit == null) {
@@ -34,7 +35,7 @@ public class ApiClient {
                 logging.setLevel(HttpLoggingInterceptor.Level.NONE);
             }
 
-            // OkHttpClient 설정
+            // OkHttpClient 설정 (AuthInterceptor 제거 - Google ID Token 직접 전달)
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(logging)
                     .connectTimeout(AppConfig.CONNECT_TIMEOUT, TimeUnit.SECONDS)

@@ -1,45 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 캘린더 일정 아이템 (인스타그램 스타일) -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="8dp">
-
-    <View
-        android:id="@+id/view_event_color"
-        android:layout_width="4dp"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="12dp"
-        android:background="@android:color/holo_red_light" />
+    android:layout_marginBottom="@dimen/item_spacing_small"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:padding="@dimen/card_padding"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tv_event_title"
-            android:layout_width="wrap_content"
+        <!-- 색상 인디케이터 -->
+        <View
+            android:id="@+id/view_event_color"
+            android:layout_width="4dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:background="#4C84FF"
+            android:layout_gravity="center_vertical" />
+
+        <!-- 일정 정보 -->
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            tools:text="[행사] 2024년 여름방학 코딩 캠프" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_event_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/darker_gray"
-            android:textSize="14sp"
-            tools:text="17:00" />
+            <TextView
+                android:id="@+id/tv_event_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="#1A1A1A"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:lineSpacingExtra="2dp"
+                tools:text="정부 지원금 신청 마감" />
 
+            <TextView
+                android:id="@+id/tv_event_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#888888"
+                android:textSize="13sp"
+                android:drawablePadding="4dp"
+                app:drawableStartCompat="@android:drawable/ic_menu_recent_history"
+                app:drawableTint="#888888"
+                tools:text="18:00 · 지식" />
+        </LinearLayout>
+
+        <!-- 저장 아이콘 -->
+        <ImageView
+            android:id="@+id/iv_saved_indicator"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:src="@android:drawable/btn_star_big_on"
+            android:tint="#FFA726"
+            android:contentDescription="저장됨" />
     </LinearLayout>
-
-</LinearLayout>
+</androidx.cardview.widget.CardView>

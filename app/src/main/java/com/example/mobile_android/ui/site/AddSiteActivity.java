@@ -28,6 +28,7 @@ import com.example.mobile_android.R;
 import com.example.mobile_android.model.SiteRegisterRequest;
 import com.example.mobile_android.model.SiteRegisterResponse;
 import com.example.mobile_android.network.ApiClient;
+import com.example.mobile_android.util.TokenManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -195,8 +196,9 @@ public class AddSiteActivity extends AppCompatActivity {
 
         Log.d("AddSiteActivity", "Registering site - URL: " + url + ", Name: " + siteName + ", Category: " + selectedCategory);
 
+        String token = TokenManager.getBearerToken(this);
         SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId, selectedCategory);
-        Call<SiteRegisterResponse> call = ApiClient.getApiService().registerSite(request);
+        Call<SiteRegisterResponse> call = ApiClient.getApiService().registerSite(token, request);
 
         call.enqueue(new Callback<SiteRegisterResponse>() {
             @Override
@@ -210,8 +212,7 @@ public class AddSiteActivity extends AppCompatActivity {
                     Log.d("AddSiteActivity", "Registration successful! siteId: " + body.getSiteId());
                     Log.d("AddSiteActivity", "Message: " + body.getMessage());
 
-                    String toastMessage = body.getMessage() + "사이트 등록 완료!\n크롤링이 끝나면 알림으로 알려드릴게요.";
-                    Toast.makeText(AddSiteActivity.this, toastMessage, Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddSiteActivity.this, "사이트 등록 완료!\n크롤링이 끝나면 알림으로 알려드릴게요.", Toast.LENGTH_LONG).show();
 
                     Intent resultIntent = new Intent();
                     if (body.getSiteId() != null) {

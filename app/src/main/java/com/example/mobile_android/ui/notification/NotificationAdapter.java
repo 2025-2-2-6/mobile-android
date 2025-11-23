@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,15 +19,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobile_android.R;
 import com.example.mobile_android.data.local.NotificationEntity;
-import com.example.mobile_android.model.Notification;
 import com.example.mobile_android.util.DateTimeUtils;
 import com.google.android.material.card.MaterialCardView;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import com.example.mobile_android.fcm.NotificationType;
 
 public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -37,7 +35,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private final Context context;
     private final List<NotificationEntity> notifications = new ArrayList<>();
-    private final EnumMap<NotificationVariant, NotificationStyle> styleMap = new EnumMap<>(NotificationVariant.class);
+    private final EnumMap<NotificationType, NotificationStyle> styleMap = new EnumMap<>(NotificationType.class);
 
     private OnNotificationClickListener listener;
 
@@ -48,31 +46,19 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public NotificationAdapter(Context context) {
         this.context = context;
-        styleMap.put(NotificationVariant.CALENDAR, new NotificationStyle(
+        styleMap.put(NotificationType.CALENDAR_REMINDER, new NotificationStyle(
                 R.string.notification_label_calendar,
                 android.R.drawable.ic_menu_my_calendar,
                 R.color.notification_unread_calendar,
                 R.color.notification_icon_calendar
         ));
-        styleMap.put(NotificationVariant.CRAWL_SUCCESS, new NotificationStyle(
-                R.string.notification_label_crawl_success,
-                android.R.drawable.checkbox_on_background,
-                R.color.notification_unread_crawl_success,
-                R.color.notification_icon_success
-        ));
-        styleMap.put(NotificationVariant.CRAWL_FAILED, new NotificationStyle(
-                R.string.notification_label_crawl_failed,
-                android.R.drawable.ic_delete,
-                R.color.notification_unread_crawl_failed,
-                R.color.notification_icon_failed
-        ));
-        styleMap.put(NotificationVariant.CRAWL_NEW_POST, new NotificationStyle(
+        styleMap.put(NotificationType.CRAWL_NEW_POSTS, new NotificationStyle(
                 R.string.notification_label_crawl_new,
                 android.R.drawable.ic_input_add,
                 R.color.notification_unread_crawl_new,
                 R.color.notification_icon_new
         ));
-        styleMap.put(NotificationVariant.DEFAULT, new NotificationStyle(
+        styleMap.put(NotificationType.UNKNOWN, new NotificationStyle(
                 R.string.notification_label_default,
                 android.R.drawable.ic_dialog_info,
                 R.color.notification_unread_default,
@@ -87,9 +73,19 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void submitList(List<NotificationEntity> items) {
         notifications.clear();
         if (items != null) {
-            notifications.addAll(items);
+            notifications.addAll(items.subList(0, Math.min(items.size(), 5))); // 최대 5개로 제한
         }
         notifyDataSetChanged();
+    }
+
+    public void submitDummyData() {
+        List<NotificationEntity> dummyNotifications = new ArrayList<>();
+        dummyNotifications.add(new NotificationEntity("1", "CALENDAR_REMINDER", "마감 임박", "2024 전국 창업 공모전 마감까지 D-2일 남았습니다", System.currentTimeMillis()));
+        dummyNotifications.add(new NotificationEntity("2", "CRAWL_NEW_POSTS", "새 게시물 수집됨", "React 공식 사이트에서 새로운 게시물이 수집되었습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)));
+        dummyNotifications.add(new NotificationEntity("3", "UNKNOWN", "수집 완료", "서울대학교 공지사항 수집이 정상 완료되었습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3)));
+        dummyNotifications.add(new NotificationEntity("4", "UNKNOWN", "수집 실패", "창업진흥원 사이트 수집 중 오류가 발생했습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5)));
+        dummyNotifications.add(new NotificationEntity("5", "UNKNOWN", "알 수 없는 상태", "일부 사이트의 수집 상태를 확인할 수 없습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7)));
+        submitList(dummyNotifications);
     }
 
     @Override
@@ -135,10 +131,10 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 : unreadColor;
 
         vh.cardView.setCardBackgroundColor(cardColor);
-        vh.cardView.setStrokeColor(notification.isRead()
-                ? ContextCompat.getColor(context, R.color.notification_icon_default)
-                : ColorUtils.setAlphaComponent(accentColor, 80));
-        vh.cardView.setStrokeWidth(notification.isRead() ? dpToPx(1) : 0);
+        vh.cardView.setCardElevation(notification.isRead() ? dpToPx(2) : dpToPx(6)); // 그림자 효과 추가
+        vh.cardView.setStrokeWidth(0); // 테두리 제거
+
+        vh.leftColorIndicator.setBackgroundColor(accentColor);
 
         vh.tvLabel.setText(context.getString(style.labelTextRes));
         Drawable labelBg = DrawableCompat.wrap(vh.tvLabel.getBackground().mutate());
@@ -146,20 +142,16 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         vh.tvLabel.setBackground(labelBg);
         vh.tvLabel.setTextColor(accentColor);
 
-        Drawable iconBg = DrawableCompat.wrap(vh.iconContainer.getBackground().mutate());
-        DrawableCompat.setTint(iconBg, ColorUtils.setAlphaComponent(accentColor, notification.isRead() ? 40 : 90));
-        vh.iconContainer.setBackground(iconBg);
-
-        vh.ivIcon.setImageResource(style.iconRes);
-        vh.ivIcon.setColorFilter(notification.isRead()
-                ? ContextCompat.getColor(context, R.color.notification_icon_default)
-                : accentColor);
-
         vh.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onNotificationClick(notification);
+            if (!notification.isRead()) {
+                notification.setRead(true);
+                notifyItemChanged(position);
+                if (listener != null) {
+                    listener.onNotificationClick(notification);
+                }
             }
         });
+        vh.itemView.setClickable(true);
 
         vh.ivDelete.setOnClickListener(v -> {
             if (listener != null) {
@@ -169,40 +161,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     private NotificationStyle resolveStyle(String rawType) {
-        NotificationVariant variant = resolveVariant(rawType);
-        NotificationStyle style = styleMap.get(variant);
-        return style != null ? style : styleMap.get(NotificationVariant.DEFAULT);
-    }
-
-    private NotificationVariant resolveVariant(String rawType) {
-        if (rawType == null) {
-            return NotificationVariant.DEFAULT;
-        }
-        String type = rawType.toLowerCase(Locale.ROOT);
-        if (type.contains("calendar") || type.contains("schedule") || type.contains("deadline")) {
-            return NotificationVariant.CALENDAR;
-        }
-        if (type.startsWith("crawl_new_posts")) {
-            if (type.contains("failed") || type.contains("failure") || type.contains("error")) {
-                return NotificationVariant.CRAWL_FAILED;
-            }
-            if (type.contains("success")) {
-                return NotificationVariant.CRAWL_SUCCESS;
-            }
-            return NotificationVariant.CRAWL_NEW_POST;
-        }
-        if (Notification.Type.CRAWLING_COMPLETE.equals(rawType)) {
-            return NotificationVariant.CRAWL_SUCCESS;
-        }
-        if (Notification.Type.NEW_POST.equals(rawType)) {
-            return NotificationVariant.CRAWL_NEW_POST;
-        }
-        if (Notification.Type.SCHEDULE_REMINDER.equals(rawType)
-                || Notification.Type.EVENT_REMINDER.equals(rawType)
-                || Notification.Type.DEADLINE.equals(rawType)) {
-            return NotificationVariant.CALENDAR;
-        }
-        return NotificationVariant.DEFAULT;
+        NotificationType type = NotificationType.fromString(rawType);
+        NotificationStyle style = styleMap.get(type);
+        return style != null ? style : styleMap.get(NotificationType.UNKNOWN);
     }
 
     private String getRelativeTimeString(NotificationEntity notification) {
@@ -213,49 +174,52 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 reference = created.getTime();
             }
         }
-        if (reference <= 0) {
+        if (reference == 0) {
             return "";
         }
-
-        long diffMillis = System.currentTimeMillis() - reference;
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(diffMillis);
-        long hours = TimeUnit.MILLISECONDS.toHours(diffMillis);
-        long days = TimeUnit.MILLISECONDS.toDays(diffMillis);
-
-        if (minutes < 1) {
-            return "방금 전";
-        } else if (minutes < 60) {
-            return minutes + "분 전";
-        } else if (hours < 24) {
-            return hours + "시간 전";
-        } else if (days < 7) {
-            return days + "일 전";
-        } else {
-            String formatted = DateTimeUtils.formatServerDate(notification.getCreatedAt(), "M월 d일");
-            return formatted != null ? formatted : "";
+        long diff = System.currentTimeMillis() - reference;
+        long days = TimeUnit.MILLISECONDS.toDays(diff);
+        if (days > 0) {
+            return context.getResources().getQuantityString(R.plurals.notification_days_ago, (int) days, days);
         }
+        long hours = TimeUnit.MILLISECONDS.toHours(diff);
+        if (hours > 0) {
+            return context.getResources().getQuantityString(R.plurals.notification_hours_ago, (int) hours, hours);
+        }
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+        return context.getResources().getQuantityString(R.plurals.notification_minutes_ago, (int) minutes, minutes);
     }
 
     private int dpToPx(int dp) {
         float density = context.getResources().getDisplayMetrics().density;
-        return Math.round(dp * density);
+        return Math.round((float) dp * density);
     }
 
-    static class NotificationViewHolder extends RecyclerView.ViewHolder {
+    // ViewHolder 및 Style 클래스 정의
+    public static class NotificationStyle {
+        @StringRes public final int labelTextRes;
+        @DrawableRes public final int iconRes;
+        @ColorRes public final int unreadColorRes;
+        @ColorRes public final int accentColorRes;
+        public NotificationStyle(@StringRes int labelTextRes, @DrawableRes int iconRes, @ColorRes int unreadColorRes, @ColorRes int accentColorRes) {
+            this.labelTextRes = labelTextRes;
+            this.iconRes = iconRes;
+            this.unreadColorRes = unreadColorRes;
+            this.accentColorRes = accentColorRes;
+        }
+    }
+    public static class NotificationViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView cardView;
-        FrameLayout iconContainer;
-        ImageView ivIcon;
+        View leftColorIndicator;
         TextView tvLabel;
         TextView tvTitle;
         TextView tvBody;
         TextView tvTime;
         ImageView ivDelete;
-
-        NotificationViewHolder(@NonNull View itemView) {
+        public NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.card_notification);
-            iconContainer = itemView.findViewById(R.id.icon_container);
-            ivIcon = itemView.findViewById(R.id.iv_notification_icon);
+            leftColorIndicator = itemView.findViewById(R.id.left_color_indicator);
             tvLabel = itemView.findViewById(R.id.tv_notification_label);
             tvTitle = itemView.findViewById(R.id.tv_notification_title);
             tvBody = itemView.findViewById(R.id.tv_notification_body);
@@ -263,35 +227,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ivDelete = itemView.findViewById(R.id.iv_delete);
         }
     }
-
-    static class TipViewHolder extends RecyclerView.ViewHolder {
-        TipViewHolder(@NonNull View itemView) {
+    public static class TipViewHolder extends RecyclerView.ViewHolder {
+        public TipViewHolder(@NonNull View itemView) {
             super(itemView);
         }
-    }
-
-    private static class NotificationStyle {
-        @StringRes final int labelTextRes;
-        @DrawableRes final int iconRes;
-        @ColorRes final int unreadColorRes;
-        @ColorRes final int accentColorRes;
-
-        NotificationStyle(@StringRes int labelTextRes,
-                          @DrawableRes int iconRes,
-                          @ColorRes int unreadColorRes,
-                          @ColorRes int accentColorRes) {
-            this.labelTextRes = labelTextRes;
-            this.iconRes = iconRes;
-            this.unreadColorRes = unreadColorRes;
-            this.accentColorRes = accentColorRes;
-        }
-    }
-
-    private enum NotificationVariant {
-        CALENDAR,
-        CRAWL_SUCCESS,
-        CRAWL_FAILED,
-        CRAWL_NEW_POST,
-        DEFAULT
     }
 }

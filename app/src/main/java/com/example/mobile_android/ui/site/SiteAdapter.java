@@ -60,9 +60,14 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
     public void onBindViewHolder(@NonNull SiteViewHolder holder, int position) {
         Site site = siteList.get(position);
 
-        holder.siteName.setText(site.getName());
+        // 사이트 이름이 비어있으면 URL을 표시
+        String displayName = TextUtils.isEmpty(site.getName()) ? site.getUrl() : site.getName();
+        holder.siteName.setText(displayName);
         holder.siteUrl.setText(site.getUrl());
-        holder.categoryTag.setText(site.getCategory());
+
+        // 카테고리가 없으면 "기타"로 표시
+        String category = TextUtils.isEmpty(site.getCategory()) ? "기타" : site.getCategory();
+        holder.categoryTag.setText(category);
 
         String formattedDate = formatDate(site.getUpdatedAt());
         if (TextUtils.isEmpty(formattedDate)) {
@@ -79,7 +84,7 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
             Context context = v.getContext();
             Intent intent = new Intent(context, PostListActivity.class);
             intent.putExtra("SITE_ID", site.getId());
-            intent.putExtra("SITE_NAME", site.getName());
+            intent.putExtra("SITE_NAME", displayName);
             context.startActivity(intent);
         });
         holder.deleteButton.setOnClickListener(v -> {

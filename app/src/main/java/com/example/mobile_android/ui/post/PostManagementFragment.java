@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import com.example.mobile_android.model.Post;
 import com.example.mobile_android.model.PostListResponse;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.network.ApiService;
+import com.example.mobile_android.util.TokenManager;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -47,6 +49,10 @@ public class PostManagementFragment extends Fragment {
     private TabLayout tabLayout;
     private EditText etSearch;
     private ImageButton btnClearSearch;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
+    private View layoutEmptyPosts;
+    private TextView tvEmptyTitle;
+    private TextView tvEmptySubtitle;
 
     private ApiService apiService;
     private PostDao postDao;
@@ -79,6 +85,10 @@ public class PostManagementFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         etSearch = view.findViewById(R.id.et_search);
         btnClearSearch = view.findViewById(R.id.btn_clear_search);
+        swipeRefresh = view.findViewById(R.id.swipe_refresh);
+        layoutEmptyPosts = view.findViewById(R.id.layout_empty_posts);
+        tvEmptyTitle = view.findViewById(R.id.tv_empty_title);
+        tvEmptySubtitle = view.findViewById(R.id.tv_empty_subtitle);
 
         apiService = ApiClient.getClient().create(ApiService.class);
         postDao = AppDatabase.getInstance(requireContext()).postDao();
@@ -97,6 +107,18 @@ public class PostManagementFragment extends Fragment {
             intent.putExtra("POST_ID", post.getId());
             startActivity(intent);
         });
+
+        // SwipeRefreshLayout 설정
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    getResources().getColor(android.R.color.holo_blue_bright),
+                    getResources().getColor(android.R.color.holo_green_light),
+                    getResources().getColor(android.R.color.holo_orange_light)
+            );
+            swipeRefresh.setOnRefreshListener(() -> {
+                loadPostsFromServer();
+            });
+        }
     }
 
     private void setupSearchView() {
@@ -151,6 +173,31 @@ public class PostManagementFragment extends Fragment {
 
         currentPostList.addAll(filteredList);
         adapter.notifyDataSetChanged();
+
+        // 빈 상태 UI 업데이트
+        updateEmptyView();
+    }
+
+    private void updateEmptyView() {
+        if (currentPostList.isEmpty()) {
+            layoutEmptyPosts.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+
+            // 필터에 따라 빈 상태 메시지 변경
+            if ("new".equals(currentFilter)) {
+                tvEmptyTitle.setText("새 게시물이 없습니다");
+                tvEmptySubtitle.setText("아직 읽지 않은 게시물이 없습니다");
+            } else if ("saved".equals(currentFilter)) {
+                tvEmptyTitle.setText("저장된 게시물이 없습니다");
+                tvEmptySubtitle.setText("게시물을 저장하여 나중에 확인하세요");
+            } else {
+                tvEmptyTitle.setText("게시물이 없습니다");
+                tvEmptySubtitle.setText("사이트를 등록하고 게시물을 수집하세요");
+            }
+        } else {
+            layoutEmptyPosts.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void setupTabLayout() {
@@ -193,15 +240,24 @@ public class PostManagementFragment extends Fragment {
     }
 
     private void loadPostsFromServer() {
-        apiService.getPosts(1, 100, null, null, null, null, "created_at", "desc")
+        if (swipeRefresh != null) {
+            swipeRefresh.setRefreshing(true);
+        }
+
+        String token = TokenManager.getBearerToken(requireContext());
+        apiService.getPosts(token, 1, 100, null, null, null, null, "created_at", "desc")
                 .enqueue(new Callback<PostListResponse>() {
             @Override
             public void onResponse(Call<PostListResponse> call, Response<PostListResponse> response) {
                 if (!isAdded()) {
                     return;
                 }
+                if (swipeRefresh != null) {
+                    swipeRefresh.setRefreshing(false);
+                }
                 if (response.isSuccessful() && response.body() != null) {
                     databaseExecutor.execute(() -> postDao.upsert(response.body().getItems()));
+                    Toast.makeText(requireContext(), "게시물을 업데이트했습니다", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -209,6 +265,9 @@ public class PostManagementFragment extends Fragment {
             public void onFailure(Call<PostListResponse> call, Throwable t) {
                 if (!isAdded()) {
                     return;
+                }
+                if (swipeRefresh != null) {
+                    swipeRefresh.setRefreshing(false);
                 }
                 Toast.makeText(requireContext(), "게시물 불러오기 실패: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

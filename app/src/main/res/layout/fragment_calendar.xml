@@ -2,126 +2,181 @@
 <!--
     캘린더 Fragment
     - MainActivity에서 20dp 상단 여백이 이미 적용되어 있음
+    - 인스타그램 스타일 부드러운 디자인
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/screen_background"
     tools:context=".ui.calendar.CalendarFragment">
 
-    <!-- Month Header -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingHorizontal="@dimen/screen_horizontal_padding"
-        android:paddingVertical="@dimen/item_spacing"
-        android:background="#FFFFFF">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/btn_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_left" />
-
-        <TextView
-            android:id="@+id/tv_month"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            tools:text="2025년 11월" />
-
-        <ImageButton
-            android:id="@+id/btn_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_right" />
-    </LinearLayout>
-
-    <!-- Day of Week Header -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="@dimen/screen_horizontal_padding"
-        android:paddingVertical="@dimen/item_spacing_small"
-        android:background="#FFFFFF">
-
-        <TextView
-            style="@style/DayOfWeekText"
-            android:text="SUN" />
-        <TextView
-            style="@style/DayOfWeekText"
-            android:text="MON" />
-        <TextView
-            style="@style/DayOfWeekText"
-            android:text="TUE" />
-        <TextView
-            style="@style/DayOfWeekText"
-            android:text="WED" />
-        <TextView
-            style="@style/DayOfWeekText"
-            android:text="THU" />
-        <TextView
-            style="@style/DayOfWeekText"
-            android:text="FRI" />
-        <TextView
-            style="@style/DayOfWeekText"
-            android:text="SAT" />
-    </LinearLayout>
-
-    <!-- Days Grid -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_days"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/screen_horizontal_padding"
-        android:paddingBottom="@dimen/item_spacing"
-        android:background="#FFFFFF"
-        android:clipChildren="false"
-        android:clipToPadding="false" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="@dimen/item_spacing_small"
-        android:background="#E0E0E0" />
-
-    <!-- Events List -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_events"
+        <!-- 캘린더 카드 -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:clipChildren="false"
-            android:paddingHorizontal="@dimen/screen_horizontal_padding"
-            android:paddingTop="@dimen/item_spacing"
-            android:paddingBottom="@dimen/screen_bottom_padding"
-            tools:listitem="@layout/item_calendar_event" />
-
-        <TextView
-            android:id="@+id/tv_no_events"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="예정된 이벤트가 없습니다."
-            android:textSize="16sp"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:layout_marginStart="@dimen/screen_horizontal_padding"
+            android:layout_marginEnd="@dimen/screen_horizontal_padding"
+            android:layout_marginTop="@dimen/item_spacing"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="#FFFFFF">
 
-    </FrameLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/card_padding">
 
-</LinearLayout>
+                <!-- Month Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="@dimen/item_spacing_small">
+
+                    <ImageButton
+                        android:id="@+id/btn_prev"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_chevron_left"
+                        android:contentDescription="이전 달" />
+
+                    <TextView
+                        android:id="@+id/tv_month"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#222222"
+                        tools:text="2025년 1월" />
+
+                    <ImageButton
+                        android:id="@+id/btn_next"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_chevron_right"
+                        android:contentDescription="다음 달" />
+                </LinearLayout>
+
+                <!-- Day of Week Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="@dimen/item_spacing_small"
+                    android:paddingBottom="@dimen/item_spacing_small"
+                    android:gravity="center"
+                    android:weightSum="7">
+
+                    <TextView
+                        style="@style/DayOfWeekText"
+                        android:text="SUN" />
+                    <TextView
+                        style="@style/DayOfWeekText"
+                        android:text="MON" />
+                    <TextView
+                        style="@style/DayOfWeekText"
+                        android:text="TUE" />
+                    <TextView
+                        style="@style/DayOfWeekText"
+                        android:text="WED" />
+                    <TextView
+                        style="@style/DayOfWeekText"
+                        android:text="THU" />
+                    <TextView
+                        style="@style/DayOfWeekText"
+                        android:text="FRI" />
+                    <TextView
+                        style="@style/DayOfWeekText"
+                        android:text="SAT" />
+                </LinearLayout>
+
+                <!-- Days Grid -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_days"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 일정 목록 제목 및 추가 버튼 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/screen_horizontal_padding"
+            android:paddingEnd="@dimen/screen_horizontal_padding"
+            android:paddingTop="@dimen/item_spacing"
+            android:paddingBottom="@dimen/item_spacing_small">
+
+            <TextView
+                android:id="@+id/tv_selected_date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A1A"
+                tools:text="15일 일정" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_event"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="일정 추가"
+                android:textSize="13sp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                app:cornerRadius="18dp"
+                app:icon="@android:drawable/ic_input_add"
+                app:iconSize="16dp"
+                app:iconPadding="4dp"
+                app:iconGravity="textStart"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+        </LinearLayout>
+
+        <!-- Events List -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_events"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:paddingHorizontal="@dimen/screen_horizontal_padding"
+                android:paddingBottom="@dimen/screen_bottom_padding"
+                tools:listitem="@layout/item_calendar_event" />
+
+            <TextView
+                android:id="@+id/tv_no_events"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="예정된 이벤트가 없습니다"
+                android:textSize="15sp"
+                android:textColor="#999999"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>

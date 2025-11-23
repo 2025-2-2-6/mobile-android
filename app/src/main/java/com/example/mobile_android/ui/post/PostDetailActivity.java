@@ -77,7 +77,6 @@ public class PostDetailActivity extends AppCompatActivity {
         tvPostEventDate = findViewById(R.id.tv_post_event_date);
         tvPostLocation = findViewById(R.id.tv_post_location);
         cardAiSummary = findViewById(R.id.card_ai_summary);
-        tvAiSummary = findViewById(R.id.tv_ai_summary);
         tvPostContent = findViewById(R.id.tv_post_content);
         cardViewSource = findViewById(R.id.card_view_source);
         btnViewSource = findViewById(R.id.btn_view_source);

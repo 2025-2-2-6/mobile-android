@@ -116,24 +116,63 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- 게시물 리스트 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/postRecyclerView"
+    <!-- 게시물 리스트 및 빈 상태 UI -->
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:paddingTop="@dimen/item_spacing"
-        android:paddingBottom="@dimen/screen_bottom_padding"
-        android:paddingStart="@dimen/screen_horizontal_padding"
-        android:paddingEnd="@dimen/screen_horizontal_padding"
-        android:background="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card_tab_layout"
-        app:layout_constraintVertical_bias="0.0"
-        tools:listitem="@layout/item_post" />
+        app:layout_constraintTop_toBottomOf="@+id/card_tab_layout">
+
+        <!-- SwipeRefreshLayout으로 새로고침 기능 추가 -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/postRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:paddingTop="@dimen/item_spacing"
+                android:paddingBottom="@dimen/screen_bottom_padding"
+                android:paddingStart="@dimen/screen_horizontal_padding"
+                android:paddingEnd="@dimen/screen_horizontal_padding"
+                android:background="@android:color/transparent"
+                tools:listitem="@layout/item_post" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- 빈 상태 UI -->
+        <LinearLayout
+            android:id="@+id/layout_empty_posts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_empty_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="게시물이 없습니다"
+                android:textSize="16sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tv_empty_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="사이트를 등록하고 게시물을 수집하세요"
+                android:textSize="14sp"
+                android:textColor="#BBBBBB"
+                android:gravity="center" />
+        </LinearLayout>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

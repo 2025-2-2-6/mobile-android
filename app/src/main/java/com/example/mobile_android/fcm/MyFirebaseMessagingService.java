@@ -39,11 +39,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            showNotification(
-                    remoteMessage.getNotification().getTitle(),
-                    remoteMessage.getNotification().getBody(),
-                    remoteMessage.getData()
-            );
+
+            String title = remoteMessage.getNotification().getTitle();
+            String body = remoteMessage.getNotification().getBody();
+
+            // notification.title이 null이면 data에서 생성
+            if (title == null || title.isEmpty()) {
+                NotificationHandler handler = NotificationHandlerFactory.getHandler(remoteMessage.getData().get("type"));
+                title = handler.getTitle(remoteMessage.getData());
+            }
+
+            showNotification(title, body, remoteMessage.getData());
         }
     }
 

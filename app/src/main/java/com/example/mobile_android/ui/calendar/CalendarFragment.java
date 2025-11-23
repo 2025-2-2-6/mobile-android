@@ -60,6 +60,12 @@ public class CalendarFragment extends Fragment {
             selectedDate = selectedDate.plusMonths(1);
             refreshMonth();
         });
+
+        binding.btnAddEvent.setOnClickListener(v -> {
+            android.widget.Toast.makeText(requireContext(),
+                "일정 추가 기능은 게시물을 저장하여 캘린더에 표시할 수 있습니다",
+                android.widget.Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void setupCalendarView() {
@@ -100,6 +106,10 @@ public class CalendarFragment extends Fragment {
                 })
                 .collect(Collectors.toList());
         eventListAdapter.submitList(eventsForDay);
+
+        // 선택된 날짜 표시 업데이트
+        DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("M월 d일 일정", Locale.KOREAN);
+        binding.tvSelectedDate.setText(selectedDate.format(dateFmt));
 
         binding.tvNoEvents.setVisibility(eventsForDay.isEmpty() ? View.VISIBLE : View.GONE);
     }

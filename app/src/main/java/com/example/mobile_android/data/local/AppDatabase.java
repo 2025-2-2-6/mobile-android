@@ -18,7 +18,7 @@ import com.example.mobile_android.model.Site;
                 Post.class,
                 Site.class
         },
-        version = 3, // 데이터베이스 스키마 변경으로 버전 업데이트
+        version = 4, // crawlStatus 필드 추가로 버전 업데이트
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
