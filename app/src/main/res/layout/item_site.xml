@@ -3,100 +3,126 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardElevation="2dp"
+    app:cardCornerRadius="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="12dp">
 
-        <!-- Site Name -->
-        <TextView
-            android:id="@+id/tv_site_name"
+        <!-- 선택 모드에서만 보이는 체크박스 -->
+        <CheckBox
+            android:id="@+id/cb_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="컴퓨터학과 공지사항"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- New Post Badge -->
+        <!-- 사이트 이름 -->
         <TextView
-            android:id="@+id/tv_new_post_badge"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_site_name"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="3 새글"
-            android:textColor="@android:color/white"
-            android:background="@drawable/bg_new_post_badge"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
-            android:textSize="12sp"
-            android:layout_marginStart="8dp"
-            app:layout_constraintStart_toEndOf="@id/tv_site_name"
-            app:layout_constraintBaseline_toBaselineOf="@id/tv_site_name" />
+            android:text="사이트 이름"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@+id/cb_select"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_edit"
+            app:layout_constraintHorizontal_bias="0"
+            android:layout_marginStart="4dp"/>
 
-        <!-- Edit Icon -->
+        <!-- 수정 버튼(연필) -->
         <ImageView
             android:id="@+id/iv_edit"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_edit_24"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_edit"
+            android:padding="2dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_delete"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- 삭제 버튼(휴지통) -->
+        <ImageView
+            android:id="@+id/iv_delete"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_delete"
+            android:padding="2dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- URL -->
+        <TextView
+            android:id="@+id/tv_site_url"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="https://example.com"
+            android:textSize="12sp"
+            android:textColor="@android:color/black"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintStart_toStartOf="@+id/tv_site_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_site_name"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        
-        <!-- Category Tag -->
+            android:layout_marginTop="4dp" />
+
+        <!-- 카테고리 태그 -->
         <TextView
             android:id="@+id/tv_category_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="학과"
+            android:text="장학금"
+            android:textSize="11sp"
+            android:textColor="@android:color/white"
             android:background="@drawable/bg_category_tag"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:textSize="12sp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_site_name" />
+            app:layout_constraintStart_toStartOf="@+id/tv_site_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_site_url"
+            android:layout_marginTop="6dp" />
 
-        <!-- Last Updated Time -->
+        <!-- 새 글 뱃지 (필요 없으면 GONE 처리) -->
+        <TextView
+            android:id="@+id/tv_new_post_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NEW"
+            android:textSize="10sp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/bg_new_badge"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@+id/tv_category_tag"
+            app:layout_constraintBaseline_toBaselineOf="@+id/tv_category_tag"
+            android:layout_marginStart="6dp" />
+
+        <!-- 마지막 업데이트 -->
         <TextView
             android:id="@+id/tv_last_updated"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="• 2시간 전"
-            android:layout_marginStart="8dp"
-            app:layout_constraintStart_toEndOf="@id/tv_category_tag"
-            app:layout_constraintBaseline_toBaselineOf="@id/tv_category_tag" />
-
-        <!-- Site URL -->
-        <TextView
-            android:id="@+id/tv_site_url"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="https://cs.university.ac.kr/notice"
+            android:text="• 2025-11-22 00:00"
+            android:textSize="11sp"
+            android:textColor="@android:color/darker_gray"
+            app:layout_constraintStart_toStartOf="@+id/tv_site_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_category_tag"
             android:layout_marginTop="4dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_category_tag" />
-
-        <!-- Delete Icon -->
-        <ImageView
-            android:id="@+id/iv_delete"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_delete_24"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_edit" />
+            android:layout_marginBottom="2dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

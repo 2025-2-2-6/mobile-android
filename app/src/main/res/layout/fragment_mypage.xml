@@ -109,7 +109,7 @@
                         android:textColor="@android:color/darker_gray" />
                 </LinearLayout>
 
-                 <LinearLayout
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -237,7 +237,9 @@
                 android:orientation="vertical"
                 android:paddingVertical="8dp">
 
+                <!-- 🔥 여기 id 추가 -->
                 <TextView
+                    android:id="@+id/manage_site_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="등록 사이트 관리"
@@ -247,11 +249,13 @@
                     android:drawableEnd="@drawable/ic_arrow_forward"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"/>
+
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#eeeeee"
                     android:layout_marginHorizontal="12dp"/>
+
                 <TextView
                     android:id="@+id/privacy_policy_button"
                     android:layout_width="match_parent"
@@ -262,11 +266,13 @@
                     android:padding="12dp"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"/>
-                 <View
+
+                <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#eeeeee"
                     android:layout_marginHorizontal="12dp"/>
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

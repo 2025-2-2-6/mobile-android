@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                         .into(profileImage);
             }
         }
+        TextView manageSiteButton = navigationView.findViewById(R.id.manage_site_button);
 
         // Setup privacy policy button
         TextView privacyPolicyButton = navigationView.findViewById(R.id.privacy_policy_button);
@@ -167,8 +168,21 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             });
+
         });
+        if (manageSiteButton != null) {
+            manageSiteButton.setOnClickListener(v -> {
+                // 드로어 먼저 닫고
+                drawerLayout.closeDrawer(GravityCompat.START);
+                // 새 액티비티 열기
+                Intent intent = new Intent(MainActivity.this, com.example.mobile_android.ui.site.SiteManageActivity.class);
+                startActivity(intent);
+            });
+        }
+
+
     }
+
 
     private void showPrivacyPolicyDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
