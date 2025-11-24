@@ -99,6 +99,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Intent에서 탭 전환 요청 확인 (알림 클릭 시)
+        handleIntentExtras(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntentExtras(intent);
+    }
+
+    private void handleIntentExtras(Intent intent) {
+        if (intent != null && intent.hasExtra("OPEN_TAB")) {
+            String tabName = intent.getStringExtra("OPEN_TAB");
+            if ("calendar".equals(tabName)) {
+                navView.setSelectedItemId(R.id.navigation_calendar);
+            }
+        }
     }
 
     @Override

@@ -4,15 +4,17 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.mobile_android.data.local.AppDatabase;
-import com.example.mobile_android.data.local.PostDao;
+import com.example.mobile_android.data.local.CalendarEventDao;
 import com.example.mobile_android.databinding.FragmentCalendarBinding;
-import com.example.mobile_android.model.Post;
+import com.example.mobile_android.model.CalendarEvent;
+import com.example.mobile_android.util.CalendarEventAlarmManager;
 import com.example.mobile_android.util.DateTimeUtils;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -20,6 +22,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class CalendarFragment extends Fragment {
@@ -27,15 +31,17 @@ public class CalendarFragment extends Fragment {
     private FragmentCalendarBinding binding;
     private LocalDate selectedDate;
     private DayAdapter dayAdapter;
-    private EventListAdapter eventListAdapter;
-    private PostDao postDao;
-    private List<Post> allSavedPosts = new ArrayList<>();
+    private CalendarEventAdapter eventListAdapter;
+    private CalendarEventDao eventDao;
+    private ExecutorService executorService;
+    private List<CalendarEvent> allEvents = new ArrayList<>();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentCalendarBinding.inflate(inflater, container, false);
-        postDao = AppDatabase.getInstance(requireContext()).postDao();
+        eventDao = AppDatabase.getInstance(requireContext()).calendarEventDao();
+        executorService = Executors.newSingleThreadExecutor();
         return binding.getRoot();
     }
 
@@ -47,7 +53,7 @@ public class CalendarFragment extends Fragment {
 
         setupCalendarView();
         setupEventListView();
-        observeSavedPosts();
+        observeEvents();
 
         refreshMonth();
 
@@ -62,9 +68,11 @@ public class CalendarFragment extends Fragment {
         });
 
         binding.btnAddEvent.setOnClickListener(v -> {
-            android.widget.Toast.makeText(requireContext(),
-                "일정 추가 기능은 게시물을 저장하여 캘린더에 표시할 수 있습니다",
-                android.widget.Toast.LENGTH_SHORT).show();
+            CalendarEventDialogHelper.showAddEventDialog(
+                requireContext(),
+                selectedDate.toString(),
+                event -> saveEvent(event)
+            );
         });
     }
 
@@ -80,31 +88,47 @@ public class CalendarFragment extends Fragment {
     }
 
     private void setupEventListView() {
-        eventListAdapter = new EventListAdapter();
+        eventListAdapter = new CalendarEventAdapter(
+            event -> {
+                // 수정 버튼 클릭
+                CalendarEventDialogHelper.showEditEventDialog(
+                    requireContext(),
+                    event,
+                    updatedEvent -> updateEvent(updatedEvent),
+                    deletedEvent -> deleteEvent(deletedEvent)
+                );
+            },
+            event -> {
+                // 삭제 버튼 클릭
+                deleteEvent(event);
+            }
+        );
         binding.rvEvents.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvEvents.setAdapter(eventListAdapter);
     }
 
-    private void observeSavedPosts() {
-        postDao.getSavedPosts().observe(getViewLifecycleOwner(), posts -> {
-            allSavedPosts = posts;
-            // 이제 getCalendarAnchorDate()를 사용하여 대표 날짜를 가져옵니다.
-            List<LocalDate> eventDates = posts.stream()
-                    .map(post -> DateTimeUtils.parseServerDateToLocalDate(post.getCalendarAnchorDate()))
+    private void observeEvents() {
+        eventDao.getAllEvents().observe(getViewLifecycleOwner(), events -> {
+            allEvents = events;
+
+            // 이벤트가 있는 날짜 목록 생성
+            List<LocalDate> eventDates = events.stream()
+                    .map(event -> LocalDate.parse(event.getEventDate()))
+                    .distinct()
                     .collect(Collectors.toList());
+
             dayAdapter.setEventDates(eventDates);
             filterEventsForSelectedDate();
         });
     }
 
     private void filterEventsForSelectedDate() {
-        List<Post> eventsForDay = allSavedPosts.stream()
-                .filter(post -> {
-                    // 여기도 getCalendarAnchorDate()를 사용합니다.
-                    LocalDate eventDate = DateTimeUtils.parseServerDateToLocalDate(post.getCalendarAnchorDate());
-                    return eventDate != null && eventDate.equals(selectedDate);
-                })
+        String dateStr = selectedDate.toString();
+
+        List<CalendarEvent> eventsForDay = allEvents.stream()
+                .filter(event -> event.getEventDate().equals(dateStr))
                 .collect(Collectors.toList());
+
         eventListAdapter.submitList(eventsForDay);
 
         // 선택된 날짜 표시 업데이트
@@ -112,6 +136,59 @@ public class CalendarFragment extends Fragment {
         binding.tvSelectedDate.setText(selectedDate.format(dateFmt));
 
         binding.tvNoEvents.setVisibility(eventsForDay.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void saveEvent(CalendarEvent event) {
+        executorService.execute(() -> {
+            long id = eventDao.insert(event);
+            event.setId((int) id); // DB에서 생성된 ID 설정
+
+            requireActivity().runOnUiThread(() -> {
+                Toast.makeText(requireContext(), "일정이 추가되었습니다", Toast.LENGTH_SHORT).show();
+
+                // 알람 스케줄링
+                if (event.isAlarmEnabled()) {
+                    CalendarEventAlarmManager.scheduleAlarm(requireContext(), event);
+                }
+
+                // TODO: 백엔드 API 호출
+            });
+        });
+    }
+
+    private void updateEvent(CalendarEvent event) {
+        executorService.execute(() -> {
+            eventDao.update(event);
+            requireActivity().runOnUiThread(() -> {
+                Toast.makeText(requireContext(), "일정이 수정되었습니다", Toast.LENGTH_SHORT).show();
+
+                // 알람 업데이트 (기존 취소 후 재스케줄링)
+                CalendarEventAlarmManager.updateAlarm(requireContext(), event);
+
+                // TODO: 백엔드 API 호출
+            });
+        });
+    }
+
+    private void deleteEvent(CalendarEvent event) {
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("일정 삭제")
+            .setMessage("이 일정을 삭제하시겠습니까?")
+            .setPositiveButton("삭제", (dialog, which) -> {
+                executorService.execute(() -> {
+                    eventDao.delete(event);
+                    requireActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "일정이 삭제되었습니다", Toast.LENGTH_SHORT).show();
+
+                        // 알람 취소
+                        CalendarEventAlarmManager.cancelAlarm(requireContext(), event.getId());
+
+                        // TODO: 백엔드 API 호출
+                    });
+                });
+            })
+            .setNegativeButton("취소", null)
+            .show();
     }
 
     private void refreshMonth() {
@@ -155,6 +232,9 @@ public class CalendarFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // Prevent memory leaks
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
+        binding = null;
     }
 }

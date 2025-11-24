@@ -86,27 +86,33 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         }
 
         public void bind(LocalDate date, OnDayClickListener listener, LocalDate selectedDate, boolean hasEvent) {
-            // null 날짜 처리 (빈 칸)
+            // null 날짜 처리 (빈 칸) - 완전히 안보이게 설정
             if (date == null) {
+                itemView.setVisibility(View.INVISIBLE);  // 공간은 차지하지만 안보임
                 tvDay.setText("");
-                itemView.setBackgroundResource(0);
+                tvDay.setBackground(null);
                 eventIndicator.setVisibility(View.GONE);
                 itemView.setOnClickListener(null);
                 itemView.setClickable(false);
+                itemView.setEnabled(false);
                 return;
             }
 
-            // 날짜 표시
-            tvDay.setText(String.valueOf(date.getDayOfMonth()));
+            // null이 아닌 경우 다시 보이게 설정
+            itemView.setVisibility(View.VISIBLE);
+            itemView.setEnabled(true);
             itemView.setClickable(true);
 
-            // 선택된 날짜 스타일
+            // 날짜 표시
+            tvDay.setText(String.valueOf(date.getDayOfMonth()));
+
+            // 선택된 날짜 스타일 (TextView에 배경 적용)
             if (date.equals(selectedDate)) {
-                itemView.setBackgroundResource(R.drawable.bg_day_selected);
+                tvDay.setBackgroundResource(R.drawable.bg_day_selected);
                 tvDay.setTextColor(Color.WHITE);
             } else {
-                itemView.setBackgroundResource(0);
-                tvDay.setTextColor(Color.parseColor("#222222"));
+                tvDay.setBackground(null);
+                tvDay.setTextColor(Color.parseColor("#1A1A1A"));
             }
 
             // 이벤트 표시
