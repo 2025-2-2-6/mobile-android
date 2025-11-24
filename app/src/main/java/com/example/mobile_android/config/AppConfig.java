@@ -22,7 +22,7 @@ public class AppConfig {
      * Debug: http://localhost:8000
      * Release: https://api.yourserver.com
      */
-    public static final String BASE_URL = BuildConfig.BASE_URL;
+    public static final String BASE_URL = "http://159.223.39.236:8000/";
 
     /**
      * 에뮬레이터용 Base URL (필요시 사용)
