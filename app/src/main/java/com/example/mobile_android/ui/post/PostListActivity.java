@@ -48,7 +48,7 @@ public class PostListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_site_detail);
+        setContentView(R.layout.activity_post_list);
 
         initDatabase();
         apiService = ApiClient.getClient().create(ApiService.class);
@@ -60,6 +60,7 @@ public class PostListActivity extends AppCompatActivity {
         setupToolbar(siteName);
         setupRecyclerView();
         setupSearchView();
+        setupFilterChips();
 
         if (siteId != null) {
             observePostsBySite();
@@ -73,15 +74,16 @@ public class PostListActivity extends AppCompatActivity {
     }
 
     private void setupToolbar(String siteName) {
+        ImageButton btnBack = findViewById(R.id.btn_back);
+        android.widget.TextView tvSiteName = findViewById(R.id.tv_site_name);
+
         if (siteName != null) {
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setTitle(siteName);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setDisplayShowHomeEnabled(true);
-            } else {
-                setTitle(siteName);
-            }
+            tvSiteName.setText(siteName);
+        } else {
+            tvSiteName.setText("게시물 목록");
         }
+
+        btnBack.setOnClickListener(v -> finish());
     }
 
     private void setupRecyclerView() {
@@ -101,8 +103,15 @@ public class PostListActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterPosts(s.toString());
                 clearSearchButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                // 현재 선택된 칩에 따라 필터링
+                com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_filters);
+                int checkedId = chipGroup.getCheckedChipId();
+                if (checkedId != View.NO_ID) {
+                    filterPostsByChip(checkedId);
+                } else {
+                    filterPosts(s.toString());
+                }
             }
 
             @Override
@@ -166,6 +175,79 @@ public class PostListActivity extends AppCompatActivity {
                 Toast.makeText(PostListActivity.this, "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setupFilterChips() {
+        com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_filters);
+
+        chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) return;
+
+            int checkedId = checkedIds.get(0);
+            filterPostsByChip(checkedId);
+        });
+    }
+
+    private void filterPostsByChip(int chipId) {
+        String query = searchEditText.getText().toString();
+
+        if (chipId == R.id.chip_all) {
+            // 전체: 검색어만 적용
+            filterPosts(query);
+        } else if (chipId == R.id.chip_recruiting) {
+            // 모집중: TODO - 마감일이 지나지 않은 게시물
+            filterPostsByStatus(query, "recruiting");
+        } else if (chipId == R.id.chip_priority) {
+            // 우선: TODO - 우선순위가 높은 게시물
+            filterPostsByStatus(query, "priority");
+        } else if (chipId == R.id.chip_new) {
+            // NEW: 최근 게시물
+            filterPostsByStatus(query, "new");
+        }
+    }
+
+    private void filterPostsByStatus(String query, String status) {
+        List<Post> filtered = allPostList.stream()
+                .filter(post -> {
+                    // 검색어 필터
+                    boolean matchesQuery = query.isEmpty() ||
+                            (post.getTitle() != null && post.getTitle().toLowerCase().contains(query.toLowerCase())) ||
+                            (post.getContent() != null && post.getContent().toLowerCase().contains(query.toLowerCase()));
+
+                    if (!matchesQuery) return false;
+
+                    // 상태 필터
+                    switch (status) {
+                        case "new":
+                            return post.isActuallyNew();
+                        case "recruiting":
+                            // 마감일 체크 (eventEndDate가 현재보다 미래)
+                            return post.getEventEndDate() != null &&
+                                   !post.getEventEndDate().isEmpty() &&
+                                   isAfterToday(post.getEventEndDate());
+                        case "priority":
+                            // TODO: 우선순위 필드가 있다면 체크
+                            return true;
+                        default:
+                            return true;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        currentPostList.clear();
+        currentPostList.addAll(filtered);
+        postAdapter.notifyDataSetChanged();
+    }
+
+    private boolean isAfterToday(String dateStr) {
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+            java.util.Date eventDate = sdf.parse(dateStr);
+            java.util.Date today = new java.util.Date();
+            return eventDate != null && eventDate.after(today);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

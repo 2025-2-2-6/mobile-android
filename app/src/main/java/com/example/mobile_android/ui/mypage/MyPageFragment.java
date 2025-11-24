@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.example.mobile_android.MainActivity;
 import com.example.mobile_android.R;
 import com.example.mobile_android.model.Site;
+import com.example.mobile_android.model.UserStatistics;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.login.Login;
 import com.example.mobile_android.ui.post.PostListActivity;
@@ -358,6 +359,44 @@ public class MyPageFragment extends Fragment {
 
     private void loadActivityCounts() {
         String token = TokenManager.getBearerToken(requireContext());
+        FirebaseUser currentUser = auth.getCurrentUser();
+
+        if (currentUser == null) {
+            // 사용자 로그인 안 됨 - 기본값 표시
+            registeredSitesCount.setText("0");
+            newPostsCount.setText("0");
+            savedEventsCount.setText("0");
+            return;
+        }
+
+        String userId = currentUser.getUid();
+
+        // 통계 API 호출
+        ApiClient.getApiService().getUserStatistics(token, userId).enqueue(new Callback<UserStatistics>() {
+            @Override
+            public void onResponse(Call<UserStatistics> call, Response<UserStatistics> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    UserStatistics stats = response.body();
+                    registeredSitesCount.setText(String.valueOf(stats.getRegisteredSitesCount()));
+                    newPostsCount.setText(String.valueOf(stats.getNewPostsCount()));
+                    savedEventsCount.setText(String.valueOf(stats.getSavedEventsCount()));
+                } else {
+                    // API 실패 시 fallback: 기존 getSites() 방식으로 사이트 수만 조회
+                    loadActivityCountsFallback(token);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserStatistics> call, Throwable t) {
+                android.util.Log.e("MyPageFragment", "통계 API 호출 실패: " + t.getMessage());
+                // 네트워크 오류 시 fallback
+                loadActivityCountsFallback(token);
+            }
+        });
+    }
+
+    private void loadActivityCountsFallback(String token) {
+        // Fallback: 기존 방식으로 등록 사이트 수만 조회
         ApiClient.getApiService().getSites(token).enqueue(new Callback<List<Site>>() {
             @Override
             public void onResponse(Call<List<Site>> call, Response<List<Site>> response) {
@@ -374,12 +413,8 @@ public class MyPageFragment extends Fragment {
             }
         });
 
-        // 새 게시물 수는 PostListResponse에서 is_new 카운트 필요 (백엔드 API 필요)
-        // 현재는 임시로 0 표시
+        // 새 게시물 수, 저장된 일정 수는 임시로 0 표시
         newPostsCount.setText("0");
-
-        // 알림 일정 (저장된 캘린더 일정) - 백엔드 API 필요
-        // 현재는 임시로 0 표시
         savedEventsCount.setText("0");
     }
 

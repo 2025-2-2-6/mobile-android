@@ -60,8 +60,8 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
     public void onBindViewHolder(@NonNull SiteViewHolder holder, int position) {
         Site site = siteList.get(position);
 
-        // 사이트 이름이 비어있으면 URL을 표시
-        String displayName = TextUtils.isEmpty(site.getName()) ? site.getUrl() : site.getName();
+        // 사이트 이름 표시 (항상 name 필드 사용, null이면 "이름 없음"으로 표시)
+        String displayName = !TextUtils.isEmpty(site.getName()) ? site.getName() : "이름 없음";
         holder.siteName.setText(displayName);
         holder.siteUrl.setText(site.getUrl());
 

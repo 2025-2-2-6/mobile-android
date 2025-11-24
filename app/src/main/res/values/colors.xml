@@ -8,23 +8,34 @@
     <color name="screen_background">#F5F6FA</color>
     <color name="screen_card_surface">#FFFFFFFF</color>
 
-    <!-- Notification categories - 이미지 기반 색상 매핑 -->
-    <color name="notification_bg_read">#FFFFFFFF</color>
-    <!-- 일정 알림 (calendar_reminder) - 파란색 계열 -->
-    <color name="notification_unread_calendar">#E3F2FD</color>
-    <color name="notification_icon_calendar">#4C84FF</color>
-    <!-- 크롤링 새 게시물 (crawl_new_posts + new_post) - 주황/오렌지 계열 -->
-    <color name="notification_unread_crawl_new">#FFF3E0</color>
-    <color name="notification_icon_new">#FF9800</color>
-    <!-- 크롤링 성공 (crawl_new_posts + success) - 초록 계열 -->
-    <color name="notification_unread_crawl_success">#E8F5E9</color>
-    <color name="notification_icon_success">#4CAF50</color>
-    <!-- 크롤링 실패 (crawl_new_posts + failed) - 빨간색 계열 -->
-    <color name="notification_unread_crawl_failed">#FFEBEE</color>
-    <color name="notification_icon_failed">#F44336</color>
-    <!-- 기본/알 수 없음 (unknown) - 짙은 회색 -->
-    <color name="notification_unread_default">#F5F5F5</color>
-    <color name="notification_icon_default">#616161</color>
+    <!-- Notification categories - image1 기반 정확한 색상 -->
+    <color name="notification_bg_read">#FFFFFF</color>
+    <color name="notification_bg_unread_shadow">#08000000</color>
+
+    <!-- 1. 일정 알림 (calendar_reminder) - 파란색 -->
+    <color name="notification_unread_calendar">#E8F0FF</color>
+    <color name="notification_label_calendar">#4C84FF</color>
+    <color name="notification_label_bg_calendar">#DDE8FF</color>
+
+    <!-- 2. 새 게시물 (crawl_new_posts) - 주황색 -->
+    <color name="notification_unread_new">#FFF3E0</color>
+    <color name="notification_label_new">#FF9800</color>
+    <color name="notification_label_bg_new">#FFE5CC</color>
+
+    <!-- 3. 수집 완료 (crawl_success) - 초록색 -->
+    <color name="notification_unread_success">#E7F7EF</color>
+    <color name="notification_label_success">#2AA876</color>
+    <color name="notification_label_bg_success">#DCF5E7</color>
+
+    <!-- 4. 수집 실패 (crawl_failed) - 빨간색 -->
+    <color name="notification_unread_failed">#FFEBEE</color>
+    <color name="notification_label_failed">#F44336</color>
+    <color name="notification_label_bg_failed">#FFCDD2</color>
+
+    <!-- 5. 알 수 없는 상태 (unknown) - 회색 -->
+    <color name="notification_unread_unknown">#F5F5F5</color>
+    <color name="notification_label_unknown">#616161</color>
+    <color name="notification_label_bg_unknown">#E0E0E0</color>
 
     <!-- Notification Page Colors -->
     <color name="notification_bg">#FFFFFF</color>

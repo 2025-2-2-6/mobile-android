@@ -51,18 +51,18 @@
                 android:textStyle="bold"
                 />
 
-            <!-- 알림 권한 버튼 (간략화) -->
-            <ImageButton
-                android:id="@+id/btn_grant_permission"
+            <!-- 기기 알림 켜기 토글 -->
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/toggle_device_notification"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_notifications"
-                android:tint="#FF6B6B"
-                android:visibility="gone"
-                android:contentDescription="알림 권한 설정" />
+                android:text="기기 알림 켜기"
+                android:textColor="@android:color/black"
+                android:textSize="13sp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
         </androidx.appcompat.widget.Toolbar>
     </FrameLayout>
 

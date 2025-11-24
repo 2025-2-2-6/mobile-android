@@ -32,6 +32,8 @@
             android:orientation="vertical">
 
             <!-- 라벨 칩 -->
+
+            <!-- 제목 -->
             <TextView
                 android:id="@+id/tv_notification_label"
                 android:layout_width="wrap_content"
@@ -45,7 +47,6 @@
                 android:textSize="11sp"
                 android:textStyle="bold" />
 
-            <!-- 제목 -->
             <TextView
                 android:id="@+id/tv_notification_title"
                 android:layout_width="match_parent"

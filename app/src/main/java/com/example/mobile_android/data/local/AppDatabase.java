@@ -6,6 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.example.mobile_android.model.CalendarEvent;
 import com.example.mobile_android.model.Post;
 import com.example.mobile_android.model.Site;
 
@@ -16,9 +17,10 @@ import com.example.mobile_android.model.Site;
         entities = {
                 NotificationEntity.class,
                 Post.class,
-                Site.class
+                Site.class,
+                CalendarEvent.class
         },
-        version = 4, // crawlStatus 필드 추가로 버전 업데이트
+        version = 5, // CalendarEvent 엔티티 추가로 버전 업데이트
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -31,6 +33,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract PostDao postDao(); // Post 데이터 관리를 위한 DAO 추가
 
     public abstract SiteDao siteDao();
+
+    public abstract CalendarEventDao calendarEventDao();
 
     public static AppDatabase getInstance(Context context) {
         if (INSTANCE == null) {
