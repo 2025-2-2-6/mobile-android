@@ -12,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mobile_android.R;
-import com.example.mobile_android.model.Site;
 
 public class SiteDetailActivity extends AppCompatActivity {
 
@@ -25,6 +24,7 @@ public class SiteDetailActivity extends AppCompatActivity {
     private TextView tvUrl;
     private TextView tvSummary;
     private Button btnSave;
+    private Button btnCancel;   // ✅ 취소 버튼
 
     private String siteId;
     private String originalName;
@@ -40,32 +40,30 @@ public class SiteDetailActivity extends AppCompatActivity {
         tvUrl        = findViewById(R.id.tv_url);
         tvSummary    = findViewById(R.id.tv_summary);
         btnSave      = findViewById(R.id.btn_save);
+        btnCancel    = findViewById(R.id.btn_cancel);   // ✅ 추가
 
         // 👉 인텐트에서 값 꺼내기
         Intent intent = getIntent();
         siteId          = intent.getStringExtra(EXTRA_SITE_ID);
-        originalName    = intent.getStringExtra(EXTRA_SITE_NAME);       // ★ 사용자가 입력한 사이트 이름
-        siteUrl         = intent.getStringExtra(EXTRA_SITE_URL);        // 실제 링크
-        siteDescription = intent.getStringExtra(EXTRA_SITE_DESCRIPTION); // AI 요약 (description)
+        originalName    = intent.getStringExtra(EXTRA_SITE_NAME);
+        siteUrl         = intent.getStringExtra(EXTRA_SITE_URL);
+        siteDescription = intent.getStringExtra(EXTRA_SITE_DESCRIPTION);
 
-        // 🔹 "사이트 이름" 칸에는 **name** 을 넣는다 (지금 URL 들어가 있던 부분 수정)
         if (originalName != null) {
             etDisplayName.setText(originalName);
         }
 
-        // 🔹 "링크" 텍스트뷰에는 url 표시
         if (siteUrl != null) {
             tvUrl.setText(siteUrl);
         }
 
-        // 🔹 "AI 요약" 텍스트뷰에는 description 표시
         if (siteDescription != null && !siteDescription.isEmpty()) {
             tvSummary.setText(siteDescription);
         } else {
             tvSummary.setText("이 사이트에서 최근에 올라온 게시글 요약이 여기 표시됩니다.");
         }
 
-        // 🔹 URL 클릭 시 브라우저로 이동 (수정은 불가)
+        // URL 클릭 시 브라우저로 이동
         tvUrl.setOnClickListener(v -> {
             if (siteUrl != null && !siteUrl.isEmpty()) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(siteUrl));
@@ -75,7 +73,7 @@ public class SiteDetailActivity extends AppCompatActivity {
             }
         });
 
-        // 🔹 저장 버튼: 이름만 바꿔서 되돌려주기 (백엔드 수정은 아직 안 함)
+        // 저장 버튼
         btnSave.setOnClickListener(v -> {
             String newName = etDisplayName.getText().toString().trim();
             if (newName.isEmpty()) {
@@ -83,11 +81,17 @@ public class SiteDetailActivity extends AppCompatActivity {
                 return;
             }
 
-            // 결과를 호출한 액티비티( SiteManageActivity )로 돌려보내고 닫기
             Intent result = new Intent();
             result.putExtra(EXTRA_SITE_ID, siteId);
             result.putExtra(EXTRA_SITE_NAME, newName);
             setResult(RESULT_OK, result);
+            finish();
+        });
+
+        // ✅ 취소 버튼: 그냥 닫기
+        btnCancel.setOnClickListener(v -> {
+            // 필요하면 호출한 쪽에서 RESULT_CANCELED 체크
+            setResult(RESULT_CANCELED);
             finish();
         });
     }

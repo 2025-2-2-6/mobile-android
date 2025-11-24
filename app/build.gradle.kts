@@ -46,10 +46,10 @@ android {
             buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000\"")
 
             // 실제 디바이스 USB 연결 시 아래 주석 해제하고 위 줄 주석 처리
-             //buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:8000\"")
+            //buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:8000\"")
 
             // Wi-Fi 연결 시 PC IP로 변경
-             //buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:8000\"")
+            //buildConfigField("String", "BASE_URL", "\"http://192.168.0.105:8000\"")
 
             isDebuggable = true
         }

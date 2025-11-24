@@ -18,9 +18,7 @@ import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,15 +35,40 @@ public class SiteManageActivity extends AppCompatActivity {
     private LinearLayout chipContainer;
 
     private TextView tvTotalItems, tvNewItems, tvUpcomingItems, tvSiteCount;
-    private TextView btnDeleteMode;   // "삭제" / "삭제 실행" 토글
-    private CheckBox cbSelectAll;     // 전체 체크박스
+    private TextView btnDeleteMode;
+    private CheckBox cbSelectAll;
+
+    // 🔹 고정 카테고리 목록
+    private static final String CATEGORY_ALL = "전체";
+    private static final String CATEGORY_SCHOOL = "학교 공지";
+    private static final String CATEGORY_SCHOLARSHIP = "장학금/지원금";
+    private static final String CATEGORY_JOB = "채용/인턴십";
+    private static final String CATEGORY_CONTEST = "공모전/대외활동";
+    private static final String CATEGORY_DISCOUNT = "할인/혜택";
+    private static final String CATEGORY_EVENT = "이벤트";
+    private static final String CATEGORY_NEWS = "뉴스";
+    private static final String CATEGORY_WEATHER = "날씨/교통";
+    private static final String CATEGORY_OTHERS = "기타";
+
+    private static final String[] FIXED_CATEGORIES = new String[] {
+            CATEGORY_ALL,
+            CATEGORY_SCHOOL,
+            CATEGORY_SCHOLARSHIP,
+            CATEGORY_JOB,
+            CATEGORY_CONTEST,
+            CATEGORY_DISCOUNT,
+            CATEGORY_EVENT,
+            CATEGORY_NEWS,
+            CATEGORY_WEATHER,
+            CATEGORY_OTHERS
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_site_manage);
 
-        // 헤더 뒤로가기 (텍스트 ←)
+        // 헤더 뒤로가기
         TextView btnBack = findViewById(R.id.btn_back);
         btnBack.setOnClickListener(v -> finish());
 
@@ -61,33 +84,44 @@ public class SiteManageActivity extends AppCompatActivity {
         siteAdapter = new SiteAdapter(displayedSites, true);
         rvSites.setAdapter(siteAdapter);
 
-        // 상세 보기 (연필 or 카드 클릭 - 선택 모드 아닐 때)
+        // 상세 보기
         siteAdapter.setOnItemClickListener(site -> {
             SiteDetailLauncher.launch(this, site);
         });
 
-        // 개별 삭제 (휴지통)
+        // 개별 삭제
         siteAdapter.setOnDeleteListener(this::deleteSingleSite);
 
-        // 삭제 모드 버튼 + 전체 체크박스
         btnDeleteMode = findViewById(R.id.btn_delete_mode);
         cbSelectAll = findViewById(R.id.cb_select_all);
 
+        // 초기 상태
+        btnDeleteMode.setText("삭제");
+        cbSelectAll.setVisibility(View.GONE);
+        cbSelectAll.setChecked(false);
+
+        // 🔹 삭제 / 삭제 | 취소 버튼
         btnDeleteMode.setOnClickListener(v -> {
             if (!siteAdapter.isSelectionMode()) {
                 // 선택 모드 켜기
                 siteAdapter.setSelectionMode(true);
-                btnDeleteMode.setText("삭제 실행");
                 cbSelectAll.setVisibility(View.VISIBLE);
                 cbSelectAll.setChecked(false);
+                btnDeleteMode.setText("삭제 | 취소");
             } else {
-                // 실제 삭제 실행
+                // 이미 선택 모드
                 List<Site> selected = siteAdapter.getSelectedSites();
                 if (selected.isEmpty()) {
-                    Toast.makeText(this, "삭제할 사이트를 선택하세요.", Toast.LENGTH_SHORT).show();
-                    return;
+                    // 아무것도 선택 안 되어 있으면 → 취소
+                    siteAdapter.setSelectionMode(false);
+                    cbSelectAll.setVisibility(View.GONE);
+                    cbSelectAll.setChecked(false);
+                    btnDeleteMode.setText("삭제");
+                    Toast.makeText(this, "삭제를 취소했어요.", Toast.LENGTH_SHORT).show();
+                } else {
+                    // 선택된 것들 삭제
+                    deleteSites(selected);
                 }
-                deleteSites(selected);
             }
         });
 
@@ -103,6 +137,71 @@ public class SiteManageActivity extends AppCompatActivity {
         loadSites();
     }
 
+    // ----------------- 카테고리 매핑 -----------------
+    /** DB에 뭐가 들어있든 화면에서 쓰는 고정 카테고리로 바꿔주는 함수 */
+    private String normalizeCategory(String raw) {
+        if (raw == null) return CATEGORY_OTHERS;
+        String t = raw.trim();
+
+        // 학교 공지 계열
+        if (t.equals("학사공지") || t.equals("학교 공지")) {
+            return CATEGORY_SCHOOL;
+        }
+
+        // 장학금/지원금 계열
+        if (t.equals("장학금") || t.equals("장학금/지원금") || t.contains("장학") || t.contains("지원금")) {
+            return CATEGORY_SCHOLARSHIP;
+        }
+
+        // 채용/인턴십 계열
+        if (t.equals("채용") || t.equals("채용/인턴십") || t.contains("인턴") || t.contains("채용공고")) {
+            return CATEGORY_JOB;
+        }
+
+        // 공모전/대외활동 계열
+        if (t.equals("공모전") || t.equals("공모전/대외활동") || t.contains("대외활동") || t.contains("서포터즈")) {
+            return CATEGORY_CONTEST;
+        }
+
+        // 할인/혜택
+        if (t.equals("할인") || t.equals("혜택") || t.equals("할인/혜택") || t.contains("쿠폰") || t.contains("포인트")) {
+            return CATEGORY_DISCOUNT;
+        }
+
+        // 이벤트
+        if (t.equals("행사") || t.equals("이벤트") || t.contains("티켓오픈") || t.contains("이벤트")) {
+            return CATEGORY_EVENT;
+        }
+
+        // 뉴스
+        if (t.equals("뉴스") || t.contains("뉴스")) {
+            return CATEGORY_NEWS;
+        }
+
+        // 날씨/교통
+        if (t.equals("날씨") || t.equals("교통") || t.equals("날씨/교통") || t.contains("기상") || t.contains("교통")) {
+            return CATEGORY_WEATHER;
+        }
+
+        // 그 외 다 기타
+        return CATEGORY_OTHERS;
+    }
+
+    private int countForCategory(String label) {
+        if (CATEGORY_ALL.equals(label)) {
+            return allSites.size();
+        }
+
+        int cnt = 0;
+        for (Site s : allSites) {
+            String norm = normalizeCategory(s.getCategory());
+            if (label.equals(norm)) {
+                cnt++;
+            }
+        }
+        return cnt;
+    }
+
     // ----------------- 데이터 로딩 -----------------
     private void loadSites() {
         ApiClient.getApiService().getSites().enqueue(new Callback<List<Site>>() {
@@ -113,7 +212,7 @@ public class SiteManageActivity extends AppCompatActivity {
                     allSites.clear();
                     allSites.addAll(response.body());
 
-                    applyFilter("전체");
+                    applyFilter(CATEGORY_ALL);
                     setupTagChips();
                     updateSummary();
 
@@ -141,27 +240,18 @@ public class SiteManageActivity extends AppCompatActivity {
         tvUpcomingItems.setText("0");
     }
 
-    // ----------------- 카테고리 태그 칩 -----------------
+    // ----------------- 태그 칩 -----------------
     private void setupTagChips() {
         chipContainer.removeAllViews();
 
-        // "전체" 칩
-        addChip("전체", allSites.size(), true);
+        boolean first = true;
+        for (String label : FIXED_CATEGORIES) {
+            int count = countForCategory(label);
+            // 전체는 무조건 표시, 나머지는 개수 0이면 안 보여도 됨
+            if (!CATEGORY_ALL.equals(label) && count == 0) continue;
 
-        // category 수집
-        Set<String> categories = new LinkedHashSet<>();
-        for (Site site : allSites) {
-            if (site.getCategory() != null && !site.getCategory().isEmpty()) {
-                categories.add(site.getCategory());
-            }
-        }
-
-        for (String c : categories) {
-            int count = 0;
-            for (Site s : allSites) {
-                if (c.equals(s.getCategory())) count++;
-            }
-            addChip(c, count, false);
+            addChip(label, count, first);
+            first = false;
         }
     }
 
@@ -191,19 +281,22 @@ public class SiteManageActivity extends AppCompatActivity {
     private void applyFilter(String category) {
         displayedSites.clear();
 
-        if ("전체".equals(category)) {
+        if (CATEGORY_ALL.equals(category)) {
             displayedSites.addAll(allSites);
         } else {
             for (Site site : allSites) {
-                if (category.equals(site.getCategory())) {
+                String norm = normalizeCategory(site.getCategory());
+                if (category.equals(norm)) {
                     displayedSites.add(site);
                 }
             }
         }
 
+        // 필터 바꾸면 선택 모드 끄기 + 버튼 초기화
         siteAdapter.setSelectionMode(false);
-        btnDeleteMode.setText("삭제");
         cbSelectAll.setVisibility(View.GONE);
+        cbSelectAll.setChecked(false);
+        btnDeleteMode.setText("삭제");
 
         siteAdapter.notifyDataSetChanged();
         updateSummary();
@@ -221,7 +314,7 @@ public class SiteManageActivity extends AppCompatActivity {
 
         for (Site s : sites) {
             ApiClient.getApiService().deleteSite(s.getId())
-                    .enqueue(new Callback<Void>() {
+                    .enqueue(new retrofit2.Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
                             loadSites();
@@ -235,10 +328,12 @@ public class SiteManageActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, "삭제 요청 완료", Toast.LENGTH_SHORT).show();
-        // 삭제 후 선택 모드 종료
+
+        // 선택 모드 종료 + UI 초기화
         siteAdapter.setSelectionMode(false);
-        btnDeleteMode.setText("삭제");
         cbSelectAll.setVisibility(View.GONE);
+        cbSelectAll.setChecked(false);
+        btnDeleteMode.setText("삭제");
     }
 
     // ----------------- 상세보기 런처 -----------------
