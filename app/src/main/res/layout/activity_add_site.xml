@@ -1,157 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@android:color/white"
-    tools:context="com.example.mobile_android.ui.site.AddSiteActivity">
+    android:background="@android:color/white">
 
-    <!-- 제목: 새 사이트 등록 -->
+    <!-- 제목 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_site_title"
+        android:text="새 사이트 등록"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
         android:layout_gravity="center_horizontal" />
 
-    <!-- 상단 설명 문구 -->
+    <!-- 설명 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_site_description"
+        android:text="AI가 사이트 내용을 분석해 자동으로 카테고리를 분류합니다."
+        android:textColor="@android:color/darker_gray"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="24dp" />
 
-    <!-- 1. 웹페이지 URL 입력 필드 -->
+    <!-- URL 입력 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_site_url_label"
-        android:textSize="14sp"
+        android:text="사이트 URL"
         android:textStyle="bold"
         android:textColor="@android:color/black" />
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/et_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="4dp">
+        android:hint="예: https://cs.example.ac.kr"
+        android:background="@drawable/edittext_background"
+        android:padding="12dp"
+        android:layout_marginTop="4dp" />
 
-        <EditText
-            android:id="@+id/et_url"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/add_site_url_hint"
-            android:textSize="16sp"
-            android:background="@drawable/edittext_background"
-            android:padding="12dp" />
-
-
-    </LinearLayout>
-
-    <!-- 2. 사이트 이름 입력 필드 -->
+    <!-- 사이트 이름 입력 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/add_site_name_label"
-        android:textSize="14sp"
+        android:text="사이트 이름 (선택)"
         android:textStyle="bold"
         android:textColor="@android:color/black"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="16dp" />
 
     <EditText
         android:id="@+id/et_site_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/add_site_name_hint"
-        android:textSize="16sp"
-        android:layout_marginTop="4dp"
+        android:hint="예: 컴퓨터학과 공지사항"
         android:background="@drawable/edittext_background"
         android:padding="12dp"
-        android:inputType="textCapSentences"/>
-
-    <!-- 3. 카테고리 선택 스피너 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_site_category_label"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginTop="12dp" />
-
-    <Spinner
-        android:id="@+id/spinner_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
         android:layout_marginTop="4dp"
-        android:background="@drawable/edittext_background"
-        android:padding="4dp"
-        android:prompt="@string/category_prompt" />
+        android:inputType="textCapSentences" />
 
-    <!-- 4. 크롤링 주기 선택 스피너 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:prompt="@string/add_site_crawl_period_label"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginTop="12dp" />
-
-    <Spinner
-        android:id="@+id/spinner_crawl_period"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/edittext_background"
-        android:padding="4dp"
-        android:prompt="@string/crawl_period_prompt" />
-
-    <!-- 빈 공간을 채워 버튼을 하단에 고정 -->
+    <!-- 공간 채우기 -->
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- 5. 하단 버튼 -->
+    <!-- 등록 버튼 -->
     <Button
         android:id="@+id/btn_register"
-        style="@style/Widget.MaterialComponents.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_site_register_button"
+        android:text="등록하기"
         android:textSize="15sp"
         android:paddingTop="12dp"
-        android:paddingBottom="12dp"/>
+        android:paddingBottom="12dp" />
 
+    <!-- 취소 버튼 -->
     <Button
         android:id="@+id/btn_cancel"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_site_cancel_button"
+        android:text="취소"
         android:textColor="@android:color/darker_gray"
         android:textSize="15sp"
         android:layout_marginTop="8dp" />
 
-    <!-- Loading Indicator -->
+    <!-- 로딩 -->
     <ProgressBar
         android:id="@+id/loadingProgressBar"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:layout_marginTop="16dp" />
 
 </LinearLayout>

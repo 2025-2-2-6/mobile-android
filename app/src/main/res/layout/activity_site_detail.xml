@@ -9,64 +9,126 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 사이트 이름(표시 이름) -->
+        <!-- 상단 제목 -->
         <TextView
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="사이트 이름"
+            android:text="사이트 상세 정보"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:textSize="14sp"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginBottom="12dp" />
 
-        <EditText
-            android:id="@+id/et_display_name"
+        <!-- 내용 카드 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="표시할 이름"
-            android:inputType="textPersonName"
-            android:layout_marginTop="4dp" />
+            android:orientation="vertical"
+            android:background="@android:color/white"
+            android:padding="16dp"
+            android:elevation="2dp"
+            android:layout_marginBottom="20dp">
 
-        <!-- URL -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="링크"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:layout_marginTop="16dp"/>
+            <!-- 사이트 이름 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="사이트 이름"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#666666" />
 
-        <TextView
-            android:id="@+id/tv_url"
+            <EditText
+                android:id="@+id/et_display_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="표시할 이름을 입력하세요"
+                android:inputType="textPersonName"
+                android:layout_marginTop="6dp"
+                android:padding="8dp"
+                android:background="@android:drawable/edit_text" />
+
+            <!-- 구분선 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="12dp"
+                android:background="#EEEEEE" />
+
+            <!-- URL -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="링크"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#666666" />
+
+            <TextView
+                android:id="@+id/tv_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="https://example.com"
+                android:textColor="@android:color/holo_blue_dark"
+                android:autoLink="web"
+                android:layout_marginTop="6dp"
+                android:paddingVertical="4dp" />
+
+            <!-- 구분선 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="12dp"
+                android:background="#EEEEEE" />
+
+            <!-- AI 요약 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI 요약"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#666666" />
+
+            <TextView
+                android:id="@+id/tv_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="이 사이트에서 최근에 올라온 게시글 요약이 여기 표시됩니다."
+                android:layout_marginTop="6dp"
+                android:padding="8dp"
+                android:background="#F7F7F7" />
+        </LinearLayout>
+
+        <!-- 버튼 영역 (스타일만 변경) -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="https://example.com"
-            android:textColor="@android:color/holo_blue_dark"
-            android:autoLink="web"
-            android:layout_marginTop="4dp" />
+            android:orientation="vertical">
 
-        <!-- AI 요약 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AI 요약"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:layout_marginTop="16dp"/>
+            <!-- 보라색 메인 버튼 -->
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="저장"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:paddingVertical="12dp"
+                android:background="#673AB7"
+                android:textColor="@android:color/white" />
 
-        <TextView
-            android:id="@+id/tv_summary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="이 사이트에서 최근에 올라온 게시글 요약이 여기 표시됩니다."
-            android:layout_marginTop="4dp" />
-
-        <!-- 저장 버튼 (지금은 이름만 수정 / 나머진 보기용) -->
-        <Button
-            android:id="@+id/btn_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="저장"
-            android:layout_marginTop="24dp"/>
+            <!-- 아래 취소 버튼 -->
+            <Button
+                android:id="@+id/btn_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="취소"
+                android:paddingVertical="12dp"
+                android:background="@android:color/transparent"
+                android:textColor="#673AB7" />
+        </LinearLayout>
     </LinearLayout>
-
 </ScrollView>
