@@ -46,4 +46,7 @@
 
     <color name="stat_upcoming_bg">#F5EFFF</color>    <!-- 연보라 배경 -->
     <color name="stat_upcoming_stroke">#B990F0</color>
+    <color name="purple_50">#F3E5F5</color>
+    <color name="purple_500">#6200EE</color>
+
 </resources>

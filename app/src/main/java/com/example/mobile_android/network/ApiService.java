@@ -15,8 +15,11 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import com.example.mobile_android.model.Site;
+import com.example.mobile_android.model.SiteRegisterRequest;
 import com.example.mobile_android.model.Site;
 
 import java.util.List;
@@ -54,6 +57,12 @@ public interface ApiService {
             @Query("type") String type,
             @Query("is_read") Boolean isRead
     );
+    @PUT("/api/v1/sites/{siteId}")
+    Call<Site> updateSite(
+            @Path("siteId") String siteId,
+            @Body SiteRegisterRequest request
+    );
+
 
     @POST("/api/v1/notifications/{notification_id}/read")
     Call<Void> markNotificationAsRead(@Path("notification_id") String notificationId);
