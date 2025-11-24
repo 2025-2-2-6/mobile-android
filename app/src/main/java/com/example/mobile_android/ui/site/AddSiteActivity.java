@@ -48,6 +48,11 @@ public class AddSiteActivity extends AppCompatActivity {
                 siteUrlEditText.setError("URL을 입력해주세요.");
                 return;
             }
+            // ⭐⭐⭐ 자동으로 https:// 붙여주는 로직 추가 ⭐⭐⭐
+            if (!siteUrl.startsWith("http://") && !siteUrl.startsWith("https://")) {
+                siteUrl = "https://" + siteUrl;
+            }
+
             registerSite(siteUrl);
         });
 
