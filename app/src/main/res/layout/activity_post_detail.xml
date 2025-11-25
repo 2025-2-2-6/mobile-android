@@ -121,7 +121,6 @@
                 android:text="2025년 11월 18일 오후 02:00"
                 android:textColor="#666666"
                 android:textSize="14sp"
-                app:drawableStartCompat="@android:drawable/ic_menu_recent_history"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/chip_group_categories"
@@ -301,7 +300,6 @@
             android:text="마감일을 캘린더에 추가하여 놓치지 마세요"
             android:textColor="#666666"
             android:textSize="13sp"
-            android:visibility="gone"
             tools:visibility="visible" />
 
         <Button
