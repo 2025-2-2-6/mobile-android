@@ -5,10 +5,8 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="56dp"
-    android:layout_weight="1"
-    android:padding="2dp"
     android:clickable="true"
     android:focusable="true"
     android:background="?attr/selectableItemBackgroundBorderless">
@@ -16,8 +14,8 @@
     <!-- 날짜 텍스트 -->
     <TextView
         android:id="@+id/tv_day"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="center"
         android:gravity="center"
         android:textColor="#1A1A1A"
@@ -32,7 +30,7 @@
         android:layout_width="6dp"
         android:layout_height="6dp"
         android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="12dp"
         android:background="@drawable/bg_event_indicator"
         android:visibility="gone"
         tools:visibility="visible" />

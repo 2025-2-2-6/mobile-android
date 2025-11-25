@@ -10,6 +10,10 @@
         <item name="colorSecondaryVariant">@color/login_bg2</item>
         <item name="colorOnSecondary">@color/login_bg2</item>
         <item name="android:statusBarColor">@color/login_bg1</item>
+
+        <!-- System bars configuration -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:navigationBarColor">@color/white</item>
     </style>
 
     <style name="Theme.mobile_android" parent="Base.Theme.mobile_android" />

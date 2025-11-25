@@ -191,9 +191,9 @@ public class Post implements Serializable, Parcelable {
             long createdTime = createdDate.getTime();
             long timeDiff = currentTime - createdTime;
 
-            // 24시간 = 24 * 60 * 60 * 1000 밀리초
-            long twentyFourHours = 24 * 60 * 60 * 1000L;
-            return timeDiff <= twentyFourHours;
+            // 1분 = 60 * 1000 밀리초 (테스트용)
+            long oneMinute = 60 * 1000L;
+            return timeDiff <= oneMinute;
         } catch (Exception e) {
             // 파싱 실패시 false 반환
             return false;

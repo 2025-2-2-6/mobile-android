@@ -97,11 +97,11 @@ public interface ApiService {
 
     // 일정 수정
     @PUT("/api/v1/calendar-events/{id}")
-    Call<CalendarEvent> updateEvent(@Header("Authorization") String token, @Path("id") int id, @Body CalendarEvent event);
+    Call<CalendarEvent> updateEvent(@Header("Authorization") String token, @Path("id") String id, @Body CalendarEvent event);
 
     // 일정 삭제
     @DELETE("/api/v1/calendar-events/{id}")
-    Call<Void> deleteEvent(@Header("Authorization") String token, @Path("id") int id);
+    Call<Void> deleteEvent(@Header("Authorization") String token, @Path("id") String id);
 
     // ========== 통계 API ==========
 

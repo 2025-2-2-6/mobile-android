@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.mobile_android.MainActivity;
 import com.example.mobile_android.R;
+import com.example.mobile_android.data.local.AppDatabase;
 import com.example.mobile_android.model.Site;
 import com.example.mobile_android.model.UserStatistics;
 import com.example.mobile_android.network.ApiClient;
@@ -113,7 +114,7 @@ public class MyPageFragment extends Fragment {
         loadUserProfile();
         setupNotificationSwitches();
         setupMenuClickListeners();
-        loadActivityCounts();
+        observeActivityCounts(); // LiveData로 실시간 관찰
 
         return view;
     }
@@ -357,65 +358,43 @@ public class MyPageFragment extends Fragment {
         // TODO: 필요시 다른 기능으로 대체
     }
 
-    private void loadActivityCounts() {
-        String token = TokenManager.getBearerToken(requireContext());
-        FirebaseUser currentUser = auth.getCurrentUser();
+    /**
+     * 활동 카운팅 실시간 관찰 (LiveData 기반)
+     * HomeFragment와 동일한 방식으로 로컬 DB에서 직접 계산
+     */
+    private void observeActivityCounts() {
+        AppDatabase db = AppDatabase.getInstance(requireContext());
 
-        if (currentUser == null) {
-            // 사용자 로그인 안 됨 - 기본값 표시
-            registeredSitesCount.setText("0");
-            newPostsCount.setText("0");
-            savedEventsCount.setText("0");
-            return;
-        }
-
-        String userId = currentUser.getUid();
-
-        // 통계 API 호출
-        ApiClient.getApiService().getUserStatistics(token, userId).enqueue(new Callback<UserStatistics>() {
-            @Override
-            public void onResponse(Call<UserStatistics> call, Response<UserStatistics> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    UserStatistics stats = response.body();
-                    registeredSitesCount.setText(String.valueOf(stats.getRegisteredSitesCount()));
-                    newPostsCount.setText(String.valueOf(stats.getNewPostsCount()));
-                    savedEventsCount.setText(String.valueOf(stats.getSavedEventsCount()));
-                } else {
-                    // API 실패 시 fallback: 기존 getSites() 방식으로 사이트 수만 조회
-                    loadActivityCountsFallback(token);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UserStatistics> call, Throwable t) {
-                android.util.Log.e("MyPageFragment", "통계 API 호출 실패: " + t.getMessage());
-                // 네트워크 오류 시 fallback
-                loadActivityCountsFallback(token);
-            }
-        });
-    }
-
-    private void loadActivityCountsFallback(String token) {
-        // Fallback: 기존 방식으로 등록 사이트 수만 조회
-        ApiClient.getApiService().getSites(token).enqueue(new Callback<List<Site>>() {
-            @Override
-            public void onResponse(Call<List<Site>> call, Response<List<Site>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    registeredSitesCount.setText(String.valueOf(response.body().size()));
-                } else {
-                    registeredSitesCount.setText("0");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Site>> call, Throwable t) {
+        // 1. 등록 사이트 개수 (LiveData)
+        db.siteDao().observeAll().observe(getViewLifecycleOwner(), sites -> {
+            if (sites != null) {
+                registeredSitesCount.setText(String.valueOf(sites.size()));
+            } else {
                 registeredSitesCount.setText("0");
             }
         });
 
-        // 새 게시물 수, 저장된 일정 수는 임시로 0 표시
-        newPostsCount.setText("0");
-        savedEventsCount.setText("0");
+        // 2. 새 게시물 개수 (is_new = true, Post.isActuallyNew() 기준)
+        db.postDao().getAllPostsForNewFilter().observe(getViewLifecycleOwner(), posts -> {
+            if (posts != null) {
+                long count = posts.stream().filter(post -> post.isActuallyNew()).count();
+                newPostsCount.setText(String.valueOf(count));
+            } else {
+                newPostsCount.setText("0");
+            }
+        });
+
+        // 3. 알림 설정된 일정 개수 (notify_enabled = true)
+        db.calendarEventDao().getAllEvents().observe(getViewLifecycleOwner(), events -> {
+            if (events != null) {
+                long count = events.stream()
+                        .filter(event -> event.isNotifyEnabled())
+                        .count();
+                savedEventsCount.setText(String.valueOf(count));
+            } else {
+                savedEventsCount.setText("0");
+            }
+        });
     }
 
     private void showNotificationPermissionDialog() {
@@ -460,7 +439,7 @@ public class MyPageFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadActivityCounts();
+        // observeActivityCounts()가 LiveData로 자동 업데이트하므로 별도 호출 불필요
         // 설정 화면에서 돌아왔을 때 권한 상태 재확인
         updateNotificationSwitchesBasedOnPermission();
     }

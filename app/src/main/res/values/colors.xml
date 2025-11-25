@@ -2,10 +2,12 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="accent_color">#4C84FF</color>
+    <color name="brand_color2">#FFFFFF</color>
     <color name="login_bg1">#0B0E18</color>
     <color name="login_bg2">#673AB7</color>
     <color name="logout_btn">#4F85B8</color>
-    <color name="screen_background">#F5F6FA</color>
+    <color name="screen_background">#FFFFFF</color>
     <color name="screen_card_surface">#FFFFFFFF</color>
 
     <!-- Notification categories - image1 기반 정확한 색상 -->

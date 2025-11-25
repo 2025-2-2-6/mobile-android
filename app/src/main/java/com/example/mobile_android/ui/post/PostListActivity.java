@@ -48,7 +48,7 @@ public class PostListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post_list);
+        setContentView(R.layout.activity_site_post_list);
 
         initDatabase();
         apiService = ApiClient.getClient().create(ApiService.class);

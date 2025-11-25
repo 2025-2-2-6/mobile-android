@@ -5,171 +5,180 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:fitsSystemWindows="true"
     android:background="@android:color/white"
     tools:context="com.example.mobile_android.ui.site.AddSiteActivity">
 
-    <!-- 제목: 새 사이트 등록 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_site_title"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_gravity="center_horizontal" />
-
-    <!-- 상단 설명 문구 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_site_description"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="24dp" />
-
-    <!-- 1. 웹페이지 URL 입력 필드 -->
-    <TextView
-        android:id="@+id/tv_site_url_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_site_url_label"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black" />
-
+    <!-- 내부 content 감싸는 레이아웃 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="4dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 제목: 새 사이트 등록 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_site_title"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center_horizontal" />
+
+        <!-- 상단 설명 문구 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_site_description"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- 1. 웹페이지 URL 입력 필드 -->
+        <TextView
+            android:id="@+id/tv_site_url_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_site_url_label"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <EditText
+                android:id="@+id/et_url"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="@string/add_site_url_hint"
+                android:textSize="16sp"
+                android:background="@drawable/edittext_background"
+                android:padding="12dp"
+                android:maxLength="@integer/site_url_max_length"
+                android:inputType="textUri" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_url_counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#888888"
+            android:textSize="12sp"
+            android:text="0/255" />
+
+        <!-- 2. 사이트 이름 입력 필드 -->
+        <TextView
+            android:id="@+id/tv_site_name_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="사이트 제목 *"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="12dp" />
 
         <EditText
-            android:id="@+id/et_url"
-            android:layout_width="0dp"
+            android:id="@+id/et_site_name"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="@string/add_site_url_hint"
+            android:hint="@string/add_site_name_hint"
             android:textSize="16sp"
+            android:layout_marginTop="4dp"
             android:background="@drawable/edittext_background"
             android:padding="12dp"
-            android:maxLength="@integer/site_url_max_length"
-            android:inputType="textUri" />
+            android:inputType="textCapSentences"/>
 
+        <!-- 3. 카테고리 선택 스피너 -->
+        <TextView
+            android:id="@+id/tv_category_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_site_category_label"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="12dp" />
+
+        <Spinner
+            android:id="@+id/spinner_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/edittext_background"
+            android:padding="4dp"
+            android:prompt="@string/category_prompt" />
+
+        <!-- 4. 메모 (선택사항) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="메모 (선택사항)"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/et_memo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="사이트에 대한 메모를 입력하세요"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/edittext_background"
+            android:padding="12dp"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:maxLines="4"
+            android:gravity="top"/>
+
+        <!-- Loading Indicator -->
+        <ProgressBar
+            android:id="@+id/loadingProgressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp"
+            android:visibility="gone" />
+
+        <!-- 빈 공간을 채워 버튼을 하단에 고정 -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- 5. 하단 버튼 -->
+        <Button
+            android:id="@+id/btn_register"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_site_register_button"
+            android:textSize="15sp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:backgroundTint="@color/accent_color" />
+
+        <Button
+            android:id="@+id/btn_cancel"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_site_cancel_button"
+            android:textColor="@color/accent_color"
+            android:textSize="15sp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:backgroundTint="@color/brand_color2" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tv_url_counter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="#888888"
-        android:textSize="12sp"
-        android:text="0/255" />
-
-    <!-- 2. 사이트 이름 입력 필드 -->
-    <TextView
-        android:id="@+id/tv_site_name_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="사이트 제목 *"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginTop="12dp" />
-
-    <EditText
-        android:id="@+id/et_site_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/add_site_name_hint"
-        android:textSize="16sp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/edittext_background"
-        android:padding="12dp"
-        android:inputType="textCapSentences"/>
-
-    <!-- 3. 카테고리 선택 스피너 -->
-    <TextView
-        android:id="@+id/tv_category_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_site_category_label"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginTop="12dp" />
-
-    <Spinner
-        android:id="@+id/spinner_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/edittext_background"
-        android:padding="4dp"
-        android:prompt="@string/category_prompt" />
-
-    <!-- 4. 메모 (선택사항) -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="메모 (선택사항)"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginTop="12dp" />
-
-    <EditText
-        android:id="@+id/et_memo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="사이트에 대한 메모를 입력하세요"
-        android:textSize="16sp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/edittext_background"
-        android:padding="12dp"
-        android:inputType="textMultiLine"
-        android:minLines="2"
-        android:maxLines="4"
-        android:gravity="top"/>
-
-    <!-- Loading Indicator (버튼 위로 이동) -->
-    <ProgressBar
-        android:id="@+id/loadingProgressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="24dp"
-        android:visibility="gone" />
-
-    <!-- 빈 공간을 채워 버튼을 하단에 고정 -->
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <!-- 5. 하단 버튼 -->
-    <Button
-        android:id="@+id/btn_register"
-        style="@style/Widget.MaterialComponents.Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/add_site_register_button"
-        android:textSize="15sp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"/>
-
-    <Button
-        android:id="@+id/btn_cancel"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/add_site_cancel_button"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="15sp"
-        android:layout_marginTop="8dp" />
-
 </LinearLayout>

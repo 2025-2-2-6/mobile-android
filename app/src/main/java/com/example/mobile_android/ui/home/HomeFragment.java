@@ -127,6 +127,9 @@ public class HomeFragment extends Fragment {
         // --- 새 게시물 개수 관찰 ---
         observeNewPostCount();
 
+        // --- 알림 설정된 일정 개수 관찰 ---
+        observeUpcomingEventCount();
+
         return view;
     }
 
@@ -322,22 +325,41 @@ public class HomeFragment extends Fragment {
             layoutEmptySites.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
         }
-
-        // 다가오는 일정 → 추후 기능
-        tvUpcomingItems.setText("0");
     }
 
     // ----------------------
-    // ★ 새 게시물 개수 관찰
+    // ★ 새 게시물 개수 관찰 (is_new = true인 Post 개수)
     // ----------------------
     private void observeNewPostCount() {
-        postDao.getNewPostCount().observe(getViewLifecycleOwner(), count -> {
-            if (count != null) {
+        // is_new는 DB 필드, 실제 "새 게시물"은 Post.isActuallyNew()로 판단
+        // 여기서는 getAllPostsForNewFilter로 전체 가져와서 클라이언트에서 필터링
+        postDao.getAllPostsForNewFilter().observe(getViewLifecycleOwner(), posts -> {
+            if (posts != null) {
+                long count = posts.stream().filter(post -> post.isActuallyNew()).count();
                 tvNewItems.setText(String.valueOf(count));
             } else {
                 tvNewItems.setText("0");
             }
         });
+    }
+
+    // ----------------------
+    // ★ 알림 설정된 일정 개수 관찰 (notify_enabled = true인 CalendarEvent 개수)
+    // ----------------------
+    private void observeUpcomingEventCount() {
+        AppDatabase.getInstance(requireContext())
+                .calendarEventDao()
+                .getAllEvents()
+                .observe(getViewLifecycleOwner(), events -> {
+                    if (events != null) {
+                        long count = events.stream()
+                                .filter(event -> event.isNotifyEnabled())
+                                .count();
+                        tvUpcomingItems.setText(String.valueOf(count));
+                    } else {
+                        tvUpcomingItems.setText("0");
+                    }
+                });
     }
 
     // ------------------------

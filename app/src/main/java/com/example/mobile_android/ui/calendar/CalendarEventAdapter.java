@@ -104,6 +104,7 @@ public class CalendarEventAdapter extends RecyclerView.Adapter<CalendarEventAdap
                 tvCategory.setTextColor(color);
             } else {
                 tvCategory.setVisibility(View.GONE);
+                categoryIndicator.setBackgroundColor(0xFF4C84FF);  // 기본 파랑색
             }
 
             // 메모 표시

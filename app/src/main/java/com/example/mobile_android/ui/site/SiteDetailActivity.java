@@ -54,7 +54,7 @@ public class SiteDetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_site_detail_new);
+        setContentView(R.layout.activity_site_detail);
 
         siteId = getIntent().getStringExtra("SITE_ID");
         if (siteId == null || siteId.isEmpty()) {
