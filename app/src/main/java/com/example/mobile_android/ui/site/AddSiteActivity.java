@@ -52,12 +52,17 @@ public class AddSiteActivity extends AppCompatActivity {
                 siteUrlEditText.setError("URL을 입력해주세요.");
                 return;
             }
-
+            String finalUrl;
+            if (siteUrl.startsWith("http://") || siteUrl.startsWith("https://")) {
+                finalUrl = siteUrl;
+            } else {
+                finalUrl = "https://" + siteUrl;
+            }
             // 🔹 사이트 이름은 선택
             // 비어 있으면 URL을 이름으로 대신 사용
             String finalSiteName = siteNameInput.isEmpty() ? siteUrl : siteNameInput;
 
-            registerSite(siteUrl, finalSiteName);
+            registerSite(finalUrl, finalSiteName);
         });
 
         cancelButton.setOnClickListener(v -> finish());
