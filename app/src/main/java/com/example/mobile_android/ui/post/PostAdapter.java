@@ -17,8 +17,10 @@ import com.example.mobile_android.R;
 import com.example.mobile_android.data.local.AppDatabase;
 import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.model.Post;
+import com.example.mobile_android.util.CalendarEventHelper;
 import com.example.mobile_android.util.DateTimeUtils;
 import androidx.core.content.ContextCompat;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,12 +96,55 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             holder.switchCalendar.setChecked(post.isSaved());
             bindCalendarStatus(holder, post.isSaved());
             holder.switchCalendar.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                // UI를 즉시 업데이트하고, DB 작업은 백그라운드에서 처리
-                post.setSaved(isChecked);
-                bindCalendarStatus(holder, isChecked);
-                databaseExecutor.execute(() -> {
-                    postDao.updateSaveState(post.getId(), isChecked);
-                });
+                if (isChecked) {
+                    // Add to calendar
+                    CalendarEventHelper.addPostToCalendar(context, post,
+                        new CalendarEventHelper.OnCalendarEventCallback() {
+                            @Override
+                            public void onSuccess() {
+                                post.setSaved(true);
+                                bindCalendarStatus(holder, true);
+                                // Update database
+                                databaseExecutor.execute(() -> {
+                                    postDao.updateSaveState(post.getId(), true);
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                // Revert UI on failure
+                                post.setSaved(false);
+                                holder.switchCalendar.setChecked(false);
+                                bindCalendarStatus(holder, false);
+                                Toast.makeText(context, "캘린더 추가 실패: " + error,
+                                    Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                } else {
+                    // Remove from calendar
+                    CalendarEventHelper.removePostFromCalendar(context, post,
+                        new CalendarEventHelper.OnCalendarEventCallback() {
+                            @Override
+                            public void onSuccess() {
+                                post.setSaved(false);
+                                bindCalendarStatus(holder, false);
+                                // Update database
+                                databaseExecutor.execute(() -> {
+                                    postDao.updateSaveState(post.getId(), false);
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                // Revert UI on failure
+                                post.setSaved(true);
+                                holder.switchCalendar.setChecked(true);
+                                bindCalendarStatus(holder, true);
+                                Toast.makeText(context, "캘린더 제거 실패: " + error,
+                                    Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                }
             });
         } else {
             holder.switchCalendar.setEnabled(false);

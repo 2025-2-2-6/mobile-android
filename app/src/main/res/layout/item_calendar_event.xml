@@ -108,9 +108,9 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_edit"
-                android:tint="#4C84FF"
-                android:contentDescription="수정" />
+                android:src="@drawable/ic_edit_24"
+                android:contentDescription="수정"
+                app:tint="#4C84FF" />
 
             <ImageButton
                 android:id="@+id/btn_delete_event"

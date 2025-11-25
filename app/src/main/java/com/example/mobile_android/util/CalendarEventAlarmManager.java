@@ -61,12 +61,15 @@ public class CalendarEventAlarmManager {
         Intent intent = new Intent(context, CalendarEventAlarmReceiver.class);
         intent.putExtra(EXTRA_EVENT_ID, event.getId());
         intent.putExtra(EXTRA_EVENT_TITLE, event.getTitle());
-        intent.putExtra(EXTRA_EVENT_CATEGORY, event.getCategory());
+        intent.putExtra(EXTRA_EVENT_CATEGORY, "");  // category removed
         intent.putExtra(EXTRA_EVENT_MEMO, event.getMemo());
+
+        // UUID를 int로 변환 (hashCode 사용)
+        int requestCode = event.getId().hashCode();
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,
-                event.getId(),
+                requestCode,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
@@ -104,19 +107,22 @@ public class CalendarEventAlarmManager {
      * 일정 알림을 취소합니다.
      *
      * @param context Context
-     * @param eventId 일정 ID
+     * @param eventId 일정 ID (UUID String)
      */
-    public static void cancelAlarm(Context context, int eventId) {
+    public static void cancelAlarm(Context context, String eventId) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) {
             Log.e(TAG, "AlarmManager is null");
             return;
         }
 
+        // UUID를 int로 변환 (hashCode 사용)
+        int requestCode = eventId.hashCode();
+
         Intent intent = new Intent(context, CalendarEventAlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 context,
-                eventId,
+                requestCode,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );

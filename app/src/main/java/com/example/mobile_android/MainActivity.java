@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         if (intent != null && intent.hasExtra("OPEN_TAB")) {
             String tabName = intent.getStringExtra("OPEN_TAB");
             if ("calendar".equals(tabName)) {
-                navView.setSelectedItemId(R.id.navigation_calendar);
+                navView.setSelectedItemId(R.id.nav_calendar);
             }
         }
     }

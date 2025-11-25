@@ -10,8 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.example.mobile_android.data.local.AppDatabase;
-import com.example.mobile_android.data.local.CalendarEventDao;
+import com.example.mobile_android.data.CalendarEventRepository;
 import com.example.mobile_android.databinding.FragmentCalendarBinding;
 import com.example.mobile_android.model.CalendarEvent;
 import com.example.mobile_android.util.CalendarEventAlarmManager;
@@ -22,8 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class CalendarFragment extends Fragment {
@@ -32,17 +30,22 @@ public class CalendarFragment extends Fragment {
     private LocalDate selectedDate;
     private DayAdapter dayAdapter;
     private CalendarEventAdapter eventListAdapter;
-    private CalendarEventDao eventDao;
-    private ExecutorService executorService;
+    private CalendarEventRepository repository;
     private List<CalendarEvent> allEvents = new ArrayList<>();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentCalendarBinding.inflate(inflater, container, false);
-        eventDao = AppDatabase.getInstance(requireContext()).calendarEventDao();
-        executorService = Executors.newSingleThreadExecutor();
+        repository = CalendarEventRepository.getInstance(requireContext());
         return binding.getRoot();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // 화면으로 돌아올 때마다 자동 새로고침 (HomeFragment와 동일)
+        refreshFromServer();
     }
 
     @Override
@@ -54,6 +57,14 @@ public class CalendarFragment extends Fragment {
         setupCalendarView();
         setupEventListView();
         observeEvents();
+
+        // SwipeRefreshLayout 설정
+        binding.swipeRefresh.setOnRefreshListener(() -> {
+            refreshFromServer();
+        });
+
+        // 백엔드에서 최신 데이터 가져오기
+        refreshFromServer();
 
         refreshMonth();
 
@@ -108,7 +119,7 @@ public class CalendarFragment extends Fragment {
     }
 
     private void observeEvents() {
-        eventDao.getAllEvents().observe(getViewLifecycleOwner(), events -> {
+        repository.getAllEvents().observe(getViewLifecycleOwner(), events -> {
             allEvents = events;
 
             // 이벤트가 있는 날짜 목록 생성
@@ -119,6 +130,38 @@ public class CalendarFragment extends Fragment {
 
             dayAdapter.setEventDates(eventDates);
             filterEventsForSelectedDate();
+        });
+    }
+
+    private void refreshFromServer() {
+        if (binding.swipeRefresh != null) {
+            binding.swipeRefresh.setRefreshing(true);
+        }
+
+        repository.refreshFromServer(new CalendarEventRepository.OnRefreshCallback() {
+            @Override
+            public void onSuccess() {
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        if (binding.swipeRefresh != null) {
+                            binding.swipeRefresh.setRefreshing(false);
+                        }
+                        // LiveData가 자동으로 UI 업데이트
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                if (getActivity() != null && isAdded()) {
+                    getActivity().runOnUiThread(() -> {
+                        if (binding.swipeRefresh != null) {
+                            binding.swipeRefresh.setRefreshing(false);
+                        }
+                        Toast.makeText(requireContext(), "새로고침 실패: " + error, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
         });
     }
 
@@ -139,34 +182,59 @@ public class CalendarFragment extends Fragment {
     }
 
     private void saveEvent(CalendarEvent event) {
-        executorService.execute(() -> {
-            long id = eventDao.insert(event);
-            event.setId((int) id); // DB에서 생성된 ID 설정
+        // UUID 생성
+        event.setId(UUID.randomUUID().toString());
 
-            requireActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), "일정이 추가되었습니다", Toast.LENGTH_SHORT).show();
+        // 백엔드에 저장 (성공 시 자동으로 로컬 DB에도 저장됨)
+        repository.createEvent(event, new CalendarEventRepository.OnEventCallback() {
+            @Override
+            public void onSuccess(CalendarEvent createdEvent) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "일정이 추가되었습니다", Toast.LENGTH_SHORT).show();
 
-                // 알람 스케줄링
-                if (event.isAlarmEnabled()) {
-                    CalendarEventAlarmManager.scheduleAlarm(requireContext(), event);
+                        // 알람 스케줄링
+                        if (createdEvent.isNotifyEnabled()) {
+                            CalendarEventAlarmManager.scheduleAlarm(requireContext(), createdEvent);
+                        }
+                    });
                 }
+            }
 
-                // TODO: 백엔드 API 호출
-            });
+            @Override
+            public void onFailure(String error) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "일정 추가 실패: " + error, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
         });
     }
 
     private void updateEvent(CalendarEvent event) {
-        executorService.execute(() -> {
-            eventDao.update(event);
-            requireActivity().runOnUiThread(() -> {
-                Toast.makeText(requireContext(), "일정이 수정되었습니다", Toast.LENGTH_SHORT).show();
+        // 백엔드 업데이트 (성공 시 자동으로 로컬 DB에도 업데이트됨)
+        repository.updateEvent(event.getId(), event, new CalendarEventRepository.OnEventCallback() {
+            @Override
+            public void onSuccess(CalendarEvent updatedEvent) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "일정이 수정되었습니다", Toast.LENGTH_SHORT).show();
 
-                // 알람 업데이트 (기존 취소 후 재스케줄링)
-                CalendarEventAlarmManager.updateAlarm(requireContext(), event);
+                        // 알람 업데이트 (기존 취소 후 재스케줄링)
+                        CalendarEventAlarmManager.updateAlarm(requireContext(), updatedEvent);
+                    });
+                }
+            }
 
-                // TODO: 백엔드 API 호출
-            });
+            @Override
+            public void onFailure(String error) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(requireContext(), "일정 수정 실패: " + error, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
         });
     }
 
@@ -175,16 +243,28 @@ public class CalendarFragment extends Fragment {
             .setTitle("일정 삭제")
             .setMessage("이 일정을 삭제하시겠습니까?")
             .setPositiveButton("삭제", (dialog, which) -> {
-                executorService.execute(() -> {
-                    eventDao.delete(event);
-                    requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "일정이 삭제되었습니다", Toast.LENGTH_SHORT).show();
+                // 백엔드에서 삭제 (성공 시 자동으로 로컬 DB에서도 삭제됨)
+                repository.deleteEvent(event.getId(), new CalendarEventRepository.OnRefreshCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), "일정이 삭제되었습니다", Toast.LENGTH_SHORT).show();
 
-                        // 알람 취소
-                        CalendarEventAlarmManager.cancelAlarm(requireContext(), event.getId());
+                                // 알람 취소
+                                CalendarEventAlarmManager.cancelAlarm(requireContext(), event.getId());
+                            });
+                        }
+                    }
 
-                        // TODO: 백엔드 API 호출
-                    });
+                    @Override
+                    public void onFailure(String error) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), "일정 삭제 실패: " + error, Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    }
                 });
             })
             .setNegativeButton("취소", null)
@@ -232,9 +312,6 @@ public class CalendarFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdown();
-        }
         binding = null;
     }
 }

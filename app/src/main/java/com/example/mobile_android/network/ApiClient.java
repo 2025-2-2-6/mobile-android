@@ -1,5 +1,7 @@
 package com.example.mobile_android.network;
 
+import android.content.Context;
+
 import com.example.mobile_android.config.AppConfig;
 
 import java.util.concurrent.TimeUnit;
@@ -11,6 +13,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     private static Retrofit retrofit = null;
+    private static Context appContext = null;
+
+    /**
+     * Application Context로 초기화
+     * @param context Application Context
+     */
+    public static void init(Context context) {
+        appContext = context.getApplicationContext();
+    }
 
     /**
      * Retrofit 인스턴스 반환
@@ -23,7 +34,7 @@ public class ApiClient {
 
     /**
      * Retrofit 인스턴스 생성 및 반환 (싱글톤)
-     * Google ID Token을 각 API에서 직접 전달
+     * AuthInterceptor를 통해 자동으로 Bearer Token 추가
      */
     public static Retrofit getClient() {
         if (retrofit == null) {
@@ -35,13 +46,19 @@ public class ApiClient {
                 logging.setLevel(HttpLoggingInterceptor.Level.NONE);
             }
 
-            // OkHttpClient 설정 (AuthInterceptor 제거 - Google ID Token 직접 전달)
-            OkHttpClient client = new OkHttpClient.Builder()
+            // OkHttpClient 설정 (AuthInterceptor 추가)
+            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
                     .addInterceptor(logging)
                     .connectTimeout(AppConfig.CONNECT_TIMEOUT, TimeUnit.SECONDS)
                     .readTimeout(AppConfig.READ_TIMEOUT, TimeUnit.SECONDS)
-                    .writeTimeout(AppConfig.WRITE_TIMEOUT, TimeUnit.SECONDS)
-                    .build();
+                    .writeTimeout(AppConfig.WRITE_TIMEOUT, TimeUnit.SECONDS);
+
+            // AuthInterceptor 추가 (appContext가 설정된 경우에만)
+            if (appContext != null) {
+                clientBuilder.addInterceptor(new AuthInterceptor(appContext));
+            }
+
+            OkHttpClient client = clientBuilder.build();
 
             // Retrofit 인스턴스 생성
             retrofit = new Retrofit.Builder()

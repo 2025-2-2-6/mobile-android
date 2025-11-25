@@ -3,18 +3,26 @@
     캘린더 Fragment
     - MainActivity에서 20dp 상단 여백이 이미 적용되어 있음
     - 인스타그램 스타일 부드러운 디자인
+    - NestedScrollView로 달력과 일정 목록이 함께 스크롤됨
+    - SwipeRefreshLayout으로 Pull-to-Refresh 기능 추가
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_refresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.calendar.CalendarFragment">
+
+<androidx.core.widget.NestedScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/screen_background"
-    tools:context=".ui.calendar.CalendarFragment">
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <!-- 캘린더 카드 -->
@@ -151,20 +159,21 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton" />
         </LinearLayout>
 
-        <!-- Events List -->
+        <!-- Events List Container -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_height="wrap_content"
+            android:minHeight="300dp">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_events"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:clipToPadding="false"
                 android:clipChildren="false"
                 android:paddingHorizontal="@dimen/screen_horizontal_padding"
                 android:paddingBottom="@dimen/screen_bottom_padding"
+                android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_calendar_event" />
 
             <TextView
@@ -172,6 +181,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginTop="-100dp"
                 android:text="예정된 이벤트가 없습니다"
                 android:textSize="15sp"
                 android:textColor="#999999"
@@ -179,4 +189,5 @@
                 tools:visibility="visible" />
         </FrameLayout>
     </LinearLayout>
-</FrameLayout>
+</androidx.core.widget.NestedScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

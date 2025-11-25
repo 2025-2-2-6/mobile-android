@@ -105,29 +105,27 @@ public class CalendarEventDialogHelper {
             btnSave.setText("수정하기");
 
             etEventTitle.setText(existingEvent.getTitle());
-            etMemo.setText(existingEvent.getMemo());
+            etMemo.setText(existingEvent.getDescription());
             eventDate[0] = existingEvent.getEventDate();
             eventTime[0] = existingEvent.getEventTime();
-            switchAlarm.setChecked(existingEvent.isAlarmEnabled());
-            spinnerAlarmTime.setVisibility(existingEvent.isAlarmEnabled() ? View.VISIBLE : View.GONE);
+            switchAlarm.setChecked(existingEvent.isNotifyEnabled());
+            spinnerAlarmTime.setVisibility(existingEvent.isNotifyEnabled() ? View.VISIBLE : View.GONE);
 
             // 카테고리 선택
             String category = existingEvent.getCategory();
-            for (int i = 0; i < CATEGORIES.length; i++) {
-                if (CATEGORIES[i].equals(category)) {
-                    spinnerCategory.setSelection(i);
-                    break;
+            if (category != null) {
+                for (int i = 0; i < CATEGORIES.length; i++) {
+                    if (CATEGORIES[i].equals(category)) {
+                        spinnerCategory.setSelection(i);
+                        break;
+                    }
                 }
             }
 
             // 알림 시간 선택
-            if (existingEvent.getAlarmTime() != null) {
-                for (int i = 0; i < ALARM_OPTIONS.length; i++) {
-                    if (ALARM_OPTIONS[i].equals(existingEvent.getAlarmTime())) {
-                        spinnerAlarmTime.setSelection(i);
-                        break;
-                    }
-                }
+            if (existingEvent.getNotifyTime() != null) {
+                // notifyTime은 ISO 8601 형식이므로 여기서는 기본값 사용
+                spinnerAlarmTime.setSelection(0);
             }
         } else {
             tvTitle.setText("일정 추가");
@@ -203,17 +201,23 @@ public class CalendarEventDialogHelper {
 
             event.setTitle(title);
             event.setCategory(spinnerCategory.getSelectedItem().toString());
-            event.setEventDate(eventDate[0]);
-            event.setEventTime(eventTime[0]);
-            event.setMemo(etMemo.getText().toString().trim());
-            event.setAlarmEnabled(switchAlarm.isChecked());
+            event.setDescription(etMemo.getText().toString().trim());
+
+            // startTime을 ISO 8601 형식으로 변환
+            String startTimeISO = convertToISO8601(eventDate[0], eventTime[0]);
+            event.setStartTime(startTimeISO);
+            event.setEndTime(null); // endTime은 선택사항이므로 null
+
+            event.setNotifyEnabled(switchAlarm.isChecked());
             if (switchAlarm.isChecked()) {
-                event.setAlarmTime(spinnerAlarmTime.getSelectedItem().toString());
+                // notifyTime 계산 (alarmTime 옵션에 따라)
+                String notifyTimeISO = calculateNotifyTime(startTimeISO, spinnerAlarmTime.getSelectedItem().toString());
+                event.setNotifyTime(notifyTimeISO);
             } else {
-                event.setAlarmTime(null);
+                event.setNotifyTime(null);
             }
 
-            // 현재 시간 저장
+            // 현재 시간 저장 (ISO 8601 형식)
             String currentTime = getCurrentTimestamp();
             if (!isEditMode) {
                 event.setCreatedAt(currentTime);
@@ -273,7 +277,52 @@ public class CalendarEventDialogHelper {
     }
 
     private static String getCurrentTimestamp() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
         return sdf.format(Calendar.getInstance().getTime());
+    }
+
+    /**
+     * YYYY-MM-DD와 HH:mm를 ISO 8601 형식으로 변환
+     * 예: 2024-01-15, 14:30 -> 2024-01-15T14:30:00
+     */
+    private static String convertToISO8601(String date, String time) {
+        return date + "T" + time + ":00";
+    }
+
+    /**
+     * startTime과 알림 옵션을 기반으로 notifyTime 계산
+     */
+    private static String calculateNotifyTime(String startTimeISO, String alarmOption) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(sdf.parse(startTimeISO));
+
+            switch (alarmOption) {
+                case "10분 전":
+                    cal.add(Calendar.MINUTE, -10);
+                    break;
+                case "1시간 전":
+                    cal.add(Calendar.HOUR_OF_DAY, -1);
+                    break;
+                case "1일 전":
+                    cal.add(Calendar.DAY_OF_MONTH, -1);
+                    break;
+                case "3일 전":
+                    cal.add(Calendar.DAY_OF_MONTH, -3);
+                    break;
+                case "일주일 전":
+                    cal.add(Calendar.DAY_OF_MONTH, -7);
+                    break;
+                case "일정 시작시간":
+                default:
+                    // 그대로 사용
+                    break;
+            }
+
+            return sdf.format(cal.getTime());
+        } catch (Exception e) {
+            return startTimeISO;
+        }
     }
 }

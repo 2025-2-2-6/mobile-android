@@ -20,7 +20,7 @@ import com.example.mobile_android.model.Site;
                 Site.class,
                 CalendarEvent.class
         },
-        version = 5, // CalendarEvent 엔티티 추가로 버전 업데이트
+        version = 8, // CalendarEvent 백엔드 API 스키마로 변경 + category 추가
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
