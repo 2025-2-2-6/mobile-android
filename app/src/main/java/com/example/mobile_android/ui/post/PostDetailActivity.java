@@ -156,7 +156,7 @@ public class PostDetailActivity extends AppCompatActivity {
             chipCategory.setVisibility(View.GONE);
         }
         tvPostContent.setText(post.getContent());
-        tvPostCreatedAt.setText(formatDateTime(post.getCreatedAt(), "yyyy년 M월 d일 a h시 mm분"));
+        tvPostCreatedAt.setText(formatDateTime(post.getCreatedAt(), "크롤링 시간 : yyyy년 M월 d일 a h시 mm분"));
         bindEventSection(post);
         bindLocation(post);
         bindSource(post);
@@ -171,7 +171,7 @@ public class PostDetailActivity extends AppCompatActivity {
             btnAddToCalendar.setVisibility(View.GONE);
         } else {
             tvPostEventDate.setVisibility(View.VISIBLE);
-            tvPostEventDate.setText("📅 " + eventLabel);
+            tvPostEventDate.setText("마감,진행 날짜 " + eventLabel);
             tvCalendarInfo.setVisibility(View.VISIBLE);
             btnAddToCalendar.setVisibility(View.VISIBLE);
         }
@@ -255,11 +255,11 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private void updateCalendarButtonUI(boolean isSaved) {
         if (isSaved) {
-            btnAddToCalendar.setText("캘린더에서 삭제");
-            btnAddToCalendar.setBackgroundColor(ContextCompat.getColor(this, R.color.accent_color));
-            btnAddToCalendar.setTextColor(ContextCompat.getColor(this, R.color.accent_color)); // ※ 주의: 텍스트 색상도 accent_color면 안 보일 수 있습니다. 배경이 accent면 텍스트는 흰색을 추천합니다.
+            btnAddToCalendar.setText("일정에서 삭제하기");
+            btnAddToCalendar.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
+            btnAddToCalendar.setTextColor(ContextCompat.getColor(this, R.color.brand_color2)); // ※ 주의: 텍스트 색상도 accent_color면 안 보일 수 있습니다. 배경이 accent면 텍스트는 흰색을 추천합니다.
         } else {
-            btnAddToCalendar.setText("캘린더에 추가");
+            btnAddToCalendar.setText("일정에서 추가하기");
             btnAddToCalendar.setBackgroundColor(ContextCompat.getColor(this, R.color.brand_color2));
         }
     }
