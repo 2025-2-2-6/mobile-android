@@ -231,6 +231,7 @@
             app:singleLine="true"
             app:singleSelection="true">
 
+            <!-- "전체" chip은 항상 존재 -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_category_all"
                 style="@style/InstagramFilterChip"
@@ -239,54 +240,7 @@
                 android:checked="true"
                 android:text="전체" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_category_startup"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="창업" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_category_education"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="교육" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_category_tech"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="기술" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_category_news"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="뉴스" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_category_contest"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="공모전" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_category_government"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="정부지원" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_category_other"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="기타" />
+            <!-- 동적 카테고리 칩들이 HomeFragment.java에서 프로그래밍 방식으로 추가됨 -->
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>

@@ -106,15 +106,18 @@
             android:textColor="@android:color/black"
             android:layout_marginTop="12dp" />
 
-        <Spinner
-            android:id="@+id/spinner_category"
+        <EditText
+            android:id="@+id/et_category"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="48dp"
+            android:hint="카테고리를 입력해주세요 (예: 창업, 공모전)"
+            android:textSize="16sp"
             android:layout_marginTop="4dp"
             android:background="@drawable/edittext_background"
-            android:padding="4dp"
-            android:prompt="@string/category_prompt" />
+            android:padding="12dp"
+            android:inputType="text"
+            android:maxLength="50"
+            android:imeOptions="actionNext" />
 
         <!-- 4. 메모 (선택사항) -->
         <TextView

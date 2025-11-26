@@ -20,6 +20,7 @@ import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.post.PostAdapter;
 import com.example.mobile_android.ui.post.PostListActivity;
+import com.example.mobile_android.util.CategoryUtils;
 import com.example.mobile_android.util.TokenManager;
 
 import java.util.ArrayList;
@@ -179,28 +180,14 @@ public class SiteDetailActivity extends AppCompatActivity {
 
         android.widget.EditText etSiteName = dialogView.findViewById(R.id.et_site_name);
         android.widget.EditText etSiteUrl = dialogView.findViewById(R.id.et_site_url);
-        android.widget.Spinner spinnerCategory = dialogView.findViewById(R.id.spinner_site_category);
+        android.widget.EditText etSiteCategory = dialogView.findViewById(R.id.et_site_category);
         android.widget.Button btnSave = dialogView.findViewById(R.id.btn_save_site);
         android.widget.Button btnCancel = dialogView.findViewById(R.id.btn_cancel_site);
-
-        // 카테고리 Spinner 설정
-        String[] categories = {"창업", "공모전", "교육", "기술", "기타"};
-        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, categories);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
 
         // 기존 데이터 로드
         etSiteName.setText(site.getName());
         etSiteUrl.setText(site.getUrl());
-        if (site.getCategory() != null) {
-            for (int i = 0; i < categories.length; i++) {
-                if (categories[i].equals(site.getCategory())) {
-                    spinnerCategory.setSelection(i);
-                    break;
-                }
-            }
-        }
+        etSiteCategory.setText(site.getCategory() != null ? site.getCategory() : "");
 
         androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setView(dialogView)
@@ -210,7 +197,9 @@ public class SiteDetailActivity extends AppCompatActivity {
         btnSave.setOnClickListener(v -> {
             String name = etSiteName.getText().toString().trim();
             String url = etSiteUrl.getText().toString().trim();
-            String category = spinnerCategory.getSelectedItem().toString();
+            String category = CategoryUtils.normalizeCategory(
+                etSiteCategory.getText().toString()
+            );
 
             if (name.isEmpty()) {
                 etSiteName.setError("사이트 이름을 입력해주세요");

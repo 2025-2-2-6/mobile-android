@@ -70,12 +70,16 @@
             android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
-        <Spinner
-            android:id="@+id/spinner_site_category"
+        <EditText
+            android:id="@+id/et_site_category"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            android:hint="카테고리를 입력해주세요"
+            android:padding="14dp"
             android:background="@drawable/bg_edit_text_rounded"
-            android:padding="12dp"
+            android:textSize="15sp"
+            android:inputType="text"
+            android:maxLength="50"
             android:layout_marginBottom="24dp" />
 
         <!-- 버튼 영역 -->

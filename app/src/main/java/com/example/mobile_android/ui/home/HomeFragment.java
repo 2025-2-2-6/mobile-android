@@ -30,6 +30,8 @@ import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.site.AddSiteActivity;
 import com.example.mobile_android.ui.site.SiteAdapter;
 import com.example.mobile_android.util.TokenManager;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +60,7 @@ public class HomeFragment extends Fragment {
     private ImageButton btnClearSearch;
     private String searchQuery = "";
     private String categoryFilter = ""; // 선택된 카테고리 필터
+    private List<String> currentCategories = new ArrayList<>(); // 현재 표시중인 카테고리 목록 (중복 업데이트 방지용)
 
     @Override
     public void onResume() {
@@ -178,33 +181,77 @@ public class HomeFragment extends Fragment {
     // ★ 카테고리 필터 설정
     // ----------------------
     private void setupCategoryFilter(View view) {
-        com.google.android.material.chip.ChipGroup chipGroup = view.findViewById(R.id.chip_category_filters);
-        if (chipGroup != null) {
-            chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
-                if (checkedIds.isEmpty()) {
+        ChipGroup chipGroup = view.findViewById(R.id.chip_category_filters);
+        if (chipGroup == null) return;
+
+        // 칩 클릭 리스너 설정
+        chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) {
+                categoryFilter = "";
+            } else {
+                int selectedId = checkedIds.get(0);
+                if (selectedId == R.id.chip_category_all) {
                     categoryFilter = "";
                 } else {
-                    int selectedId = checkedIds.get(0);
-                    if (selectedId == R.id.chip_category_all) {
-                        categoryFilter = "";
-                    } else if (selectedId == R.id.chip_category_startup) {
-                        categoryFilter = "창업";
-                    } else if (selectedId == R.id.chip_category_education) {
-                        categoryFilter = "교육";
-                    } else if (selectedId == R.id.chip_category_tech) {
-                        categoryFilter = "기술";
-                    } else if (selectedId == R.id.chip_category_news) {
-                        categoryFilter = "뉴스";
-                    } else if (selectedId == R.id.chip_category_contest) {
-                        categoryFilter = "공모전";
-                    } else if (selectedId == R.id.chip_category_government) {
-                        categoryFilter = "정부지원";
-                    } else if (selectedId == R.id.chip_category_other) {
-                        categoryFilter = "기타";
+                    // 동적으로 생성된 칩의 텍스트를 가져옴
+                    Chip selectedChip = group.findViewById(selectedId);
+                    if (selectedChip != null) {
+                        categoryFilter = selectedChip.getText().toString();
                     }
                 }
-                filterSites();
-            });
+            }
+            filterSites();
+        });
+
+        // DB에서 고유 카테고리 목록을 관찰하고 동적으로 칩 생성
+        siteDao.observeDistinctCategories().observe(getViewLifecycleOwner(), categories -> {
+            if (categories != null) {
+                updateCategoryChips(chipGroup, categories);
+            }
+        });
+    }
+
+    /**
+     * 카테고리 칩을 동적으로 업데이트합니다.
+     * DB의 카테고리가 변경될 때만 칩을 재생성하여 성능을 최적화합니다.
+     */
+    private void updateCategoryChips(ChipGroup chipGroup, List<String> categories) {
+        // 카테고리 목록이 변경되지 않았으면 스킵
+        if (categories.equals(currentCategories)) {
+            return;
+        }
+        currentCategories = new ArrayList<>(categories);
+
+        // 모든 동적 칩 제거 (R.id.chip_category_all은 유지)
+        int childCount = chipGroup.getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            View child = chipGroup.getChildAt(i);
+            if (child.getId() != R.id.chip_category_all) {
+                chipGroup.removeViewAt(i);
+            }
+        }
+
+        // 새 카테고리 칩 추가
+        for (String category : categories) {
+            Chip chip = new Chip(requireContext());
+            chip.setText(category);
+            chip.setCheckable(true);
+            chip.setId(View.generateViewId());
+
+            // InstagramFilterChip 스타일 프로그래밍 방식으로 적용
+            chip.setChipBackgroundColorResource(R.color.chip_background_state);
+            chip.setChipStrokeColorResource(R.color.chip_stroke_state);
+            chip.setChipStrokeWidth(1);
+            chip.setTextColor(getResources().getColorStateList(R.color.chip_text_state));
+            chip.setChipCornerRadius(16 * getResources().getDisplayMetrics().density);
+            chip.setChipMinHeight(32 * getResources().getDisplayMetrics().density);
+            chip.setChipStartPadding(12 * getResources().getDisplayMetrics().density);
+            chip.setChipEndPadding(12 * getResources().getDisplayMetrics().density);
+            chip.setTextSize(13);
+            chip.setCheckedIconVisible(false);
+            chip.setChipIconVisible(false);
+
+            chipGroup.addView(chip);
         }
     }
 

@@ -20,7 +20,7 @@ import com.example.mobile_android.model.Site;
                 Site.class,
                 CalendarEvent.class
         },
-        version = 8, // CalendarEvent 백엔드 API 스키마로 변경 + category 추가
+        version = 9, // 동적 카테고리 시스템 마이그레이션 (기존 카테고리 초기화)
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

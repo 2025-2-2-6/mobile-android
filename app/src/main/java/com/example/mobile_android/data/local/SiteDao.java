@@ -17,6 +17,15 @@ public abstract class SiteDao {
     @Query("SELECT * FROM site ORDER BY updatedAt DESC")
     public abstract LiveData<List<Site>> observeAll();
 
+    /**
+     * Gets distinct non-null categories from all sites.
+     * Used for generating dynamic category filter chips.
+     *
+     * @return LiveData list of unique category strings, ordered alphabetically
+     */
+    @Query("SELECT DISTINCT category FROM site WHERE category IS NOT NULL AND category != '' ORDER BY category ASC")
+    public abstract LiveData<List<String>> observeDistinctCategories();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     protected abstract void insertAll(List<Site> sites);
 

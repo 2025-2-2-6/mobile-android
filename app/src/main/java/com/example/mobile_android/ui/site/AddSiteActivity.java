@@ -13,12 +13,9 @@ import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +25,7 @@ import com.example.mobile_android.R;
 import com.example.mobile_android.model.SiteRegisterRequest;
 import com.example.mobile_android.model.SiteRegisterResponse;
 import com.example.mobile_android.network.ApiClient;
+import com.example.mobile_android.util.CategoryUtils;
 import com.example.mobile_android.util.TokenManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,12 +41,11 @@ public class AddSiteActivity extends AppCompatActivity {
 
     private EditText siteUrlEditText;
     private EditText siteNameEditText;
-    private Spinner categorySpinner;
+    private EditText categoryEditText;
     private EditText memoEditText;
     private Button registerButton;
     private Button cancelButton;
     private ProgressBar loadingProgressBar;
-    private String selectedCategory = "";
     private TextView urlCounterTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +54,7 @@ public class AddSiteActivity extends AppCompatActivity {
 
         siteUrlEditText = findViewById(R.id.et_url);
         siteNameEditText = findViewById(R.id.et_site_name);
-        categorySpinner = findViewById(R.id.spinner_category);
+        categoryEditText = findViewById(R.id.et_category);
         memoEditText = findViewById(R.id.et_memo);
         registerButton = findViewById(R.id.btn_register);
         cancelButton = findViewById(R.id.btn_cancel);
@@ -66,7 +63,6 @@ public class AddSiteActivity extends AppCompatActivity {
 
         setupRequiredLabels();
         setupUrlLengthWatcher();
-        setupCategorySpinner();
 
         registerButton.setOnClickListener(v -> {
             String siteUrl = siteUrlEditText.getText().toString().trim();
@@ -89,12 +85,12 @@ public class AddSiteActivity extends AppCompatActivity {
                 return;
             }
 
-            if (selectedCategory.isEmpty() || selectedCategory.equals("카테고리 선택")) {
-                Toast.makeText(this, "카테고리를 선택해주세요.", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            // CategoryUtils로 카테고리 정규화 (빈 값이면 "기타"로 자동 설정)
+            String category = CategoryUtils.normalizeCategory(
+                categoryEditText.getText().toString()
+            );
 
-            registerSite(finalUrl, siteName);
+            registerSite(finalUrl, siteName, category);
         });
 
         cancelButton.setOnClickListener(v -> {
@@ -150,41 +146,7 @@ public class AddSiteActivity extends AppCompatActivity {
         }
     }
 
-    private void setupCategorySpinner() {
-        String[] categories = {
-                "카테고리 선택",
-                "학교 공지",
-                "장학금/지원금",
-                "채용/인턴십",
-                "공모전/대외활동",
-                "할인/혜택",
-                "이벤트",
-                "뉴스",
-                "날씨/교통"
-        };
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                categories
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categorySpinner.setAdapter(adapter);
-
-        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCategory = categories[position];
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                selectedCategory = "";
-            }
-        });
-    }
-
-    private void registerSite(String url, String siteName) {
+    private void registerSite(String url, String siteName, String category) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null || TextUtils.isEmpty(currentUser.getUid())) {
             Toast.makeText(this, "로그인 상태를 확인할 수 없습니다. 다시 로그인해 주세요.", Toast.LENGTH_LONG).show();
@@ -194,10 +156,10 @@ public class AddSiteActivity extends AppCompatActivity {
         showLoading(true);
         String userId = currentUser.getUid();
 
-        Log.d("AddSiteActivity", "Registering site - URL: " + url + ", Name: " + siteName + ", Category: " + selectedCategory);
+        Log.d("AddSiteActivity", "Registering site - URL: " + url + ", Name: " + siteName + ", Category: " + category);
 
         String token = TokenManager.getBearerToken(this);
-        SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId, selectedCategory);
+        SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId, category);
         Call<SiteRegisterResponse> call = ApiClient.getApiService().registerSite(token, request);
 
         call.enqueue(new Callback<SiteRegisterResponse>() {
@@ -254,11 +216,15 @@ public class AddSiteActivity extends AppCompatActivity {
             registerButton.setEnabled(false);
             cancelButton.setEnabled(false);
             siteUrlEditText.setEnabled(false);
+            siteNameEditText.setEnabled(false);
+            categoryEditText.setEnabled(false);
         } else {
             loadingProgressBar.setVisibility(View.GONE);
             registerButton.setEnabled(true);
             cancelButton.setEnabled(true);
             siteUrlEditText.setEnabled(true);
+            siteNameEditText.setEnabled(true);
+            categoryEditText.setEnabled(true);
         }
     }
 }
