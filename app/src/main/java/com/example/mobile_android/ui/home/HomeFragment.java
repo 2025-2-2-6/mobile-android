@@ -23,12 +23,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.mobile_android.R;
 import com.example.mobile_android.data.local.AppDatabase;
+import com.example.mobile_android.data.local.CalendarEventDao;
 import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.data.local.SiteDao;
 import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.site.AddSiteActivity;
 import com.example.mobile_android.ui.site.SiteAdapter;
+import com.example.mobile_android.util.StatisticsHelper;
 import com.example.mobile_android.util.TokenManager;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -51,7 +53,9 @@ public class HomeFragment extends Fragment {
     private List<Site> filteredSitesList = new ArrayList<>(); // 필터링된 사이트 목록
     private PostDao postDao;
     private SiteDao siteDao;
+    private CalendarEventDao calendarEventDao;
     private ExecutorService executor;
+    private StatisticsHelper statisticsHelper;
 
     private TextView tvTotalItems, tvNewItems, tvUpcomingItems, tvSiteCount;
     private View layoutEmptySites;
@@ -91,9 +95,14 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // --- 데이터베이스 초기화 ---
-        postDao = AppDatabase.getInstance(requireContext()).postDao();
-        siteDao = AppDatabase.getInstance(requireContext()).siteDao();
+        AppDatabase db = AppDatabase.getInstance(requireContext());
+        postDao = db.postDao();
+        siteDao = db.siteDao();
+        calendarEventDao = db.calendarEventDao();
         executor = Executors.newSingleThreadExecutor();
+
+        // --- 통계 헬퍼 초기화 ---
+        statisticsHelper = new StatisticsHelper(siteDao, postDao, calendarEventDao);
 
         // --- 어댑터 생성 ---
         siteAdapter = new SiteAdapter(filteredSitesList);
@@ -127,11 +136,8 @@ public class HomeFragment extends Fragment {
         // --- 서버에서 사이트 목록 로드 및 DB 동기화 ---
         loadSiteList();
 
-        // --- 새 게시물 개수 관찰 ---
-        observeNewPostCount();
-
-        // --- 알림 설정된 일정 개수 관찰 ---
-        observeUpcomingEventCount();
+        // --- 통계 관찰 (StatisticsHelper 사용) ---
+        setupStatisticsObserver();
 
         return view;
     }
@@ -359,13 +365,18 @@ public class HomeFragment extends Fragment {
     // ★ 요약 정보 업데이트
     // ----------------------
     private void updateSummary() {
-        int totalSites = filteredSitesList.size();
+        // 전체 사이트 수 (필터링 무관)
+        int totalSites = allSitesList.size();
 
+        // 필터링된 사이트 수
+        int filteredCount = filteredSitesList.size();
+
+        // 상단 카운트는 전체 사이트 수 표시
         tvTotalItems.setText(String.valueOf(totalSites));
         tvSiteCount.setText(totalSites + "개");
 
-        // 빈 상태 UI 표시/숨김
-        if (totalSites == 0) {
+        // 빈 상태 UI는 필터링된 결과 기준으로 표시/숨김
+        if (filteredCount == 0) {
             layoutEmptySites.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
         } else {
@@ -375,38 +386,37 @@ public class HomeFragment extends Fragment {
     }
 
     // ----------------------
-    // ★ 새 게시물 개수 관찰 (is_new = true인 Post 개수)
+    // ★ 통계 관찰 설정 (StatisticsHelper 사용)
     // ----------------------
-    private void observeNewPostCount() {
-        // is_new는 DB 필드, 실제 "새 게시물"은 Post.isActuallyNew()로 판단
-        // 여기서는 getAllPostsForNewFilter로 전체 가져와서 클라이언트에서 필터링
-        postDao.getAllPostsForNewFilter().observe(getViewLifecycleOwner(), posts -> {
-            if (posts != null) {
-                long count = posts.stream().filter(post -> post.isActuallyNew()).count();
-                tvNewItems.setText(String.valueOf(count));
-            } else {
-                tvNewItems.setText("0");
+    private void setupStatisticsObserver() {
+        statisticsHelper.observeStatistics(getViewLifecycleOwner(), new StatisticsHelper.StatisticsCallback() {
+            @Override
+            public void onTotalSitesUpdated(int count) {
+                // updateSummary()에서 allSitesList 기반으로 표시하므로 여기서는 불필요
+                // 하지만 일관성을 위해 유지
+                tvTotalItems.setText(String.valueOf(count));
             }
-        });
-    }
 
-    // ----------------------
-    // ★ 알림 설정된 일정 개수 관찰 (notify_enabled = true인 CalendarEvent 개수)
-    // ----------------------
-    private void observeUpcomingEventCount() {
-        AppDatabase.getInstance(requireContext())
-                .calendarEventDao()
-                .getAllEvents()
-                .observe(getViewLifecycleOwner(), events -> {
+            @Override
+            public void onNewPostsUpdated(int count) {
+                tvNewItems.setText(String.valueOf(count));
+            }
+
+            @Override
+            public void onSavedEventsUpdated(int count) {
+                // 알림 설정된 일정만 표시 (notify_enabled = true)
+                calendarEventDao.getAllEvents().observe(getViewLifecycleOwner(), events -> {
                     if (events != null) {
-                        long count = events.stream()
+                        long notifyCount = events.stream()
                                 .filter(event -> event.isNotifyEnabled())
                                 .count();
-                        tvUpcomingItems.setText(String.valueOf(count));
+                        tvUpcomingItems.setText(String.valueOf(notifyCount));
                     } else {
                         tvUpcomingItems.setText("0");
                     }
                 });
+            }
+        });
     }
 
     // ------------------------
