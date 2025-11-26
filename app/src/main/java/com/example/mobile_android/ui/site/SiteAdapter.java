@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobile_android.R;
 import com.example.mobile_android.model.Site;
-import com.example.mobile_android.ui.post.PostListActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -79,12 +78,11 @@ public class SiteAdapter extends RecyclerView.Adapter<SiteAdapter.SiteViewHolder
         // newPosts 같은 값은 백엔드에 아직 없음 → 숨기기
         holder.newPostBadge.setVisibility(View.GONE);
 
-        // 클릭 시 PostListActivity 로 이동
+        // 클릭 시 SiteDetailActivity로 이동
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
-            Intent intent = new Intent(context, PostListActivity.class);
+            Intent intent = new Intent(context, SiteDetailActivity.class);
             intent.putExtra("SITE_ID", site.getId());
-            intent.putExtra("SITE_NAME", displayName);
             context.startActivity(intent);
         });
         holder.deleteButton.setOnClickListener(v -> {

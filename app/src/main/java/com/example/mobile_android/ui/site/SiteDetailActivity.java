@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobile_android.R;
+import com.example.mobile_android.data.local.AppDatabase;
+import com.example.mobile_android.data.local.PostDao;
 import com.example.mobile_android.model.Post;
 import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
@@ -25,6 +27,7 @@ import com.example.mobile_android.util.TokenManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,6 +37,8 @@ public class SiteDetailActivity extends AppCompatActivity {
 
     private String siteId;
     private Site site;
+    private PostDao postDao;
+    private List<Post> recentPostsList = new ArrayList<>();
 
     // Views
     private ImageButton btnBack;
@@ -64,6 +69,10 @@ public class SiteDetailActivity extends AppCompatActivity {
             return;
         }
 
+        // PostDao 초기화
+        AppDatabase db = AppDatabase.getInstance(this);
+        postDao = db.postDao();
+
         initViews();
         setupListeners();
         loadSiteDetails();
@@ -86,7 +95,7 @@ public class SiteDetailActivity extends AppCompatActivity {
         tvViewAll = findViewById(R.id.tv_view_all);
 
         rvRecentPosts.setLayoutManager(new LinearLayoutManager(this));
-        recentPostsAdapter = new PostAdapter(this, new ArrayList<>());
+        recentPostsAdapter = new PostAdapter(this, recentPostsList);
         rvRecentPosts.setAdapter(recentPostsAdapter);
     }
 
@@ -155,10 +164,33 @@ public class SiteDetailActivity extends AppCompatActivity {
     }
 
     private void loadRecentPosts() {
-        // TODO: API 호출하여 최근 게시물 2개 가져오기
-        // 임시 데이터
-        List<Post> posts = new ArrayList<>();
-        // recentPostsAdapter.updatePosts(posts);
+        // PostDao를 사용해 로컬 DB에서 해당 사이트의 최신 4개 게시물 조회
+        postDao.getPostsBySite(siteId).observe(this, posts -> {
+            if (posts != null && !posts.isEmpty()) {
+                // 최대 4개만 표시
+                List<Post> recentPosts = posts.stream()
+                        .limit(4)
+                        .collect(Collectors.toList());
+
+                recentPostsList.clear();
+                recentPostsList.addAll(recentPosts);
+                recentPostsAdapter.notifyDataSetChanged();
+
+                // 통계 업데이트 (전체 게시물 수)
+                tvTotalCount.setText(String.valueOf(posts.size()));
+
+                // 새 게시물 수 계산
+                long newCount = posts.stream()
+                        .filter(Post::isActuallyNew)
+                        .count();
+                tvNewCount.setText(String.valueOf(newCount));
+            } else {
+                recentPostsList.clear();
+                recentPostsAdapter.notifyDataSetChanged();
+                tvTotalCount.setText("0");
+                tvNewCount.setText("0");
+            }
+        });
     }
 
     private void showDeleteConfirmDialog() {

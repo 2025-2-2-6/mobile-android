@@ -53,6 +53,18 @@ public abstract class PostDao {
     public abstract LiveData<List<Post>> getSavedPosts();
 
     /**
+     * 데이터베이스의 모든 Post의 고유 카테고리 목록을 조회합니다.
+     */
+    @Query("SELECT DISTINCT category FROM post WHERE category IS NOT NULL AND category != '' ORDER BY category")
+    public abstract LiveData<List<String>> getDistinctCategories();
+
+    /**
+     * 특정 사이트의 Post의 고유 카테고리 목록을 조회합니다.
+     */
+    @Query("SELECT DISTINCT category FROM post WHERE siteId = :siteId AND category IS NOT NULL AND category != '' ORDER BY category")
+    public abstract LiveData<List<String>> getCategoriesBySite(String siteId);
+
+    /**
      * 특정 Post의 캘린더 저장 상태를 업데이트합니다.
      */
     @Query("UPDATE post SET isSaved = :isSaved WHERE id = :postId")

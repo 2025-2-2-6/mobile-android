@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.mobile_android.R;
 import com.example.mobile_android.data.local.AppDatabase;
@@ -21,6 +22,8 @@ import com.example.mobile_android.model.PostListResponse;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.network.ApiService;
 import com.example.mobile_android.util.TokenManager;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +47,10 @@ public class PostListActivity extends AppCompatActivity {
     private String siteId;
     private EditText searchEditText;
     private ImageButton clearSearchButton;
+    private SwipeRefreshLayout swipeRefresh;
+    private View layoutEmptyPosts;
+    private String categoryFilter = ""; // 선택된 카테고리 필터
+    private List<String> currentCategories = new ArrayList<>(); // 현재 표시중인 카테고리 목록
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,10 +67,13 @@ public class PostListActivity extends AppCompatActivity {
         setupToolbar(siteName);
         setupRecyclerView();
         setupSearchView();
+        setupSwipeRefresh();
         setupFilterChips();
+        setupCategoryFilter();
 
         if (siteId != null) {
             observePostsBySite();
+            observeCategoriesBySite();
             loadPostsFromServer();
         }
     }
@@ -91,6 +101,22 @@ public class PostListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         postAdapter = new PostAdapter(this, currentPostList);
         recyclerView.setAdapter(postAdapter);
+        layoutEmptyPosts = findViewById(R.id.layout_empty_posts);
+    }
+
+    private void setupSwipeRefresh() {
+        swipeRefresh = findViewById(R.id.swipe_refresh);
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    getResources().getColor(android.R.color.holo_blue_bright),
+                    getResources().getColor(android.R.color.holo_green_light),
+                    getResources().getColor(android.R.color.holo_orange_light)
+            );
+            swipeRefresh.setOnRefreshListener(() -> {
+                loadPostsFromServer();
+                swipeRefresh.setRefreshing(false);
+            });
+        }
     }
 
     private void setupSearchView() {
@@ -104,14 +130,7 @@ public class PostListActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 clearSearchButton.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
-                // 현재 선택된 칩에 따라 필터링
-                com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_filters);
-                int checkedId = chipGroup.getCheckedChipId();
-                if (checkedId != View.NO_ID) {
-                    filterPostsByChip(checkedId);
-                } else {
-                    filterPosts(s.toString());
-                }
+                applyFilters();
             }
 
             @Override
@@ -124,23 +143,45 @@ public class PostListActivity extends AppCompatActivity {
         });
     }
 
-    private void filterPosts(String query) {
-        if (query.isEmpty()) {
-            currentPostList.clear();
-            currentPostList.addAll(allPostList);
-        } else {
-            String lowerQuery = query.toLowerCase();
-            List<Post> filtered = allPostList.stream()
-                    .filter(post -> {
+    private void applyFilters() {
+        String query = searchEditText.getText().toString();
+
+        List<Post> filtered = allPostList.stream()
+                .filter(post -> {
+                    // 카테고리 필터링
+                    if (!categoryFilter.isEmpty()) {
+                        String postCategory = post.getCategory() != null ? post.getCategory() : "";
+                        if (!postCategory.equals(categoryFilter)) {
+                            return false;
+                        }
+                    }
+
+                    // 검색어 필터링
+                    if (!query.isEmpty()) {
+                        String lowerQuery = query.toLowerCase();
                         String title = post.getTitle() != null ? post.getTitle().toLowerCase() : "";
                         String content = post.getContent() != null ? post.getContent().toLowerCase() : "";
                         return title.contains(lowerQuery) || content.contains(lowerQuery);
-                    })
-                    .collect(Collectors.toList());
-            currentPostList.clear();
-            currentPostList.addAll(filtered);
-        }
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        currentPostList.clear();
+        currentPostList.addAll(filtered);
         postAdapter.notifyDataSetChanged();
+        updateEmptyState();
+    }
+
+    private void updateEmptyState() {
+        if (currentPostList.isEmpty()) {
+            layoutEmptyPosts.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            layoutEmptyPosts.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void observePostsBySite() {
@@ -148,10 +189,7 @@ public class PostListActivity extends AppCompatActivity {
         postsLiveData.observe(this, posts -> {
             allPostList.clear();
             allPostList.addAll(posts);
-
-            // 검색어가 있으면 필터링, 없으면 전체 표시
-            String query = searchEditText.getText().toString();
-            filterPosts(query);
+            applyFilters();
         });
     }
 
@@ -178,77 +216,82 @@ public class PostListActivity extends AppCompatActivity {
     }
 
     private void setupFilterChips() {
-        com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chip_filters);
+        ChipGroup chipGroup = findViewById(R.id.chip_filters);
 
         chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds.isEmpty()) return;
-
-            int checkedId = checkedIds.get(0);
-            filterPostsByChip(checkedId);
+            if (checkedIds.isEmpty()) {
+                categoryFilter = "";
+            } else {
+                int selectedId = checkedIds.get(0);
+                if (selectedId == R.id.chip_all) {
+                    categoryFilter = "";
+                } else {
+                    // 동적으로 생성된 칩의 텍스트를 가져옴
+                    Chip selectedChip = group.findViewById(selectedId);
+                    if (selectedChip != null) {
+                        categoryFilter = selectedChip.getText().toString();
+                    }
+                }
+            }
+            applyFilters();
         });
     }
 
-    private void filterPostsByChip(int chipId) {
-        String query = searchEditText.getText().toString();
+    private void setupCategoryFilter() {
+        // ChipGroup은 이미 setupFilterChips에서 설정됨
+    }
 
-        if (chipId == R.id.chip_all) {
-            // 전체: 검색어만 적용
-            filterPosts(query);
-        } else if (chipId == R.id.chip_recruiting) {
-            // 모집중: TODO - 마감일이 지나지 않은 게시물
-            filterPostsByStatus(query, "recruiting");
-        } else if (chipId == R.id.chip_priority) {
-            // 우선: TODO - 우선순위가 높은 게시물
-            filterPostsByStatus(query, "priority");
-        } else if (chipId == R.id.chip_new) {
-            // NEW: 최근 게시물
-            filterPostsByStatus(query, "new");
+    private void observeCategoriesBySite() {
+        postDao.getCategoriesBySite(siteId).observe(this, categories -> {
+            if (categories != null) {
+                updateCategoryChips(categories);
+            }
+        });
+    }
+
+    private void updateCategoryChips(List<String> categories) {
+        // 카테고리 목록이 변경되지 않았으면 스킵
+        if (categories.equals(currentCategories)) {
+            return;
+        }
+        currentCategories = new ArrayList<>(categories);
+
+        ChipGroup chipGroup = findViewById(R.id.chip_filters);
+        if (chipGroup == null) return;
+
+        // 모든 동적 칩 제거 (R.id.chip_all은 유지)
+        int childCount = chipGroup.getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            View child = chipGroup.getChildAt(i);
+            if (child.getId() != R.id.chip_all) {
+                chipGroup.removeViewAt(i);
+            }
+        }
+
+        // 새 카테고리 칩 추가
+        for (String category : categories) {
+            Chip chip = new Chip(this);
+            chip.setText(category);
+            chip.setCheckable(true);
+            chip.setId(View.generateViewId());
+
+            // 스타일 프로그래밍 방식으로 적용
+            chip.setChipBackgroundColorResource(R.color.chip_background_state);
+            chip.setChipStrokeColorResource(R.color.chip_stroke_state);
+            chip.setChipStrokeWidth(1);
+            chip.setTextColor(getResources().getColorStateList(R.color.chip_text_state));
+            chip.setChipCornerRadius(16 * getResources().getDisplayMetrics().density);
+            chip.setChipMinHeight(32 * getResources().getDisplayMetrics().density);
+            chip.setChipStartPadding(12 * getResources().getDisplayMetrics().density);
+            chip.setChipEndPadding(12 * getResources().getDisplayMetrics().density);
+            chip.setTextSize(13);
+            chip.setCheckedIconVisible(false);
+            chip.setChipIconVisible(false);
+
+            chipGroup.addView(chip);
         }
     }
 
-    private void filterPostsByStatus(String query, String status) {
-        List<Post> filtered = allPostList.stream()
-                .filter(post -> {
-                    // 검색어 필터
-                    boolean matchesQuery = query.isEmpty() ||
-                            (post.getTitle() != null && post.getTitle().toLowerCase().contains(query.toLowerCase())) ||
-                            (post.getContent() != null && post.getContent().toLowerCase().contains(query.toLowerCase()));
-
-                    if (!matchesQuery) return false;
-
-                    // 상태 필터
-                    switch (status) {
-                        case "new":
-                            return post.isActuallyNew();
-                        case "recruiting":
-                            // 마감일 체크 (eventEndDate가 현재보다 미래)
-                            return post.getEventEndDate() != null &&
-                                   !post.getEventEndDate().isEmpty() &&
-                                   isAfterToday(post.getEventEndDate());
-                        case "priority":
-                            // TODO: 우선순위 필드가 있다면 체크
-                            return true;
-                        default:
-                            return true;
-                    }
-                })
-                .collect(Collectors.toList());
-
-        currentPostList.clear();
-        currentPostList.addAll(filtered);
-        postAdapter.notifyDataSetChanged();
-    }
-
-    private boolean isAfterToday(String dateStr) {
-        try {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
-            java.util.Date eventDate = sdf.parse(dateStr);
-            java.util.Date today = new java.util.Date();
-            return eventDate != null && eventDate.after(today);
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     @Override
     public boolean onSupportNavigateUp() {
