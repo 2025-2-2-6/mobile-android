@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import com.example.mobile_android.config.AppConfig;
 import com.example.mobile_android.model.FcmTokenRequest;
 import com.example.mobile_android.network.ApiClient;
+import com.example.mobile_android.util.TokenManager;
 import com.example.mobile_android.network.ApiService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -60,9 +61,11 @@ public final class FcmTokenManager {
 
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         String deviceInfo = Build.MANUFACTURER + " " + Build.MODEL + " / Android " + Build.VERSION.RELEASE;
-        FcmTokenRequest request = new FcmTokenRequest(user.getUid(), cachedToken, "android", deviceInfo);
+        // user_id는 서버가 Authorization 토큰에서 자동 추출하므로 전달 불필요
+        FcmTokenRequest request = new FcmTokenRequest(cachedToken, "android", deviceInfo);
 
-        apiService.registerFcmToken(request).enqueue(new Callback<Void>() {
+        String token = TokenManager.getBearerToken(context);
+        apiService.registerFcmToken(token, request).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {

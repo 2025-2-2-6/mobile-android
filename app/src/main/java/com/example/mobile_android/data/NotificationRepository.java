@@ -97,6 +97,9 @@ public class NotificationRepository {
                 System.currentTimeMillis()
         );
 
+        // crawlStatus 추가 설정
+        entity.setCrawlStatus(data.get("status"));
+
         ioExecutor.execute(() -> notificationDao.upsert(entity));
     }
 
@@ -104,5 +107,111 @@ public class NotificationRepository {
 
     private String safeId(String id) {
         return TextUtils.isEmpty(id) ? UUID.randomUUID().toString() : id;
+    }
+
+    /**
+     * 임시 더미 데이터 삽입 (테스트용)
+     * 5가지 타입: 캘린더 일정, 크롤링 성공, 크롤링 실패, 새 게시물, unknown
+     */
+    public void insertDummyNotifications(String userId) {
+        if (TextUtils.isEmpty(userId)) {
+            Log.w(TAG, "insertDummyNotifications: missing user id");
+            return;
+        }
+
+        ioExecutor.execute(() -> {
+            long now = System.currentTimeMillis();
+
+            // 1. 캘린더 일정 알림 (calendar_reminder)
+            NotificationEntity calendarReminder = NotificationEntity.from(
+                    UUID.randomUUID().toString(),
+                    userId,
+                    "calendar_reminder",
+                    "일정 알림",
+                    "내일 오전 9시 '2025 창업 아이디어 경진대회' 일정이 있습니다.",
+                    "post_calendar_001",
+                    "site_calendar",
+                    false,
+                    "2025-11-24T10:00:00Z",
+                    "2025-11-25T09:00:00Z",
+                    "2025-11-25T12:00:00Z",
+                    now - 3600000
+            );
+
+            // 2. 크롤링 성공 (crawl_new_posts - success)
+            NotificationEntity crawlSuccess = NotificationEntity.from(
+                    UUID.randomUUID().toString(),
+                    userId,
+                    "crawl_new_posts",
+                    "사이트 등록 완료",
+                    "서울대학교 공지사항 크롤링이 완료되었습니다. 새로운 게시물 5개가 추가되었습니다.",
+                    null,
+                    "site_success_001",
+                    false,
+                    "2025-11-24T09:30:00Z",
+                    null,
+                    null,
+                    now - 7200000
+            );
+            crawlSuccess.setCrawlStatus("success");
+
+            // 3. 크롤링 실패 (crawl_new_posts - failed)
+            NotificationEntity crawlFailed = NotificationEntity.from(
+                    UUID.randomUUID().toString(),
+                    userId,
+                    "crawl_new_posts",
+                    "크롤링 실패",
+                    "고려대학교 공지사항 크롤링 중 오류가 발생했습니다. 사이트 접근이 차단되었습니다.",
+                    null,
+                    "site_failed_001",
+                    false,
+                    "2025-11-24T08:15:00Z",
+                    null,
+                    null,
+                    now - 10800000
+            );
+            crawlFailed.setCrawlStatus("failed");
+
+            // 4. 새 게시물 업데이트 (crawl_new_posts - new_post) - 스케줄링 도중
+            NotificationEntity newPost = NotificationEntity.from(
+                    UUID.randomUUID().toString(),
+                    userId,
+                    "crawl_new_posts",
+                    "연세대학교 공지사항",
+                    "[긴급] 2025-1학기 수강신청 일정 변경 안내",
+                    "post_newpost_001",
+                    "site_newpost_001",
+                    false,
+                    "2025-11-24T11:45:00Z",
+                    null,
+                    null,
+                    now - 1800000
+            );
+            newPost.setCrawlStatus("new_post");
+
+            // 5. unknown (회색) - 공지사항 등
+            NotificationEntity unknownNotice = NotificationEntity.from(
+                    UUID.randomUUID().toString(),
+                    userId,
+                    "unknown",
+                    "서비스 공지",
+                    "새로운 기능이 추가되었습니다! 캘린더에서 일정을 관리해보세요.",
+                    null,
+                    null,
+                    false,
+                    "2025-11-23T18:00:00Z",
+                    null,
+                    null,
+                    now - 86400000
+            );
+
+            notificationDao.upsert(calendarReminder);
+            notificationDao.upsert(crawlSuccess);
+            notificationDao.upsert(crawlFailed);
+            notificationDao.upsert(newPost);
+            notificationDao.upsert(unknownNotice);
+
+            Log.d(TAG, "더미 알림 데이터 삽입 완료 (5가지 타입)");
+        });
     }
 }

@@ -3,6 +3,7 @@ package com.example.mobile_android.data.local;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 /**
@@ -43,8 +44,26 @@ public class NotificationEntity {
     @ColumnInfo(name = "received_at")
     private long receivedAt;
 
+    @ColumnInfo(name = "crawl_status")
+    private String crawlStatus; // success, failed, new_post, unknown
+
+    @Ignore
     public NotificationEntity(@NonNull String id) {
         this.id = id;
+    }
+
+    @Ignore
+    public NotificationEntity(@NonNull String id, String type, String title, String message, long receivedAt) {
+        this.id = id;
+        this.type = type;
+        this.title = title;
+        this.message = message;
+        this.receivedAt = receivedAt;
+    }
+
+    // Room에서 사용할 기본 생성자
+    public NotificationEntity() {
+        this.id = "";
     }
 
     public static NotificationEntity from(
@@ -171,5 +190,13 @@ public class NotificationEntity {
 
     public void setReceivedAt(long receivedAt) {
         this.receivedAt = receivedAt;
+    }
+
+    public String getCrawlStatus() {
+        return crawlStatus;
+    }
+
+    public void setCrawlStatus(String crawlStatus) {
+        this.crawlStatus = crawlStatus;
     }
 }

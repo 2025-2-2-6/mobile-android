@@ -2,15 +2,18 @@ package com.example.mobile_android.ui.post;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,12 +26,14 @@ import com.example.mobile_android.model.Post;
 import com.example.mobile_android.model.PostListResponse;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.network.ApiService;
+import com.example.mobile_android.util.TokenManager;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,23 +44,28 @@ public class PostManagementFragment extends Fragment {
     private RecyclerView recyclerView;
     private PostAdapter adapter;
     private List<Post> currentPostList = new ArrayList<>(); // 어댑터에 공급할 현재 리스트
+    private List<Post> allPostsList = new ArrayList<>(); // 전체 게시물 저장 (검색용)
 
     private TabLayout tabLayout;
     private EditText etSearch;
-    private CardView cardCalendarInfo;
+    private ImageButton btnClearSearch;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh;
+    private View layoutEmptyPosts;
+    private TextView tvEmptyTitle;
+    private TextView tvEmptySubtitle;
 
     private ApiService apiService;
     private PostDao postDao;
     private ExecutorService databaseExecutor;
     private String currentFilter = "all";
+    private String searchQuery = "";
 
     private LiveData<List<Post>> allPostsLiveData;
-    private LiveData<List<Post>> savedPostsLiveData;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_post_management, container, false);
+        return inflater.inflate(R.layout.fragment_posts, container, false);
     }
 
     @Override
@@ -64,8 +74,8 @@ public class PostManagementFragment extends Fragment {
 
         initViews(view);
         setupRecyclerView();
+        setupSearchView();
         setupTabLayout();
-        setupClickListeners();
         loadPostsFromServer();
         observeDatabase();
     }
@@ -74,14 +84,17 @@ public class PostManagementFragment extends Fragment {
         recyclerView = view.findViewById(R.id.postRecyclerView);
         tabLayout = view.findViewById(R.id.tab_layout);
         etSearch = view.findViewById(R.id.et_search);
-        cardCalendarInfo = view.findViewById(R.id.card_calendar_info);
+        btnClearSearch = view.findViewById(R.id.btn_clear_search);
+        swipeRefresh = view.findViewById(R.id.swipe_refresh);
+        layoutEmptyPosts = view.findViewById(R.id.layout_empty_posts);
+        tvEmptyTitle = view.findViewById(R.id.tv_empty_title);
+        tvEmptySubtitle = view.findViewById(R.id.tv_empty_subtitle);
 
         apiService = ApiClient.getClient().create(ApiService.class);
         postDao = AppDatabase.getInstance(requireContext()).postDao();
         databaseExecutor = Executors.newSingleThreadExecutor();
 
         allPostsLiveData = postDao.getAllPosts();
-        savedPostsLiveData = postDao.getSavedPosts();
     }
 
     private void setupRecyclerView() {
@@ -94,6 +107,97 @@ public class PostManagementFragment extends Fragment {
             intent.putExtra("POST_ID", post.getId());
             startActivity(intent);
         });
+
+        // SwipeRefreshLayout 설정
+        if (swipeRefresh != null) {
+            swipeRefresh.setColorSchemeColors(
+                    getResources().getColor(android.R.color.holo_blue_bright),
+                    getResources().getColor(android.R.color.holo_green_light),
+                    getResources().getColor(android.R.color.holo_orange_light)
+            );
+            swipeRefresh.setOnRefreshListener(() -> {
+                loadPostsFromServer();
+            });
+        }
+    }
+
+    private void setupSearchView() {
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchQuery = s.toString();
+                btnClearSearch.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                filterPosts();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        btnClearSearch.setOnClickListener(v -> {
+            etSearch.setText("");
+            etSearch.clearFocus();
+        });
+    }
+
+    private void filterPosts() {
+        currentPostList.clear();
+
+        List<Post> filteredList = allPostsList;
+
+        // 검색어 필터링
+        if (!searchQuery.isEmpty()) {
+            String lowerQuery = searchQuery.toLowerCase();
+            filteredList = filteredList.stream()
+                    .filter(post -> {
+                        String title = post.getTitle() != null ? post.getTitle().toLowerCase() : "";
+                        String content = post.getContent() != null ? post.getContent().toLowerCase() : "";
+                        return title.contains(lowerQuery) || content.contains(lowerQuery);
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // 탭 필터링
+        if ("new".equals(currentFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(post -> post.isActuallyNew())
+                    .collect(Collectors.toList());
+        } else if ("saved".equals(currentFilter)) {
+            filteredList = filteredList.stream()
+                    .filter(Post::isSaved)
+                    .collect(Collectors.toList());
+        }
+
+        currentPostList.addAll(filteredList);
+        adapter.notifyDataSetChanged();
+
+        // 빈 상태 UI 업데이트
+        updateEmptyView();
+    }
+
+    private void updateEmptyView() {
+        if (currentPostList.isEmpty()) {
+            layoutEmptyPosts.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+
+            // 필터에 따라 빈 상태 메시지 변경
+            if ("new".equals(currentFilter)) {
+                tvEmptyTitle.setText("새 게시물이 없습니다");
+                tvEmptySubtitle.setText("아직 읽지 않은 게시물이 없습니다");
+            } else if ("saved".equals(currentFilter)) {
+                tvEmptyTitle.setText("저장된 게시물이 없습니다");
+                tvEmptySubtitle.setText("게시물을 저장하여 나중에 확인하세요");
+            } else {
+                tvEmptyTitle.setText("게시물이 없습니다");
+                tvEmptySubtitle.setText("사이트를 등록하고 게시물을 수집하세요");
+            }
+        } else {
+            layoutEmptyPosts.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void setupTabLayout() {
@@ -104,18 +208,15 @@ public class PostManagementFragment extends Fragment {
                 switch (position) {
                     case 0:
                         currentFilter = "all";
-                        allPostsLiveData.observe(getViewLifecycleOwner(), PostManagementFragment.this::updateAdapter);
                         break;
                     case 1:
                         currentFilter = "new";
-                        // 'new' 필터링 로직은 getAllPosts() 결과에서 처리 가능하므로 별도 LiveData 불필요
-                        allPostsLiveData.observe(getViewLifecycleOwner(), PostManagementFragment.this::updateAdapter);
                         break;
                     case 2:
                         currentFilter = "saved";
-                        savedPostsLiveData.observe(getViewLifecycleOwner(), PostManagementFragment.this::updateAdapter);
                         break;
                 }
+                filterPosts();
             }
 
             @Override
@@ -130,55 +231,44 @@ public class PostManagementFragment extends Fragment {
         // 초기 탭("all")에 대한 관찰 시작
         allPostsLiveData.observe(getViewLifecycleOwner(), this::updateAdapter);
 
-        // 저장된 게시물 개수 관찰
-        savedPostsLiveData.observe(getViewLifecycleOwner(), savedPosts -> {
-            if (savedPosts.size() > 0) {
-                cardCalendarInfo.setVisibility(View.VISIBLE);
-            } else {
-                cardCalendarInfo.setVisibility(View.GONE);
-            }
-        });
     }
 
     private void updateAdapter(List<Post> posts) {
-        currentPostList.clear();
-        if ("new".equals(currentFilter)) {
-             // 24시간 이내 게시물 필터링 (isNew 필드 또는 createdAt 기준)
-            for (Post post : posts) {
-                if (post.getIsNew() != null && post.getIsNew()) {
-                    currentPostList.add(post);
-                }
-            }
-        } else {
-            currentPostList.addAll(posts);
-        }
-        adapter.notifyDataSetChanged();
-    }
-
-    private void setupClickListeners() {
-        if (cardCalendarInfo != null) {
-            cardCalendarInfo.setOnClickListener(v ->
-                    Toast.makeText(requireContext(), "캘린더 이동", Toast.LENGTH_SHORT).show()
-            );
-        }
+        allPostsList.clear();
+        allPostsList.addAll(posts);
+        filterPosts();
     }
 
     private void loadPostsFromServer() {
-        Call<PostListResponse> call = apiService.getPosts(1, 100, null, null, null, null, "created_at", "desc");
+        if (swipeRefresh != null) {
+            swipeRefresh.setRefreshing(true);
+        }
 
-        call.enqueue(new Callback<PostListResponse>() {
+        String token = TokenManager.getBearerToken(requireContext());
+        apiService.getPosts(token, 1, 100, null, null, null, null, "created_at", "desc")
+                .enqueue(new Callback<PostListResponse>() {
             @Override
             public void onResponse(Call<PostListResponse> call, Response<PostListResponse> response) {
+                if (!isAdded()) {
+                    return;
+                }
+                if (swipeRefresh != null) {
+                    swipeRefresh.setRefreshing(false);
+                }
                 if (response.isSuccessful() && response.body() != null) {
-                    // 서버에서 받은 데이터를 DB에 upsert
-                    databaseExecutor.execute(() -> {
-                        postDao.upsert(response.body().getItems());
-                    });
+                    databaseExecutor.execute(() -> postDao.upsert(response.body().getItems()));
+                    Toast.makeText(requireContext(), "게시물을 업데이트했습니다", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<PostListResponse> call, Throwable t) {
+                if (!isAdded()) {
+                    return;
+                }
+                if (swipeRefresh != null) {
+                    swipeRefresh.setRefreshing(false);
+                }
                 Toast.makeText(requireContext(), "게시물 불러오기 실패: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

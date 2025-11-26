@@ -1,10 +1,16 @@
 package com.example.mobile_android.model;
 
-public class SiteRegisterRequest {
+import com.google.gson.annotations.SerializedName;
 
+public class SiteRegisterRequest {
+    @SerializedName("url")
     private String url;
+    @SerializedName("name")
     private String name;
+    @SerializedName("user_id")
     private String userId;
+    @SerializedName("category")
+    private String category;
 
     public SiteRegisterRequest(String url, String name, String userId) {
         this.url = url;
@@ -12,7 +18,10 @@ public class SiteRegisterRequest {
         this.userId = userId;
     }
 
-    public String getUrl() { return url; }
-    public String getName() { return name; }
-    public String getUserId() { return userId; }
+    public SiteRegisterRequest(String url, String name, String userId, String category) {
+        this.url = url;
+        this.name = name;
+        this.userId = userId;
+        this.category = category;
+    }
 }

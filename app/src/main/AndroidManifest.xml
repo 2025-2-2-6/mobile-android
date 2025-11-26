@@ -5,12 +5,12 @@
     <!-- 기본 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- 캘린더 권한 -->
-    <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
-
     <!-- 알림 권한 (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- 정확한 알람 스케줄 권한 (Android 12+) -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -35,6 +35,9 @@
             android:name=".ui.site.AddSiteActivity"
             android:exported="true"/>
         <activity
+            android:name=".ui.site.SiteDetailActivity"
+            android:exported="false"/>
+        <activity
             android:name=".ui.post.PostListActivity"
             android:exported="false"/>
         <activity
@@ -44,8 +47,6 @@
             android:name=".MainActivity"
             android:exported="true"
         />
-        <activity android:name=".ui.site.SiteManageActivity" />
-        <activity android:name=".ui.site.SiteDetailActivity" />
 
         <!-- FCM 서비스 -->
         <service
@@ -56,6 +57,11 @@
             </intent-filter>
         </service>
 
+        <!-- 캘린더 일정 알림 리시버 -->
+        <receiver
+            android:name=".util.CalendarEventAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 

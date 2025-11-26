@@ -10,6 +10,10 @@
         <item name="colorOnSecondary">@color/login_bg2</item>
         <item name="android:statusBarColor">@color/login_bg1</item>
 
+        <!-- System bars configuration -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:navigationBarColor">@color/white</item>
+
         <!-- 다크 모드 강제 비활성화 -->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>

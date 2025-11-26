@@ -10,7 +10,32 @@
         <item name="colorSecondaryVariant">@color/login_bg2</item>
         <item name="colorOnSecondary">@color/login_bg2</item>
         <item name="android:statusBarColor">@color/login_bg1</item>
+
+        <!-- System bars configuration -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:navigationBarColor">@color/white</item>
     </style>
 
     <style name="Theme.mobile_android" parent="Base.Theme.mobile_android" />
+
+    <!--
+        모달 다이얼로그 스타일 테마
+        - 투명한 배경으로 어두운 오버레이 효과
+        - 가운데 정렬된 모달 창
+        - 부드러운 애니메이션
+    -->
+    <style name="Theme.mobile_android.ModalDialog" parent="Theme.mobile_android">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@style/ModalDialogAnimation</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+    </style>
+
+    <!-- 모달 다이얼로그 애니메이션 -->
+    <style name="ModalDialogAnimation" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/slide_up_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/slide_down_fade_out</item>
+    </style>
 </resources>

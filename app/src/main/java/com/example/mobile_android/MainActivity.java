@@ -7,13 +7,10 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -26,22 +23,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.bumptech.glide.Glide;
 import com.example.mobile_android.data.local.NotificationEntity;
 import com.example.mobile_android.model.Notification;
-import com.example.mobile_android.ui.login.Login;
 import com.example.mobile_android.ui.notification.NotificationAdapter;
 import com.example.mobile_android.ui.notification.NotificationViewModel;
 import com.example.mobile_android.ui.post.PostDetailActivity;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.example.mobile_android.util.NotificationPermissionHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,16 +43,16 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private ImageButton btnMenu, btnNotification;
     private View notificationBadge;
-    private GoogleSignInClient googleSignInClient;
+    private BottomNavigationView navView;
     private NotificationAdapter notificationAdapter;
     private NotificationViewModel notificationViewModel;
     private SwipeRefreshLayout notificationSwipeRefresh;
     private TextView notificationEmptyView;
     private TextView notificationUnreadCount;
-    private MaterialButton notificationFilterButton;
     private ChipGroup notificationFilterChips;
     private final List<NotificationEntity> cachedNotifications = new ArrayList<>();
     private NotificationFilter currentNotificationFilter = NotificationFilter.ALL;
+    private ImageButton btnGrantPermission;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+        navView = findViewById(R.id.nav_view);
         NavigationUI.setupWithNavController(navView, navController);
 
         btnMenu = toolbar.findViewById(R.id.btn_menu);
@@ -109,101 +99,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        setupNavigationView();
+        // Intent에서 탭 전환 요청 확인 (알림 클릭 시)
+        handleIntentExtras(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntentExtras(intent);
+    }
+
+    private void handleIntentExtras(Intent intent) {
+        if (intent != null && intent.hasExtra("OPEN_TAB")) {
+            String tabName = intent.getStringExtra("OPEN_TAB");
+            if ("calendar".equals(tabName)) {
+                navView.setSelectedItemId(R.id.nav_calendar);
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         // Room DB LiveData가 자동으로 관찰하므로 별도 refresh 불필요
-    }
-
-    private void setupNavigationView() {
-        NavigationView navigationView = findViewById(R.id.navigation_drawer);
-
-        // Setup user profile
-        ImageView profileImage = navigationView.findViewById(R.id.profile_image);
-        TextView userName = navigationView.findViewById(R.id.user_name);
-        TextView userEmail = navigationView.findViewById(R.id.user_email);
-
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            if (currentUser.getDisplayName() != null && !currentUser.getDisplayName().isEmpty()) {
-                userName.setText(currentUser.getDisplayName());
-            }
-            if (currentUser.getEmail() != null && !currentUser.getEmail().isEmpty()) {
-                userEmail.setText(currentUser.getEmail());
-            }
-            if (currentUser.getPhotoUrl() != null) {
-                Glide.with(this)
-                        .load(currentUser.getPhotoUrl())
-                        .circleCrop()
-                        .into(profileImage);
-            }
+        // 설정 화면에서 돌아왔을 때 알림 권한 상태 재확인
+        if (notificationView.getVisibility() == View.VISIBLE) {
+            updateNotificationPermissionUI();
         }
-        TextView manageSiteButton = navigationView.findViewById(R.id.manage_site_button);
-
-        // Setup privacy policy button
-        TextView privacyPolicyButton = navigationView.findViewById(R.id.privacy_policy_button);
-        privacyPolicyButton.setOnClickListener(v -> showPrivacyPolicyDialog());
-
-        // Setup logout button
-        TextView logoutButton = navigationView.findViewById(R.id.logout_button);
-
-        // Configure Google Sign In
-        GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.client_id))
-                .requestEmail()
-                .build();
-        googleSignInClient = GoogleSignIn.getClient(this, options);
-
-        logoutButton.setOnClickListener(v -> {
-            // Sign out from Firebase
-            FirebaseAuth.getInstance().signOut();
-            // Sign out from Google
-            googleSignInClient.signOut().addOnCompleteListener(this, task -> {
-                Toast.makeText(MainActivity.this, "로그아웃 하였습니다", Toast.LENGTH_SHORT).show();
-                // Go back to Login activity
-                Intent intent = new Intent(MainActivity.this, Login.class);
-                startActivity(intent);
-                finish();
-            });
-
-        });
-        if (manageSiteButton != null) {
-            manageSiteButton.setOnClickListener(v -> {
-                // 드로어 먼저 닫고
-                drawerLayout.closeDrawer(GravityCompat.START);
-                // 새 액티비티 열기
-                Intent intent = new Intent(MainActivity.this, com.example.mobile_android.ui.site.SiteManageActivity.class);
-                startActivity(intent);
-            });
-        }
-
-
-    }
-
-
-    private void showPrivacyPolicyDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("개인정보 처리방침");
-
-        // Create a ScrollView to contain the long text
-        ScrollView scrollView = new ScrollView(this);
-
-        // Create a TextView for the message
-        TextView message = new TextView(this);
-        message.setText(R.string.privacy_policy_text);
-
-        // Add padding
-        int padding = (int) (16 * getResources().getDisplayMetrics().density);
-        message.setPadding(padding, padding, padding, padding);
-
-        scrollView.addView(message);
-
-        builder.setView(scrollView);
-        builder.setPositiveButton("확인", (dialog, which) -> dialog.dismiss());
-        builder.create().show();
     }
 
     private void showNotificationView() {
@@ -211,6 +133,18 @@ public class MainActivity extends AppCompatActivity {
         notificationView.setVisibility(View.VISIBLE);
         Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_right);
         notificationView.startAnimation(slideIn);
+
+        // 알림 권한 체크 및 UI 업데이트
+        updateNotificationPermissionUI();
+    }
+
+    private void updateNotificationPermissionUI() {
+        boolean hasPermission = NotificationPermissionHelper.hasNotificationPermission(this);
+
+        // 권한이 없을 때만 툴바 버튼 표시
+        if (btnGrantPermission != null) {
+            btnGrantPermission.setVisibility(hasPermission ? View.GONE : View.VISIBLE);
+        }
     }
 
     private void hideNotificationView() {
@@ -235,7 +169,6 @@ public class MainActivity extends AppCompatActivity {
         notificationEmptyView = notificationView.findViewById(R.id.tv_notification_empty);
         notificationSwipeRefresh = notificationView.findViewById(R.id.notification_swipe_refresh);
         notificationUnreadCount = notificationView.findViewById(R.id.tv_notification_unread_count);
-        notificationFilterButton = notificationView.findViewById(R.id.btn_notification_filter);
         notificationFilterChips = notificationView.findViewById(R.id.chip_notification_filters);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -259,20 +192,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (notificationFilterButton != null) {
-            notificationFilterButton.setOnClickListener(v ->
-                    Toast.makeText(this, "세부 필터는 곧 제공될 예정입니다.", Toast.LENGTH_SHORT).show()
-            );
-        }
-
         if (notificationFilterChips != null) {
             notificationFilterChips.check(R.id.chip_filter_all);
             notificationFilterChips.setOnCheckedStateChangeListener((group, checkedIds) -> {
                 int selectedId = checkedIds.isEmpty() ? R.id.chip_filter_all : checkedIds.get(0);
                 if (selectedId == R.id.chip_filter_deadline) {
-                    currentNotificationFilter = NotificationFilter.DEADLINE;
+                    currentNotificationFilter = NotificationFilter.CALENDAR;
                 } else if (selectedId == R.id.chip_filter_new) {
-                    currentNotificationFilter = NotificationFilter.NEW;
+                    currentNotificationFilter = NotificationFilter.CRAWL;
                 } else {
                     currentNotificationFilter = NotificationFilter.ALL;
                 }
@@ -288,6 +215,14 @@ public class MainActivity extends AppCompatActivity {
                     notificationSwipeRefresh.setRefreshing(false);
                 }
             });
+        }
+
+        // 알림 권한 관련 UI 설정
+        btnGrantPermission = notificationView.findViewById(R.id.btn_grant_permission);
+        if (btnGrantPermission != null) {
+            btnGrantPermission.setOnClickListener(v ->
+                    NotificationPermissionHelper.openNotificationSettings(this)
+            );
         }
 
         if (notificationViewModel != null) {
@@ -342,25 +277,62 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         notificationAdapter.submitList(filtered);
+
+        // empty view 표시
         if (notificationEmptyView != null) {
-            notificationEmptyView.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+            notificationEmptyView.setVisibility(
+                    filtered.isEmpty() ? View.VISIBLE : View.GONE
+            );
         }
     }
 
     private boolean matchesFilter(NotificationEntity entity) {
         if (entity == null) return false;
         String type = entity.getType();
-        if (currentNotificationFilter == NotificationFilter.DEADLINE) {
-            return Notification.Type.SCHEDULE_REMINDER.equals(type);
-        } else if (currentNotificationFilter == NotificationFilter.NEW) {
-            return Notification.Type.NEW_POST.equals(type);
+        if (currentNotificationFilter == NotificationFilter.CALENDAR) {
+            return isCalendarNotification(type);
+        } else if (currentNotificationFilter == NotificationFilter.CRAWL) {
+            return isCrawlNotification(type);
         }
         return true;
     }
 
+    private boolean isCalendarNotification(String rawType) {
+        if (rawType == null) {
+            return false;
+        }
+        String type = rawType.toLowerCase();
+        return type.contains("calendar")
+                || type.contains("schedule")
+                || Notification.Type.SCHEDULE_REMINDER.equals(rawType)
+                || Notification.Type.EVENT_REMINDER.equals(rawType)
+                || Notification.Type.DEADLINE.equals(rawType);
+    }
+
+    private boolean isCrawlNotification(String rawType) {
+        if (rawType == null) {
+            return false;
+        }
+        String type = rawType.toLowerCase();
+        if (type.contains("crawl_new_posts")) {
+            return true;
+        }
+        return Notification.Type.NEW_POST.equals(rawType)
+                || Notification.Type.CRAWLING_COMPLETE.equals(rawType);
+    }
+
     private enum NotificationFilter {
         ALL,
-        DEADLINE,
-        NEW
+        CALENDAR,
+        CRAWL
+    }
+
+    /**
+     * 드로어 닫기
+     */
+    public void closeDrawer() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
     }
 }

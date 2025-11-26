@@ -2,9 +2,42 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="login_bg1">#673AB7</color>
-    <color name="login_bg2">#9C27B0</color>
+    <color name="accent_color">#4C84FF</color>
+    <color name="brand_color2">#FFFFFF</color>
+    <color name="login_bg1">#0B0E18</color>
+    <color name="login_bg2">#673AB7</color>
     <color name="logout_btn">#4F85B8</color>
+    <color name="screen_background">#FFFFFF</color>
+    <color name="screen_card_surface">#FFFFFFFF</color>
+
+    <!-- Notification categories - image1 기반 정확한 색상 -->
+    <color name="notification_bg_read">#FFFFFF</color>
+    <color name="notification_bg_unread_shadow">#08000000</color>
+
+    <!-- 1. 일정 알림 (calendar_reminder) - 파란색 -->
+    <color name="notification_unread_calendar">#E8F0FF</color>
+    <color name="notification_label_calendar">#4C84FF</color>
+    <color name="notification_label_bg_calendar">#DDE8FF</color>
+
+    <!-- 2. 새 게시물 (crawl_new_posts) - 주황색 -->
+    <color name="notification_unread_new">#FFF3E0</color>
+    <color name="notification_label_new">#FF9800</color>
+    <color name="notification_label_bg_new">#FFE5CC</color>
+
+    <!-- 3. 수집 완료 (crawl_success) - 초록색 -->
+    <color name="notification_unread_success">#E7F7EF</color>
+    <color name="notification_label_success">#2AA876</color>
+    <color name="notification_label_bg_success">#DCF5E7</color>
+
+    <!-- 4. 수집 실패 (crawl_failed) - 빨간색 -->
+    <color name="notification_unread_failed">#FFEBEE</color>
+    <color name="notification_label_failed">#F44336</color>
+    <color name="notification_label_bg_failed">#FFCDD2</color>
+
+    <!-- 5. 알 수 없는 상태 (unknown) - 회색 -->
+    <color name="notification_unread_unknown">#F5F5F5</color>
+    <color name="notification_label_unknown">#616161</color>
+    <color name="notification_label_bg_unknown">#E0E0E0</color>
 
     <!-- Notification Page Colors -->
     <color name="notification_bg">#FFFFFF</color>
@@ -30,6 +63,9 @@
     <color name="notification_icon_green_tint">#2AA876</color>
     <color name="notification_icon_purple_tint">#7B4EDB</color>
 
+    <color name="calendar_status_on">#2E7D32</color>
+    <color name="calendar_status_off">#9E9E9E</color>
+
     <!-- Search Page Colors -->
     <color name="chip_selected_bg">#0B0E18</color>          <!-- 진한 네이비/블랙 계열 -->
     <color name="chip_unselected_bg">#FFFFFFFF</color>
@@ -46,7 +82,9 @@
 
     <color name="stat_upcoming_bg">#F5EFFF</color>    <!-- 연보라 배경 -->
     <color name="stat_upcoming_stroke">#B990F0</color>
-    <color name="purple_50">#F3E5F5</color>
-    <color name="purple_500">#6200EE</color>
 
+    <!-- Notification status and label colors -->
+    <color name="notification_status_color">#FF5722</color>
+    <color name="notification_label_color">#4CAF50</color>
+    <color name="gray">#808080</color>
 </resources>

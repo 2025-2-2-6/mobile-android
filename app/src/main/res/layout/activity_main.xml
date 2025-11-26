@@ -15,12 +15,12 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/screen_top_padding"
             >
 
             <include
                 android:id="@+id/header"
-                layout="@layout/header_bar" />
+                layout="@layout/layout_header_bar" />
 
             <fragment
                 android:id="@+id/nav_host_fragment_activity_main"
@@ -36,7 +36,7 @@
 
             <include
                 android:id="@+id/nav_view"
-                layout="@layout/bottom_nav_bar"
+                layout="@layout/layout_bottom_nav_bar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -62,7 +62,11 @@
         android:layout_height="match_parent"
         android:layout_gravity="start">
 
-        <include layout="@layout/fragment_mypage" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/drawer_fragment_container"
+            android:name="com.example.mobile_android.ui.mypage.MyPageFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </com.google.android.material.navigation.NavigationView>
 
