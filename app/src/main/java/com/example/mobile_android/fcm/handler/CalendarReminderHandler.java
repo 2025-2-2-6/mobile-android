@@ -24,7 +24,7 @@ public class CalendarReminderHandler extends BaseNotificationHandler {
 
         // 없으면 캘린더로 이동
         Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtra("NAVIGATE_TO", "calendar");
+        intent.putExtra("OPEN_TAB", "calendar");
         String eventId = data.get("event_id");
         if (eventId != null && !eventId.isEmpty()) {
             intent.putExtra("EVENT_ID", eventId);
