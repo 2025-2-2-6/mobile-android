@@ -107,7 +107,7 @@ public class HomeFragment extends Fragment {
         statisticsHelper = new StatisticsHelper(siteDao, postDao, calendarEventDao);
 
         // --- 어댑터 생성 ---
-        siteAdapter = new SiteAdapter(filteredSitesList);
+        siteAdapter = new SiteAdapter(requireContext(), filteredSitesList);
 
         // 🔥 편집 버튼 리스너 추가
         siteAdapter.setOnEditListener(site -> {

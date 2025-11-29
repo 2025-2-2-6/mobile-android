@@ -45,6 +45,7 @@ public class PostListActivity extends AppCompatActivity {
     private PostDao postDao;
     private ExecutorService databaseExecutor;
     private String siteId;
+    private String filterType; // 필터 타입 (null, "new_posts" 등)
     private EditText searchEditText;
     private ImageButton clearSearchButton;
     private SwipeRefreshLayout swipeRefresh;
@@ -63,6 +64,7 @@ public class PostListActivity extends AppCompatActivity {
         // Intent에서 사이트 정보 가져오기
         String siteName = getIntent().getStringExtra("SITE_NAME");
         siteId = getIntent().getStringExtra("SITE_ID");
+        filterType = getIntent().getStringExtra("FILTER_TYPE"); // "new_posts" 등
 
         setupToolbar(siteName);
         setupRecyclerView();
@@ -148,6 +150,13 @@ public class PostListActivity extends AppCompatActivity {
 
         List<Post> filtered = allPostList.stream()
                 .filter(post -> {
+                    // is_new 필터링 (FILTER_TYPE="new_posts"인 경우)
+                    if ("new_posts".equals(filterType)) {
+                        if (!post.isActuallyNew()) {
+                            return false;
+                        }
+                    }
+
                     // 카테고리 필터링
                     if (!categoryFilter.isEmpty()) {
                         String postCategory = post.getCategory() != null ? post.getCategory() : "";
@@ -185,7 +194,17 @@ public class PostListActivity extends AppCompatActivity {
     }
 
     private void observePostsBySite() {
-        LiveData<List<Post>> postsLiveData = postDao.getPostsBySite(siteId);
+        LiveData<List<Post>> postsLiveData;
+
+        // FILTER_TYPE이 "new_posts"이면 전체 게시물 조회, 아니면 특정 사이트만
+        if ("new_posts".equals(filterType)) {
+            postsLiveData = postDao.getAllPosts();
+        } else if (siteId != null) {
+            postsLiveData = postDao.getPostsBySite(siteId);
+        } else {
+            postsLiveData = postDao.getAllPosts();
+        }
+
         postsLiveData.observe(this, posts -> {
             allPostList.clear();
             allPostList.addAll(posts);
@@ -195,15 +214,27 @@ public class PostListActivity extends AppCompatActivity {
 
     private void loadPostsFromServer() {
         String token = TokenManager.getBearerToken(this);
-        Call<PostListResponse> call = apiService.getPosts(token, 1, 100, null, siteId, null, null, "created_at", "desc");
+        Call<PostListResponse> call;
+
+        // FILTER_TYPE이 "new_posts"이면 전체 게시물 조회, 아니면 특정 사이트만
+        if ("new_posts".equals(filterType)) {
+            call = apiService.getPosts(token, 1, 1000, null, null, null, null, "created_at", "desc");
+        } else {
+            call = apiService.getPosts(token, 1, 100, null, siteId, null, null, "created_at", "desc");
+        }
 
         call.enqueue(new Callback<PostListResponse>() {
             @Override
             public void onResponse(Call<PostListResponse> call, Response<PostListResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     databaseExecutor.execute(() -> {
-                        // 특정 사이트의 게시물만 덮어쓰기 (전체 DB를 지우지 않음)
-                        postDao.upsertBySite(siteId, response.body().getItems());
+                        if ("new_posts".equals(filterType)) {
+                            // 전체 게시물 덮어쓰기
+                            postDao.upsert(response.body().getItems());
+                        } else {
+                            // 특정 사이트의 게시물만 덮어쓰기
+                            postDao.upsertBySite(siteId, response.body().getItems());
+                        }
                     });
                 }
             }

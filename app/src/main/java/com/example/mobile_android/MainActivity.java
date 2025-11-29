@@ -252,18 +252,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void routeNotification(NotificationEntity notification) {
-        if (notification == null) return;
-
-        if ("new_post".equals(notification.getType()) && notification.getPostId() != null) {
-            Intent intent = new Intent(this, PostDetailActivity.class);
-            intent.putExtra("POST_ID", notification.getPostId());
-            startActivity(intent);
-        } else if ("site_registered".equals(notification.getType())) {
-            hideNotificationView();
-            Toast.makeText(this, getString(R.string.notifications_title), Toast.LENGTH_SHORT).show();
-        } else {
-            hideNotificationView();
-        }
+        // 읽음 처리만 수행 (NotificationFragment에서 이미 처리됨)
+        // 알림 창 닫기 및 화면 이동 제거
     }
 
     private void applyNotificationFilter() {
@@ -333,6 +323,20 @@ public class MainActivity extends AppCompatActivity {
     public void closeDrawer() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        }
+    }
+
+    /**
+     * 마이페이지 탭으로 이동 (알림 설정 등을 위해 사용)
+     */
+    public void navigateToMyPage() {
+        // 알림 슬라이드 패널이 열려있으면 닫기
+        if (notificationView.getVisibility() == View.VISIBLE) {
+            hideNotificationView();
+        }
+        // 마이페이지 탭으로 이동
+        if (navView != null) {
+            navView.setSelectedItemId(R.id.nav_mypage);
         }
     }
 }

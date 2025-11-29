@@ -110,7 +110,7 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="저장됨" />
+            android:text="일정 등록" />
 
     </com.google.android.material.tabs.TabLayout>
 

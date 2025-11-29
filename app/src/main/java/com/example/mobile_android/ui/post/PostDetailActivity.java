@@ -171,7 +171,7 @@ public class PostDetailActivity extends AppCompatActivity {
             btnAddToCalendar.setVisibility(View.GONE);
         } else {
             tvPostEventDate.setVisibility(View.VISIBLE);
-            tvPostEventDate.setText("마감,진행 날짜 " + eventLabel);
+            tvPostEventDate.setText("마감,진행 날짜 : " + eventLabel);
             tvCalendarInfo.setVisibility(View.VISIBLE);
             btnAddToCalendar.setVisibility(View.VISIBLE);
         }
@@ -180,7 +180,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private void bindLocation(Post post) {
         if (!TextUtils.isEmpty(post.getLocation())) {
             tvPostLocation.setVisibility(View.VISIBLE);
-            tvPostLocation.setText("📍 " + post.getLocation());
+            tvPostLocation.setText("장소/위치 : " + post.getLocation());
         } else {
             tvPostLocation.setVisibility(View.GONE);
         }
@@ -269,9 +269,14 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     private String resolveCategory(Post post) {
+        // PostAdapter와 동일한 우선순위: category > categoryName > siteName > app name
+        if (!TextUtils.isEmpty(post.getCategory())) {
+            return post.getCategory();
+        }
         if (!TextUtils.isEmpty(post.getCategoryName())) {
             return post.getCategoryName();
-        } else if (!TextUtils.isEmpty(post.getSiteName())) {
+        }
+        if (!TextUtils.isEmpty(post.getSiteName())) {
             return post.getSiteName();
         }
         return getString(R.string.app_name);

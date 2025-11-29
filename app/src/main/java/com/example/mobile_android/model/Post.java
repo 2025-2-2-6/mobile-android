@@ -9,6 +9,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import com.example.mobile_android.util.Constants;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
@@ -191,9 +192,8 @@ public class Post implements Serializable, Parcelable {
             long createdTime = createdDate.getTime();
             long timeDiff = currentTime - createdTime;
 
-            // 1분 = 60 * 1000 밀리초 (테스트용)
-            long oneMinute = 60 * 1000L;
-            return timeDiff <= oneMinute;
+            // Constants에서 정의한 시간 기준 사용 (DEBUG: 1분, RELEASE: 24시간)
+            return timeDiff <= Constants.NEW_POST_THRESHOLD_MS;
         } catch (Exception e) {
             // 파싱 실패시 false 반환
             return false;

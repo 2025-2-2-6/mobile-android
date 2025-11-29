@@ -71,34 +71,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void submitList(List<NotificationEntity> items) {
         notifications.clear();
         if (items != null) {
-            notifications.addAll(items.subList(0, Math.min(items.size(), 5))); // 최대 5개로 제한
+            notifications.addAll(items);
         }
         notifyDataSetChanged();
     }
 
-    public void submitDummyData() {
-        List<NotificationEntity> dummyNotifications = new ArrayList<>();
-        // image1과 동일한 더미 데이터 (백엔드 구조 반영)
-        NotificationEntity notif1 = new NotificationEntity("1", "calendar_reminder", "일정 알림", "2024 전국 창업 공모전 마감까지 D-2일 남았습니다", System.currentTimeMillis() - TimeUnit.HOURS.toMillis(24));
-        dummyNotifications.add(notif1);
-
-        NotificationEntity notif2 = new NotificationEntity("2", "crawl_new_posts", "새 게시물", "React 공식 사이트에서 새로운 게시물이 수집되었습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1));
-        notif2.setCrawlStatus("new_post");
-        dummyNotifications.add(notif2);
-
-        NotificationEntity notif3 = new NotificationEntity("3", "crawl_new_posts", "수집 완료", "서울대학교 공지사항 수집이 정상 완료되었습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3));
-        notif3.setCrawlStatus("success");
-        dummyNotifications.add(notif3);
-
-        NotificationEntity notif4 = new NotificationEntity("4", "crawl_new_posts", "수집 실패", "창업진흥원 사이트 수집 중 오류가 발생했습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(5));
-        notif4.setCrawlStatus("failed");
-        dummyNotifications.add(notif4);
-
-        NotificationEntity notif5 = new NotificationEntity("5", "unknown", "알 수 없는 상태", "일부 사이트의 수집 상태를 확인할 수 없습니다", System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7));
-        dummyNotifications.add(notif5);
-
-        submitList(dummyNotifications);
-    }
 
     @Override
     public int getItemCount() {

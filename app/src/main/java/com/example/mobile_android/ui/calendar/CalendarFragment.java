@@ -122,9 +122,17 @@ public class CalendarFragment extends Fragment {
         repository.getAllEvents().observe(getViewLifecycleOwner(), events -> {
             allEvents = events;
 
-            // 이벤트가 있는 날짜 목록 생성
+            // 이벤트가 있는 날짜 목록 생성 (null 안전 처리)
             List<LocalDate> eventDates = events.stream()
-                    .map(event -> LocalDate.parse(event.getEventDate()))
+                    .filter(event -> event.getEventDate() != null && !event.getEventDate().isEmpty())
+                    .map(event -> {
+                        try {
+                            return LocalDate.parse(event.getEventDate());
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    })
+                    .filter(date -> date != null)
                     .distinct()
                     .collect(Collectors.toList());
 

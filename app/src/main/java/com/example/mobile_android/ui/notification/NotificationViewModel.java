@@ -1,6 +1,8 @@
 package com.example.mobile_android.ui.notification;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -30,13 +32,24 @@ public class NotificationViewModel extends AndroidViewModel {
             notifications = repository.getNotifications(userId);
             unreadCount = repository.getUnreadCount(userId);
 
-            // 임시: 더미 데이터 자동 삽입 (테스트용)
-            repository.insertDummyNotifications(userId);
+            // 더미 데이터 정리 (한 번만 실행)
+            clearDummyDataOnce(application, userId);
         } else {
             MutableLiveData<List<NotificationEntity>> emptyNotifications = new MutableLiveData<>();
             emptyNotifications.setValue(java.util.Collections.emptyList());
             notifications = emptyNotifications;
             unreadCount = new MutableLiveData<>(0);
+        }
+    }
+
+    /**
+     * 앱 시작 시 한 번만 더미 데이터를 정리합니다.
+     */
+    private void clearDummyDataOnce(Application application, String userId) {
+        SharedPreferences prefs = application.getSharedPreferences("notification_cleanup", Context.MODE_PRIVATE);
+        if (!prefs.getBoolean("dummy_data_cleaned_v2", false)) {
+            repository.clearDummyData(userId);
+            prefs.edit().putBoolean("dummy_data_cleaned_v2", true).apply();
         }
     }
 

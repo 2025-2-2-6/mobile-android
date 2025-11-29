@@ -90,7 +90,10 @@ public class AddSiteActivity extends AppCompatActivity {
                 categoryEditText.getText().toString()
             );
 
-            registerSite(finalUrl, siteName, category);
+            // 메모 가져오기
+            String memo = memoEditText.getText().toString().trim();
+
+            registerSite(finalUrl, siteName, category, memo);
         });
 
         cancelButton.setOnClickListener(v -> {
@@ -146,7 +149,7 @@ public class AddSiteActivity extends AppCompatActivity {
         }
     }
 
-    private void registerSite(String url, String siteName, String category) {
+    private void registerSite(String url, String siteName, String category, String memo) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null || TextUtils.isEmpty(currentUser.getUid())) {
             Toast.makeText(this, "로그인 상태를 확인할 수 없습니다. 다시 로그인해 주세요.", Toast.LENGTH_LONG).show();
@@ -156,10 +159,10 @@ public class AddSiteActivity extends AppCompatActivity {
         showLoading(true);
         String userId = currentUser.getUid();
 
-        Log.d("AddSiteActivity", "Registering site - URL: " + url + ", Name: " + siteName + ", Category: " + category);
+        Log.d("AddSiteActivity", "Registering site - URL: " + url + ", Name: " + siteName + ", Category: " + category + ", Memo: " + memo);
 
         String token = TokenManager.getBearerToken(this);
-        SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId, category);
+        SiteRegisterRequest request = new SiteRegisterRequest(url, siteName, userId, category, memo);
         Call<SiteRegisterResponse> call = ApiClient.getApiService().registerSite(token, request);
 
         call.enqueue(new Callback<SiteRegisterResponse>() {

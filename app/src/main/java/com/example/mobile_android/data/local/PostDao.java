@@ -27,6 +27,26 @@ public abstract class PostDao {
     public abstract LiveData<List<Post>> getPostsBySite(String siteId);
 
     /**
+     * 특정 사이트의 게시물 수를 동기적으로 조회합니다 (RecyclerView Adapter용).
+     */
+    @Query("SELECT COUNT(*) FROM post WHERE siteId = :siteId")
+    public abstract int getPostCountBySiteSync(String siteId);
+
+    /**
+     * 특정 사이트의 가장 최근 게시물의 createdAt을 동기적으로 조회합니다.
+     * 마지막 크롤링 날짜를 표시하는 데 사용됩니다.
+     */
+    @Query("SELECT createdAt FROM post WHERE siteId = :siteId ORDER BY createdAt DESC LIMIT 1")
+    public abstract String getLatestPostDateBySiteSync(String siteId);
+
+    /**
+     * 특정 사이트의 가장 최근 게시물의 createdAt을 LiveData로 조회합니다.
+     * 마지막 크롤링 날짜를 표시하는 데 사용됩니다.
+     */
+    @Query("SELECT createdAt FROM post WHERE siteId = :siteId ORDER BY createdAt DESC LIMIT 1")
+    public abstract LiveData<String> getLatestPostDateBySite(String siteId);
+
+    /**
      * 데이터베이스의 모든 Post를 최신순으로 조회합니다.
      */
     @Query("SELECT * FROM post ORDER BY createdAt DESC")

@@ -36,12 +36,9 @@ public class NotificationFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
-    private SwitchMaterial toggleDeviceNotification;
     private TextView tvUnreadCount;
-    private SharedPreferences prefs;
-
-    private ActivityResultLauncher<String> notificationPermissionLauncher;
-    private boolean isProgrammaticChange = false;
+    private com.google.android.material.card.MaterialCardView cardPermissionTip;
+    private android.widget.Button btnGoToSettings;
 
     private NotificationAdapter notificationAdapter;
     private NotificationViewModel notificationViewModel;
@@ -50,38 +47,6 @@ public class NotificationFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        prefs = requireContext().getSharedPreferences(PREFS_NAME, 0);
-
-        // 알림 권한 요청 런처 등록
-        notificationPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(),
-                isGranted -> {
-                    if (isGranted) {
-                        // 권한 승인 시 토글 ON, MyPage 스위치들도 ON
-                        isProgrammaticChange = true;
-                        toggleDeviceNotification.setChecked(true);
-                        isProgrammaticChange = false;
-
-                        // MyPage 알림 설정도 ON으로 변경
-                        prefs.edit()
-                            .putBoolean(KEY_NEW_POST_NOTIFICATION, true)
-                            .putBoolean(KEY_CALENDAR_NOTIFICATION, true)
-                            .apply();
-
-                        // 토픽 구독
-                        NotificationTopicManager.updateTopic(NotificationTopicManager.TOPIC_CRAWL_NEW_POSTS, true, success -> {});
-                        NotificationTopicManager.updateTopic(NotificationTopicManager.TOPIC_CALENDAR_REMINDER, true, success -> {});
-
-                        Toast.makeText(requireContext(), "알림이 활성화되었습니다", Toast.LENGTH_SHORT).show();
-                    } else {
-                        isProgrammaticChange = true;
-                        toggleDeviceNotification.setChecked(false);
-                        isProgrammaticChange = false;
-                    }
-                    updateUIBasedOnPermission();
-                }
-        );
     }
 
     @Nullable
@@ -105,14 +70,23 @@ public class NotificationFragment extends Fragment {
             notificationAdapter.submitList(new java.util.ArrayList<>(notificationList));
         });
         initViews(view);
-        setupPermissionButton();
-        updateUIBasedOnPermission();
+
+        // 권한 안내 카드 설정
+        cardPermissionTip = view.findViewById(R.id.card_permission_tip);
+        btnGoToSettings = view.findViewById(R.id.btn_go_to_settings);
+
+        btnGoToSettings.setOnClickListener(v -> {
+            if (getActivity() instanceof com.example.mobile_android.MainActivity) {
+                ((com.example.mobile_android.MainActivity) getActivity()).navigateToMyPage();
+            }
+        });
+
+        updatePermissionTipVisibility();
     }
 
     private void initViews(View view) {
         swipeRefreshLayout = view.findViewById(R.id.notification_swipe_refresh);
         recyclerView = view.findViewById(R.id.notifications_recycler_view);
-        toggleDeviceNotification = view.findViewById(R.id.toggle_device_notification);
 
         notificationAdapter = new NotificationAdapter(requireContext());
         recyclerView.setAdapter(notificationAdapter);
@@ -120,8 +94,7 @@ public class NotificationFragment extends Fragment {
             @Override
             public void onNotificationClick(com.example.mobile_android.data.local.NotificationEntity notification) {
                 // 읽음 처리는 Adapter에서 이미 처리됨
-                // 타입별 네비게이션 처리만 수행
-                handleNotificationNavigation(notification);
+                // 화면 이동 로직 제거
             }
             @Override
             public void onDeleteClick(com.example.mobile_android.data.local.NotificationEntity notification) {
@@ -131,115 +104,14 @@ public class NotificationFragment extends Fragment {
         });
     }
 
-    private void setupPermissionButton() {
-        // 초기 상태 설정: 권한 있고 MyPage 스위치 중 하나라도 ON이면 ON
+    private void updatePermissionTipVisibility() {
         boolean hasPermission = NotificationPermissionHelper.hasNotificationPermission(requireContext());
-        boolean newPostEnabled = prefs.getBoolean(KEY_NEW_POST_NOTIFICATION, false);
-        boolean calendarEnabled = prefs.getBoolean(KEY_CALENDAR_NOTIFICATION, false);
-        boolean shouldBeChecked = hasPermission && (newPostEnabled || calendarEnabled);
-
-        isProgrammaticChange = true;
-        toggleDeviceNotification.setChecked(shouldBeChecked);
-        isProgrammaticChange = false;
-
-        toggleDeviceNotification.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isProgrammaticChange) return;
-
-            if (isChecked) {
-                // 토글 ON -> 권한 요청
-                if (!NotificationPermissionHelper.hasNotificationPermission(requireContext())) {
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                        NotificationPermissionHelper.requestNotificationPermission(notificationPermissionLauncher);
-                    } else {
-                        NotificationPermissionHelper.openNotificationSettings(requireContext());
-                    }
-                } else {
-                    // 이미 권한이 있으면 MyPage 스위치들을 ON으로
-                    prefs.edit()
-                        .putBoolean(KEY_NEW_POST_NOTIFICATION, true)
-                        .putBoolean(KEY_CALENDAR_NOTIFICATION, true)
-                        .apply();
-
-                    // 토픽 구독
-                    NotificationTopicManager.updateTopic(NotificationTopicManager.TOPIC_CRAWL_NEW_POSTS, true, success -> {});
-                    NotificationTopicManager.updateTopic(NotificationTopicManager.TOPIC_CALENDAR_REMINDER, true, success -> {});
-
-                    Toast.makeText(requireContext(), "알림이 활성화되었습니다", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                // 토글 OFF -> MyPage 스위치들도 OFF
-                prefs.edit()
-                    .putBoolean(KEY_NEW_POST_NOTIFICATION, false)
-                    .putBoolean(KEY_CALENDAR_NOTIFICATION, false)
-                    .apply();
-
-                // 토픽 구독 해제
-                NotificationTopicManager.updateTopic(NotificationTopicManager.TOPIC_CRAWL_NEW_POSTS, false, success -> {});
-                NotificationTopicManager.updateTopic(NotificationTopicManager.TOPIC_CALENDAR_REMINDER, false, success -> {});
-
-                Toast.makeText(requireContext(), "알림이 비활성화되었습니다", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void updateUIBasedOnPermission() {
-        boolean hasPermission = NotificationPermissionHelper.hasNotificationPermission(requireContext());
-        boolean newPostEnabled = prefs.getBoolean(KEY_NEW_POST_NOTIFICATION, false);
-        boolean calendarEnabled = prefs.getBoolean(KEY_CALENDAR_NOTIFICATION, false);
-        boolean shouldBeChecked = hasPermission && (newPostEnabled || calendarEnabled);
-
-        isProgrammaticChange = true;
-        if (toggleDeviceNotification != null) {
-            toggleDeviceNotification.setChecked(shouldBeChecked);
-        }
-        isProgrammaticChange = false;
-    }
-
-    private void handleNotificationNavigation(NotificationEntity notification) {
-        NotificationType type = NotificationType.fromString(notification.getType());
-
-        switch (type) {
-            case CALENDAR_REMINDER:
-                // 일정 알림 -> 캘린더 페이지로 이동 (해당 날짜)
-                navigateToCalendar(notification);
-                break;
-
-            case CRAWL_NEW_POSTS:
-                // 크롤링 알림 -> status 상관없이 사이트 상세 페이지로 이동
-                // (new_post, success, failed 모두 사이트 상세 보기)
-                navigateToSiteDetail(notification);
-                break;
-
-            case UNKNOWN:
-            default:
-                // 알 수 없음 -> 읽음 처리만 (이미 위에서 처리됨)
-                break;
-        }
-    }
-
-    private void navigateToCalendar(NotificationEntity notification) {
-        // CalendarFragment로 이동 (MainActivity의 BottomNavigationView 이용)
-        if (getActivity() instanceof com.example.mobile_android.MainActivity) {
-            // TODO: 특정 날짜로 이동하는 로직 추가 필요
-            Toast.makeText(requireContext(), "캘린더로 이동", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void navigateToSiteDetail(NotificationEntity notification) {
-        if (notification.getSiteId() != null && !notification.getSiteId().isEmpty()) {
-            // SiteDetailActivity로 이동
-            Intent intent = new Intent(requireContext(), com.example.mobile_android.ui.site.SiteDetailActivity.class);
-            intent.putExtra("SITE_ID", notification.getSiteId());
-            startActivity(intent);
-        } else {
-            Toast.makeText(requireContext(), "사이트 정보를 찾을 수 없습니다", Toast.LENGTH_SHORT).show();
-        }
+        cardPermissionTip.setVisibility(hasPermission ? View.GONE : View.VISIBLE);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // 설정 화면에서 돌아왔을 때 권한 상태 재확인
-        updateUIBasedOnPermission();
+        updatePermissionTipVisibility();
     }
 }
