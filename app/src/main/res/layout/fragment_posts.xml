@@ -110,11 +110,57 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="저장됨" />
+            android:text="일정 등록" />
 
     </com.google.android.material.tabs.TabLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <!-- 카테고리 필터 ChipGroup -->
+    <HorizontalScrollView
+        android:id="@+id/scroll_category_filters"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_spacing"
+        android:scrollbars="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_tab_layout">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_category_filters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_horizontal_padding"
+            android:paddingEnd="@dimen/screen_horizontal_padding"
+            app:singleSelection="true"
+            app:chipSpacing="8dp">
+
+            <!-- "전체" 칩은 항상 표시 -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_category_all"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="전체"
+                android:checked="true"
+                app:chipBackgroundColor="@color/chip_background_state"
+                app:chipStrokeColor="@color/chip_stroke_state"
+                app:chipStrokeWidth="1dp"
+                android:textColor="@color/chip_text_state"
+                app:chipCornerRadius="16dp"
+                app:chipMinHeight="32dp"
+                app:chipStartPadding="12dp"
+                app:chipEndPadding="12dp"
+                android:textSize="13sp"
+                app:checkedIconVisible="false"
+                app:chipIconVisible="false" />
+
+            <!-- 동적 카테고리 칩은 프로그래밍 방식으로 추가됨 -->
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
 
     <!-- 게시물 리스트 및 빈 상태 UI -->
     <FrameLayout
@@ -123,7 +169,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card_tab_layout">
+        app:layout_constraintTop_toBottomOf="@+id/scroll_category_filters">
 
         <!-- SwipeRefreshLayout으로 새로고침 기능 추가 -->
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

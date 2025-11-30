@@ -177,7 +177,7 @@
                 android:textColor="#999999"
                 android:textSize="11sp" />
 
-        </LinearLayout>
+    </LinearLayout>
 
     </LinearLayout>
 

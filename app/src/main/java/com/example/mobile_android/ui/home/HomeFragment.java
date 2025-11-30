@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +31,7 @@ import com.example.mobile_android.model.Site;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.ui.site.AddSiteActivity;
 import com.example.mobile_android.ui.site.SiteAdapter;
+import com.example.mobile_android.util.CategoryUtils;
 import com.example.mobile_android.util.StatisticsHelper;
 import com.example.mobile_android.util.TokenManager;
 import com.google.android.material.chip.Chip;
@@ -105,11 +107,16 @@ public class HomeFragment extends Fragment {
         statisticsHelper = new StatisticsHelper(siteDao, postDao, calendarEventDao);
 
         // --- 어댑터 생성 ---
-        siteAdapter = new SiteAdapter(filteredSitesList);
+        siteAdapter = new SiteAdapter(requireContext(), filteredSitesList);
+
+        // 🔥 편집 버튼 리스너 추가
+        siteAdapter.setOnEditListener(site -> {
+            showEditSiteDialog(site);
+        });
 
         // 🔥 삭제 버튼 리스너 추가
         siteAdapter.setOnDeleteListener(site -> {
-            deleteSite(site);
+            showDeleteConfirmDialog(site);
         });
 
         recyclerView.setAdapter(siteAdapter);
@@ -222,8 +229,17 @@ public class HomeFragment extends Fragment {
      * DB의 카테고리가 변경될 때만 칩을 재생성하여 성능을 최적화합니다.
      */
     private void updateCategoryChips(ChipGroup chipGroup, List<String> categories) {
-        // 카테고리 목록이 변경되지 않았으면 스킵
-        if (categories.equals(currentCategories)) {
+        // 현재 ChipGroup에 있는 동적 칩 개수 확인
+        int dynamicChipCount = 0;
+        for (int i = 0; i < chipGroup.getChildCount(); i++) {
+            View child = chipGroup.getChildAt(i);
+            if (child.getId() != R.id.chip_category_all) {
+                dynamicChipCount++;
+            }
+        }
+
+        // 카테고리 목록이 변경되지 않았고, 칩이 정상적으로 있으면 스킵
+        if (categories.equals(currentCategories) && dynamicChipCount == categories.size()) {
             return;
         }
         currentCategories = new ArrayList<>(categories);
@@ -417,6 +433,113 @@ public class HomeFragment extends Fragment {
                 });
             }
         });
+    }
+
+    // ------------------------
+    // ★ 사이트 편집 다이얼로그
+    // ------------------------
+    private void showEditSiteDialog(Site site) {
+        if (site == null) {
+            Toast.makeText(getContext(), "사이트 정보를 불러오는 중입니다", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_site, null);
+
+        EditText etSiteName = dialogView.findViewById(R.id.et_site_name);
+        EditText etSiteUrl = dialogView.findViewById(R.id.et_site_url);
+        EditText etSiteCategory = dialogView.findViewById(R.id.et_site_category);
+        Button btnSave = dialogView.findViewById(R.id.btn_save_site);
+        Button btnCancel = dialogView.findViewById(R.id.btn_cancel_site);
+
+        // 기존 데이터 로드
+        etSiteName.setText(site.getName());
+        etSiteUrl.setText(site.getUrl());
+        etSiteCategory.setText(site.getCategory() != null ? site.getCategory() : "");
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        btnSave.setOnClickListener(v -> {
+            String name = etSiteName.getText().toString().trim();
+            String url = etSiteUrl.getText().toString().trim();
+            String category = CategoryUtils.normalizeCategory(
+                    etSiteCategory.getText().toString()
+            );
+
+            if (name.isEmpty()) {
+                etSiteName.setError("사이트 이름을 입력해주세요");
+                return;
+            }
+            if (url.isEmpty()) {
+                etSiteUrl.setError("사이트 URL을 입력해주세요");
+                return;
+            }
+
+            updateSite(site, name, url, category);
+            dialog.dismiss();
+        });
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    // ------------------------
+    // ★ 사이트 수정 기능
+    // ------------------------
+    private void updateSite(Site originalSite, String name, String url, String category) {
+        // 수정할 필드만 포함한 새 Site 객체 생성
+        Site updateRequest = new Site();
+        updateRequest.setId(originalSite.getId());
+        updateRequest.setName(name);
+        updateRequest.setUrl(url);
+        updateRequest.setCategory(category);
+        // createdAt, updatedAt은 설정하지 않음 (백엔드가 관리)
+
+        String token = TokenManager.getBearerToken(requireContext());
+        Log.d("HomeFragment", "수정 요청 - Site ID: " + originalSite.getId() + ", Name: " + name + ", URL: " + url + ", Category: " + category);
+
+        ApiClient.getApiService().updateSite(token, originalSite.getId(), updateRequest).enqueue(new Callback<Site>() {
+            @Override
+            public void onResponse(Call<Site> call, Response<Site> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(getContext(), "사이트가 수정되었습니다", Toast.LENGTH_SHORT).show();
+                    loadSiteList();
+                } else {
+                    String errorMsg = "수정 실패 (Code: " + response.code() + ")";
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMsg += " - " + response.errorBody().string();
+                        } catch (Exception e) {
+                            Log.e("HomeFragment", "Error reading error body", e);
+                        }
+                    }
+                    Log.e("HomeFragment", errorMsg);
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Site> call, Throwable t) {
+                Log.e("HomeFragment", "네트워크 오류", t);
+                Toast.makeText(getContext(), "네트워크 오류: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ------------------------
+    // ★ 사이트 삭제 확인 다이얼로그
+    // ------------------------
+    private void showDeleteConfirmDialog(Site site) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("사이트 삭제")
+                .setMessage("정말 이 사이트를 삭제하시겠습니까?")
+                .setPositiveButton("삭제", (dialog, which) -> deleteSite(site))
+                .setNegativeButton("취소", null)
+                .show();
     }
 
     // ------------------------

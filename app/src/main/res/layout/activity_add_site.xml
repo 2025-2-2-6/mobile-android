@@ -45,6 +45,14 @@
             android:textStyle="bold"
             android:textColor="@android:color/black" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="(사이트 URL은 나중에 수정할 수 없습니다)"
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

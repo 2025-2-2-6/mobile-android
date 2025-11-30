@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 게시물 목록 페이지 - 인스타그램 스타일 부드러운 UI -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 게시물 목록 페이지 - fragment_posts 스타일 통일 -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="@color/screen_background"
+    android:fitsSystemWindows="true"
+    >
 
     <!-- 헤더 -->
     <FrameLayout
-        android:layout_width="match_parent"
+        android:id="@+id/header"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp"
         android:background="@android:color/white"
-        android:elevation="2dp">
+        android:elevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -34,129 +38,176 @@
                 android:id="@+id/tv_site_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
+                android:layout_gravity="center"
                 android:layout_marginStart="8dp"
-                android:text="창업진흥원"
+                android:text="사이트 제목"
                 android:textColor="#1A1A1A"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="창업진흥원" />
+                />
         </androidx.appcompat.widget.Toolbar>
     </FrameLayout>
 
-    <!-- 검색바 -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- 검색창 영역 (CardView 스타일) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_search"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical"
-        android:background="@android:color/white">
+        android:layout_marginStart="@dimen/screen_horizontal_padding"
+        android:layout_marginEnd="@dimen/screen_horizontal_padding"
+        android:layout_marginTop="@dimen/item_spacing"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="2dp"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/header">
 
-        <EditText
-            android:id="@+id/searchEditText"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="44dp"
-            android:hint="게시물 검색"
-            android:paddingStart="16dp"
-            android:paddingEnd="40dp"
-            android:background="@drawable/bg_search_bar"
-            android:textSize="15sp"
-            android:textColor="#1A1A1A"
-            android:textColorHint="#AAAAAA"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:drawablePadding="8dp"
-            android:drawableTint="#999999"
-            android:singleLine="true"
-            android:imeOptions="actionSearch" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp">
 
-        <ImageButton
-            android:id="@+id/clearSearchButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="-48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:visibility="gone"
-            android:contentDescription="검색어 지우기" />
-    </LinearLayout>
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_search"
+                android:tint="#999999" />
 
-    <!-- 탭/필터 칩 -->
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="제목 또는 내용으로 검색"
+                android:padding="12dp"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:imeOptions="actionSearch"
+                android:inputType="text" />
+
+            <ImageButton
+                android:id="@+id/clearSearchButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="#999999"
+                android:visibility="gone"
+                android:contentDescription="검색 지우기" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- 카테고리 필터 ChipGroup -->
     <HorizontalScrollView
-        android:layout_width="match_parent"
+        android:id="@+id/scroll_category_filters"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_spacing"
         android:scrollbars="none"
-        android:background="@android:color/white"
-        android:paddingBottom="8dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_search">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chip_filters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            app:chipSpacingHorizontal="8dp"
-            app:singleLine="true"
-            app:singleSelection="true">
+            android:paddingStart="@dimen/screen_horizontal_padding"
+            android:paddingEnd="@dimen/screen_horizontal_padding"
+            app:singleSelection="true"
+            app:chipSpacing="8dp">
 
+            <!-- "전체" 칩은 항상 표시 -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_all"
-                style="@style/InstagramFilterChip"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="전체"
                 android:checked="true"
-                android:text="전체" />
+                app:chipBackgroundColor="@color/chip_background_state"
+                app:chipStrokeColor="@color/chip_stroke_state"
+                app:chipStrokeWidth="1dp"
+                android:textColor="@color/chip_text_state"
+                app:chipCornerRadius="16dp"
+                app:chipMinHeight="32dp"
+                app:chipStartPadding="12dp"
+                app:chipEndPadding="12dp"
+                android:textSize="13sp"
+                app:checkedIconVisible="false"
+                app:chipIconVisible="false" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_recruiting"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="모집중" />
+            <!-- 동적 카테고리 칩은 프로그래밍 방식으로 추가됨 -->
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_priority"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="우선" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_new"
-                style="@style/InstagramFilterChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="NEW" />
         </com.google.android.material.chip.ChipGroup>
+
     </HorizontalScrollView>
 
-    <!-- 구분선 -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#F0F0F0" />
-
-    <!-- 게시물 리스트 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/postRecyclerView"
-        android:layout_width="match_parent"
+    <!-- 게시물 리스트 및 빈 상태 UI -->
+    <FrameLayout
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
-        tools:listitem="@layout/item_post" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scroll_category_filters">
 
-    <!-- 빈 상태 -->
-    <TextView
-        android:id="@+id/tv_empty"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:text="게시물이 없습니다"
-        android:textColor="#999999"
-        android:textSize="15sp"
-        android:visibility="gone" />
-</LinearLayout>
+        <!-- SwipeRefreshLayout으로 새로고침 기능 추가 -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/postRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:paddingTop="@dimen/item_spacing"
+                android:paddingBottom="@dimen/screen_bottom_padding"
+                android:paddingStart="@dimen/screen_horizontal_padding"
+                android:paddingEnd="@dimen/screen_horizontal_padding"
+                android:background="@android:color/transparent"
+                tools:listitem="@layout/item_post" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- 빈 상태 UI -->
+        <LinearLayout
+            android:id="@+id/layout_empty_posts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="게시물이 없습니다"
+                android:textSize="16sp"
+                android:textColor="#999999"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tv_empty_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="다른 필터를 선택하거나 검색해 보세요"
+                android:textSize="14sp"
+                android:textColor="#BBBBBB"
+                android:gravity="center" />
+        </LinearLayout>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

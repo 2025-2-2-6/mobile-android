@@ -32,4 +32,7 @@ public interface NotificationDao {
 
     @Query("DELETE FROM notifications WHERE user_id = :userId")
     void clearForUser(String userId);
+
+    @Query("DELETE FROM notifications WHERE user_id = :userId AND title = :title")
+    void deleteByTitle(String userId, String title);
 }
