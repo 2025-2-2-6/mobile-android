@@ -39,6 +39,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private TextView tvPostTitle;
     private ChipGroup chipGroupCategories;
     private Chip chipCategory;
+    private TextView badgeNew;
     private TextView tvPostCreatedAt;
     private TextView tvPostEventDate;
     private TextView tvPostLocation;
@@ -97,8 +98,8 @@ public class PostDetailActivity extends AppCompatActivity {
 
         // [추가 팁] 나머지 초기화 코드는 그대로 유지
         tvPostTitle = findViewById(R.id.tv_post_title);
-        chipGroupCategories = findViewById(R.id.chip_group_categories);
         chipCategory = findViewById(R.id.chip_category);
+        badgeNew = findViewById(R.id.badge_new);
         tvPostCreatedAt = findViewById(R.id.tv_post_created_at);
         tvPostEventDate = findViewById(R.id.tv_post_event_date);
         tvPostLocation = findViewById(R.id.tv_post_location);
@@ -155,6 +156,14 @@ public class PostDetailActivity extends AppCompatActivity {
         } else {
             chipCategory.setVisibility(View.GONE);
         }
+
+        // NEW 뱃지 표시
+        if (post.isActuallyNew()) {
+            badgeNew.setVisibility(View.VISIBLE);
+        } else {
+            badgeNew.setVisibility(View.GONE);
+        }
+
         tvPostContent.setText(post.getContent());
         tvPostCreatedAt.setText(formatDateTime(post.getCreatedAt(), "크롤링 시간 : yyyy년 M월 d일 a h시 mm분"));
         bindEventSection(post);
@@ -171,7 +180,7 @@ public class PostDetailActivity extends AppCompatActivity {
             btnAddToCalendar.setVisibility(View.GONE);
         } else {
             tvPostEventDate.setVisibility(View.VISIBLE);
-            tvPostEventDate.setText("마감,진행 날짜 : " + eventLabel);
+            tvPostEventDate.setText("마감/진행/게시 날짜 : " + eventLabel);
             tvCalendarInfo.setVisibility(View.VISIBLE);
             btnAddToCalendar.setVisibility(View.VISIBLE);
         }

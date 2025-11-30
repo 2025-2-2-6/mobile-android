@@ -173,18 +173,18 @@ public class Post implements Serializable, Parcelable {
             return isNew;
         }
 
-        // is_new가 null이면 created_at 기준으로 판단 (24시간)
+        // is_new가 null이면 created_at 기준으로 판단
         if (TextUtils.isEmpty(createdAt)) {
             return false;
         }
 
         try {
-            // ISO 8601 형식 파싱 (예: "2025-11-22T10:30:00Z")
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US);
-            sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-            java.util.Date createdDate = sdf.parse(createdAt);
+            // DateTimeUtils 사용하여 여러 날짜 형식 지원
+            java.util.Date createdDate = com.example.mobile_android.util.DateTimeUtils.parseServerDate(createdAt);
 
             if (createdDate == null) {
+                // 파싱 실패 로그
+                android.util.Log.w("Post", "isActuallyNew() 파싱 실패 - created_at: " + createdAt);
                 return false;
             }
 
@@ -192,10 +192,21 @@ public class Post implements Serializable, Parcelable {
             long createdTime = createdDate.getTime();
             long timeDiff = currentTime - createdTime;
 
-            // Constants에서 정의한 시간 기준 사용 (DEBUG: 1분, RELEASE: 24시간)
-            return timeDiff <= Constants.NEW_POST_THRESHOLD_MS;
+            boolean result = timeDiff <= Constants.NEW_POST_THRESHOLD_MS;
+
+            // 디버깅 로그
+            if (com.example.mobile_android.BuildConfig.DEBUG) {
+                android.util.Log.d("Post", "isActuallyNew() - Title: " + title
+                    + ", created_at: " + createdAt
+                    + ", timeDiff(ms): " + timeDiff
+                    + ", threshold(ms): " + Constants.NEW_POST_THRESHOLD_MS
+                    + ", result: " + result);
+            }
+
+            return result;
         } catch (Exception e) {
-            // 파싱 실패시 false 반환
+            // 파싱 실패시 로그 및 false 반환
+            android.util.Log.e("Post", "isActuallyNew() 예외 발생 - created_at: " + createdAt, e);
             return false;
         }
     }

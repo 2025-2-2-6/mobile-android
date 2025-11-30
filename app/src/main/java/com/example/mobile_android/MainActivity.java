@@ -217,14 +217,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        // 알림 권한 관련 UI 설정
-        btnGrantPermission = notificationView.findViewById(R.id.btn_grant_permission);
-        if (btnGrantPermission != null) {
-            btnGrantPermission.setOnClickListener(v ->
-                    NotificationPermissionHelper.openNotificationSettings(this)
-            );
-        }
-
         if (notificationViewModel != null) {
             notificationViewModel.getNotifications().observe(this, entities -> {
                 cachedNotifications.clear();

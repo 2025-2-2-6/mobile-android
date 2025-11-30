@@ -79,8 +79,15 @@ public class CalendarEventRepository {
     }
 
     /**
+     * Room DB에서 특정 이벤트를 ID로 조회 (LiveData)
+     */
+    public LiveData<CalendarEvent> getEventById(String eventId) {
+        return calendarEventDao.getEventByIdLive(eventId);
+    }
+
+    /**
      * 백엔드에서 최신 일정 목록을 가져와 로컬 DB에 덮어쓰기
-     * - Site/Post 패턴과 동일: 기존 데이터 삭제 후 새 데이터 삽입
+     * - Site/Post 패턴과 동일: 트랜잭션으로 전체 삭제 후 새 데이터 삽입
      * - AuthInterceptor가 자동으로 Authorization 헤더 추가
      */
     public void refreshFromServer(OnRefreshCallback callback) {
@@ -110,15 +117,9 @@ public class CalendarEventRepository {
                     Log.d(TAG, "Fetched " + events.size() + " events from server");
 
                     // 백그라운드 스레드에서 로컬 DB 업데이트
+                    // SiteDao.replaceAll()과 동일한 패턴: 트랜잭션으로 전체 삭제 후 삽입
                     ioExecutor.execute(() -> {
-                        // 1. 기존 사용자의 모든 일정 삭제
-                        calendarEventDao.deleteByUserId(userId);
-
-                        // 2. 서버에서 가져온 데이터 삽입
-                        if (!events.isEmpty()) {
-                            calendarEventDao.insertAll(events);
-                        }
-
+                        calendarEventDao.replaceAll(events);
                         Log.d(TAG, "Local DB updated with " + events.size() + " events");
                     });
 

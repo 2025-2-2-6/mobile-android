@@ -5,14 +5,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/screen_background">
+    android:background="@color/screen_background"
+    android:fitsSystemWindows="true"
+    >
 
     <!-- 헤더 -->
     <FrameLayout
         android:id="@+id/header"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp"
         android:background="@android:color/white"
         android:elevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,13 +38,13 @@
                 android:id="@+id/tv_site_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
+                android:layout_gravity="center"
                 android:layout_marginStart="8dp"
-                android:text="창업진흥원"
+                android:text="사이트 제목"
                 android:textColor="#1A1A1A"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="창업진흥원" />
+                />
         </androidx.appcompat.widget.Toolbar>
     </FrameLayout>
 

@@ -139,9 +139,10 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         auth = FirebaseAuth.getInstance();
 
-        // Firebase Auth 확인: 로그인되어 있다면 Google ID Token 갱신 후 MainActivity로 이동
-        if (auth.getCurrentUser() != null) {
-            Log.d(TAG, "이미 Firebase 로그인 상태, Google ID Token 갱신 시도 중...");
+        // Firebase Auth와 TokenManager 모두 확인: 둘 다 있을 때만 자동 로그인
+        String savedToken = TokenManager.getBearerToken(this);
+        if (auth.getCurrentUser() != null && savedToken != null && !savedToken.isEmpty()) {
+            Log.d(TAG, "이미 Firebase 로그인 상태 & Token 존재, Google ID Token 갱신 시도 중...");
 
             // GoogleSignInOptions 먼저 설정
             GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -177,6 +178,18 @@ public class Login extends AppCompatActivity {
             });
             return;
         }
+
+        // Firebase Auth는 있지만 Token이 없는 경우 → 로그아웃 처리
+        if (auth.getCurrentUser() != null && (savedToken == null || savedToken.isEmpty())) {
+            Log.w(TAG, "Firebase 로그인 상태지만 Token이 없음 → 로그아웃 처리");
+            auth.signOut();
+            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.client_id))
+                    .requestEmail()
+                    .build();
+            GoogleSignIn.getClient(this, options).signOut();
+        }
+
         setContentView(R.layout.activity_login);
 
         GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

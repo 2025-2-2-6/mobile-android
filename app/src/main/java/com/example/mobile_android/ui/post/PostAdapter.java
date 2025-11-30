@@ -203,7 +203,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     private boolean shouldShowNewBadge(Post post) {
         // Post 모델의 isActuallyNew() 메서드를 사용하여 일관성 유지
-        return post.isActuallyNew();
+        boolean result = post.isActuallyNew();
+
+        // 디버깅 로그 (DEBUG 빌드에서만)
+        if (com.example.mobile_android.BuildConfig.DEBUG) {
+            android.util.Log.d("PostAdapter", "shouldShowNewBadge - " +
+                "Title: " + post.getTitle() +
+                ", is_new(backend): " + post.getIsNew() +
+                ", created_at: " + post.getCreatedAt() +
+                ", result: " + result);
+        }
+
+        return result;
     }
 
     private String resolveDdaySource(Post post) {

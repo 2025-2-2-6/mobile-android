@@ -13,7 +13,6 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp"
         android:background="@android:color/white"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -41,23 +40,13 @@
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
+                android:layout_gravity="center"
                 android:text="게시물 상세"
                 android:textColor="@android:color/black"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                />
 
-            <ImageButton
-                android:id="@+id/btn_grant_permission"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginEnd="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_notifications"
-                android:tint="#FF6B6B"
-                android:visibility="gone"
-                android:contentDescription="알림 권한 설정" />
         </androidx.appcompat.widget.Toolbar>
     </FrameLayout>
 
@@ -91,13 +80,13 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="HardcodedText" />
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chip_group_categories"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/chip_with_badge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_marginTop="12dp"
-                app:chipSpacing="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_post_title">
 
@@ -105,9 +94,22 @@
                     android:id="@+id/chip_category"
                     style="@style/InstagramFilterChip"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="카테고리" />
 
-            </com.google.android.material.chip.ChipGroup>
+                <TextView
+                    android:id="@+id/badge_new"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="#FF5252"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp"
+                    android:text="NEW"
+                    android:textColor="@android:color/white"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_post_created_at"
@@ -120,7 +122,7 @@
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/chip_group_categories"
+                app:layout_constraintTop_toBottomOf="@+id/chip_with_badge"
                 tools:ignore="HardcodedText" />
 
             <TextView
