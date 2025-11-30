@@ -391,7 +391,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="크롤리머 v1.0.0"
+                    android:text="crawlimer v1.0.0"
                     android:textColor="#BBBBBB"
                     android:textSize="11sp" />
 
@@ -400,7 +400,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="© 2025 크롤리머 Team. All rights reserved."
+                    android:text="© 2025 mop Team. All rights reserved."
                     android:textColor="#BBBBBB"
                     android:textSize="10sp" />
             </LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.mobile_android.ui.calendar;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -129,11 +130,11 @@ public class CalendarEventAdapter extends RecyclerView.Adapter<CalendarEventAdap
                 }
             });
 
-            // 카드 클릭 시에도 수정
+            // 카드 클릭 시 상세 화면으로 이동
             cardView.setOnClickListener(v -> {
-                if (onEditListener != null) {
-                    onEditListener.onClick(event);
-                }
+                Intent intent = new Intent(itemView.getContext(), CalendarEventDetailActivity.class);
+                intent.putExtra("EVENT_ID", event.getId());
+                itemView.getContext().startActivity(intent);
             });
         }
 

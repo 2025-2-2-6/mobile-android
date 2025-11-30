@@ -91,6 +91,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.switchCalendar.setOnCheckedChangeListener(null);
         String calendarAnchor = resolveCalendarAnchor(post);
         if (!TextUtils.isEmpty(calendarAnchor)) {
+            holder.notificationArea.setVisibility(View.VISIBLE);
             holder.switchCalendar.setEnabled(true);
             // 이제 데이터베이스의 isSaved 필드를 사용해 토글 상태를 결정
             holder.switchCalendar.setChecked(post.isSaved());
@@ -147,9 +148,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 }
             });
         } else {
-            holder.switchCalendar.setEnabled(false);
-            holder.switchCalendar.setChecked(false);
-            bindCalendarStatus(holder, false);
+            holder.notificationArea.setVisibility(View.GONE);
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -204,7 +203,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     private boolean shouldShowNewBadge(Post post) {
         // Post 모델의 isActuallyNew() 메서드를 사용하여 일관성 유지
-        return post.isActuallyNew();
+        boolean result = post.isActuallyNew();
+
+        // 디버깅 로그 (DEBUG 빌드에서만)
+        if (com.example.mobile_android.BuildConfig.DEBUG) {
+            android.util.Log.d("PostAdapter", "shouldShowNewBadge - " +
+                "Title: " + post.getTitle() +
+                ", is_new(backend): " + post.getIsNew() +
+                ", created_at: " + post.getCreatedAt() +
+                ", result: " + result);
+        }
+
+        return result;
     }
 
     private String resolveDdaySource(Post post) {
@@ -274,6 +284,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         ImageView calendarStatusIcon;
         TextView calendarStatusText;
         SwitchCompat switchCalendar;
+        View notificationArea;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -286,6 +297,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             calendarStatusIcon = itemView.findViewById(R.id.iv_notification_icon);
             calendarStatusText = itemView.findViewById(R.id.tv_calendar_status);
             switchCalendar = itemView.findViewById(R.id.switch_calendar);
+            notificationArea = itemView.findViewById(R.id.notification_area);
         }
     }
 }

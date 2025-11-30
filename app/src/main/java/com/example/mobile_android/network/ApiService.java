@@ -20,6 +20,7 @@ import retrofit2.http.Query;
 import com.example.mobile_android.model.Site;
 import retrofit2.http.Header;
 import retrofit2.http.PUT;
+import retrofit2.http.PATCH;
 import com.example.mobile_android.model.CalendarEvent;
 import com.example.mobile_android.model.UserStatistics;
 
@@ -40,7 +41,7 @@ public interface ApiService {
     Call<Site> getSiteById(@Header("Authorization") String token, @Path("siteId") String siteId);
 
     // 사이트 수정
-    @PUT("/api/v1/sites/{siteId}")
+    @PATCH("/api/v1/sites/{siteId}")
     Call<Site> updateSite(@Header("Authorization") String token, @Path("siteId") String siteId, @Body Site site);
 
     // 사이트 삭제

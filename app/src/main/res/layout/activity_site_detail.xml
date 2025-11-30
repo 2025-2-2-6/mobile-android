@@ -7,7 +7,73 @@
     android:background="#FFFFFF"
     android:fitsSystemWindows="true">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 스켈레톤 로딩 레이아웃 -->
+        <LinearLayout
+            android:id="@+id/skeleton_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:background="#FFFFFF"
+            android:visibility="gone">
+
+        <!-- 헤더 스켈레톤 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_skeleton_item"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 사이트 정보 스켈레톤 -->
+        <View
+            android:layout_width="200dp"
+            android:layout_height="28dp"
+            android:background="@drawable/bg_skeleton_item"
+            android:layout_marginBottom="8dp" />
+
+        <View
+            android:layout_width="150dp"
+            android:layout_height="20dp"
+            android:background="@drawable/bg_skeleton_item"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 통계 카드 스켈레톤 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_skeleton_item"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_skeleton_item"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- 게시물 리스트 스켈레톤 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@drawable/bg_skeleton_item"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+
+    <!-- 실제 콘텐츠 레이아웃 -->
     <LinearLayout
+        android:id="@+id/content_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -16,7 +82,6 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="20dp"
             android:background="@android:color/white"
             android:elevation="4dp">
 
@@ -49,20 +114,28 @@
                     android:layout_marginEnd="8dp"
                     android:orientation="horizontal">
 
-                    <ImageButton
+                    <ImageView
                         android:id="@+id/btn_edit"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@android:drawable/ic_menu_edit"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_edit_24"
+                        android:tint="#888888"
                         android:contentDescription="수정" />
 
-                    <ImageButton
+                    <ImageView
                         android:id="@+id/btn_delete"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_delete"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_delete_24"
+                        android:tint="#FF5252"
                         android:contentDescription="삭제" />
                 </LinearLayout>
             </androidx.appcompat.widget.Toolbar>
@@ -83,29 +156,19 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <!-- 사이트 아이콘 + 제목 + 카테고리 -->
+                <!-- 제목 + 카테고리 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:gravity="left"
                     android:layout_marginBottom="12dp">
 
-                    <ImageView
-                        android:id="@+id/iv_site_icon"
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:src="@android:drawable/ic_menu_compass"
-                        android:background="@drawable/bg_notification_icon_blue"
-                        android:padding="12dp"
-                        android:contentDescription="사이트 아이콘" />
-
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
+                        android:orientation="vertical">
 
                         <TextView
                             android:id="@+id/tv_site_name"
@@ -127,18 +190,15 @@
                             android:layout_marginTop="4dp" />
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/tv_category"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_category"
+                        style="@style/InstagramFilterChip"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="창업"
-                        android:textColor="#FFFFFF"
-                        android:background="@drawable/bg_category_badge"
-                        android:paddingHorizontal="14dp"
-                        android:paddingVertical="7dp"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:elevation="0dp" />
+                        android:checkable="false"
+                        android:clickable="false"
+                        android:focusable="false" />
                 </LinearLayout>
 
                 <!-- 마지막 수집 시간 -->
@@ -149,8 +209,20 @@
                     android:text="마지막 수집: 2024.01.15"
                     android:textColor="#999999"
                     android:textSize="13sp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- 메모 -->
+                <TextView
+                    android:id="@+id/tv_memo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="#666666"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="2dp"
                     android:layout_marginBottom="20dp"
-                    android:layout_marginTop="4dp" />
+                    android:visibility="gone" />
 
                 <!-- 수집 통계 -->
                 <LinearLayout
@@ -189,7 +261,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="전체"
+                            android:text="게시물"
                             android:textColor="#666666"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -229,45 +301,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="신규"
-                            android:textColor="#666666"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="8dp"
-                        android:layout_height="1dp" />
-
-                    <!-- 수집중 -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="16dp"
-                        android:background="@drawable/bg_stat_box">
-
-                        <ImageView
-                            android:id="@+id/iv_crawling_status"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_popup_sync"
-                            app:tint="#FF9800"
-                            android:contentDescription="수집중" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textColor="@android:color/black"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="수집중"
                             android:textColor="#666666"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -321,4 +354,5 @@
                 tools:listitem="@layout/item_post" />
         </LinearLayout>
     </LinearLayout>
+    </FrameLayout>
 </ScrollView>

@@ -11,6 +11,8 @@ public class SiteRegisterRequest {
     private String userId;
     @SerializedName("category")
     private String category;
+    @SerializedName("description")
+    private String description;
 
     public SiteRegisterRequest(String url, String name, String userId) {
         this.url = url;
@@ -23,5 +25,13 @@ public class SiteRegisterRequest {
         this.name = name;
         this.userId = userId;
         this.category = category;
+    }
+
+    public SiteRegisterRequest(String url, String name, String userId, String category, String description) {
+        this.url = url;
+        this.name = name;
+        this.userId = userId;
+        this.category = category;
+        this.description = description;
     }
 }

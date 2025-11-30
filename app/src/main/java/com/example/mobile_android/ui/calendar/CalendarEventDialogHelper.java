@@ -28,7 +28,6 @@ import java.util.Locale;
  */
 public class CalendarEventDialogHelper {
 
-    private static final String[] CATEGORIES = {"창업", "공모전", "교육", "기타"};
     private static final String[] ALARM_OPTIONS = {
             "일정 시작시간",
             "10분 전",
@@ -72,7 +71,6 @@ public class CalendarEventDialogHelper {
         // Views
         TextView tvTitle = dialogView.findViewById(R.id.tv_dialog_title);
         EditText etEventTitle = dialogView.findViewById(R.id.et_event_title);
-        Spinner spinnerCategory = dialogView.findViewById(R.id.spinner_category);
         TextView tvDatePicker = dialogView.findViewById(R.id.tv_date_picker);
         TextView tvTimePicker = dialogView.findViewById(R.id.tv_time_picker);
         EditText etMemo = dialogView.findViewById(R.id.et_memo);
@@ -80,12 +78,6 @@ public class CalendarEventDialogHelper {
         Spinner spinnerAlarmTime = dialogView.findViewById(R.id.spinner_alarm_time);
         Button btnSave = dialogView.findViewById(R.id.btn_save);
         Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
-
-        // 카테고리 Spinner 설정
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(context,
-                android.R.layout.simple_spinner_item, CATEGORIES);
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(categoryAdapter);
 
         // 알림 시간 Spinner 설정
         ArrayAdapter<String> alarmAdapter = new ArrayAdapter<>(context,
@@ -110,17 +102,6 @@ public class CalendarEventDialogHelper {
             eventTime[0] = existingEvent.getEventTime();
             switchAlarm.setChecked(existingEvent.isNotifyEnabled());
             spinnerAlarmTime.setVisibility(existingEvent.isNotifyEnabled() ? View.VISIBLE : View.GONE);
-
-            // 카테고리 선택
-            String category = existingEvent.getCategory();
-            if (category != null) {
-                for (int i = 0; i < CATEGORIES.length; i++) {
-                    if (CATEGORIES[i].equals(category)) {
-                        spinnerCategory.setSelection(i);
-                        break;
-                    }
-                }
-            }
 
             // 알림 시간 선택
             if (existingEvent.getNotifyTime() != null) {
@@ -200,7 +181,7 @@ public class CalendarEventDialogHelper {
             }
 
             event.setTitle(title);
-            event.setCategory(spinnerCategory.getSelectedItem().toString());
+            event.setCategory(null); // 카테고리는 더 이상 사용하지 않음
             event.setDescription(etMemo.getText().toString().trim());
 
             // startTime을 ISO 8601 형식으로 변환

@@ -74,6 +74,17 @@ public class CrawlNewPostsHandler extends BaseNotificationHandler {
                         public void onResponse(Call<PostListResponse> call, Response<PostListResponse> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 Log.d(TAG, "게시물 갱신: " + response.body().getItems().size() + "개");
+
+                                // 디버깅: 각 게시물의 is_new와 created_at 확인
+                                if (com.example.mobile_android.BuildConfig.DEBUG) {
+                                    for (com.example.mobile_android.model.Post post : response.body().getItems()) {
+                                        Log.d(TAG, "  - ID: " + post.getId()
+                                            + ", Title: " + post.getTitle()
+                                            + ", is_new: " + post.getIsNew()
+                                            + ", created_at: " + post.getCreatedAt());
+                                    }
+                                }
+
                                 executor.execute(() -> {
                                     PostDao postDao = AppDatabase.getInstance(context).postDao();
                                     postDao.upsertBySite(siteId, response.body().getItems());
@@ -94,6 +105,17 @@ public class CrawlNewPostsHandler extends BaseNotificationHandler {
                         public void onResponse(Call<PostListResponse> call, Response<PostListResponse> response) {
                             if (response.isSuccessful() && response.body() != null) {
                                 Log.d(TAG, "전체 게시물 갱신: " + response.body().getItems().size() + "개");
+
+                                // 디버깅: 각 게시물의 is_new와 created_at 확인
+                                if (com.example.mobile_android.BuildConfig.DEBUG) {
+                                    for (com.example.mobile_android.model.Post post : response.body().getItems()) {
+                                        Log.d(TAG, "  - ID: " + post.getId()
+                                            + ", Title: " + post.getTitle()
+                                            + ", is_new: " + post.getIsNew()
+                                            + ", created_at: " + post.getCreatedAt());
+                                    }
+                                }
+
                                 executor.execute(() -> {
                                     PostDao postDao = AppDatabase.getInstance(context).postDao();
                                     postDao.upsert(response.body().getItems());

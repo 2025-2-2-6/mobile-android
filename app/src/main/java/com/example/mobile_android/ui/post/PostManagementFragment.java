@@ -27,6 +27,8 @@ import com.example.mobile_android.model.PostListResponse;
 import com.example.mobile_android.network.ApiClient;
 import com.example.mobile_android.network.ApiService;
 import com.example.mobile_android.util.TokenManager;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -59,6 +61,8 @@ public class PostManagementFragment extends Fragment {
     private ExecutorService databaseExecutor;
     private String currentFilter = "all";
     private String searchQuery = "";
+    private String categoryFilter = ""; // 선택된 카테고리 필터
+    private List<String> currentCategories = new ArrayList<>(); // 현재 표시중인 카테고리 목록
 
     private LiveData<List<Post>> allPostsLiveData;
 
@@ -76,8 +80,10 @@ public class PostManagementFragment extends Fragment {
         setupRecyclerView();
         setupSearchView();
         setupTabLayout();
+        setupCategoryFilter(view);
         loadPostsFromServer();
         observeDatabase();
+        observeCategories();
     }
 
     private void initViews(View view) {
@@ -147,6 +153,16 @@ public class PostManagementFragment extends Fragment {
         currentPostList.clear();
 
         List<Post> filteredList = allPostsList;
+
+        // 카테고리 필터링
+        if (!categoryFilter.isEmpty()) {
+            filteredList = filteredList.stream()
+                    .filter(post -> {
+                        String postCategory = post.getCategory() != null ? post.getCategory() : "";
+                        return postCategory.equals(categoryFilter);
+                    })
+                    .collect(Collectors.toList());
+        }
 
         // 검색어 필터링
         if (!searchQuery.isEmpty()) {
@@ -225,6 +241,89 @@ public class PostManagementFragment extends Fragment {
             @Override
             public void onTabReselected(TabLayout.Tab tab) { }
         });
+    }
+
+    private void setupCategoryFilter(View view) {
+        ChipGroup chipGroup = view.findViewById(R.id.chip_category_filters);
+        if (chipGroup == null) return;
+
+        chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (checkedIds.isEmpty()) {
+                categoryFilter = "";
+            } else {
+                int selectedId = checkedIds.get(0);
+                if (selectedId == R.id.chip_category_all) {
+                    categoryFilter = "";
+                } else {
+                    // 동적으로 생성된 칩의 텍스트를 가져옴
+                    Chip selectedChip = group.findViewById(selectedId);
+                    if (selectedChip != null) {
+                        categoryFilter = selectedChip.getText().toString();
+                    }
+                }
+            }
+            filterPosts();
+        });
+    }
+
+    private void observeCategories() {
+        postDao.getDistinctCategories().observe(getViewLifecycleOwner(), categories -> {
+            if (categories != null) {
+                updateCategoryChips(categories);
+            }
+        });
+    }
+
+    private void updateCategoryChips(List<String> categories) {
+        ChipGroup chipGroup = getView() != null ? getView().findViewById(R.id.chip_category_filters) : null;
+        if (chipGroup == null) return;
+
+        // 현재 ChipGroup에 있는 동적 칩 개수 확인
+        int dynamicChipCount = 0;
+        for (int i = 0; i < chipGroup.getChildCount(); i++) {
+            View child = chipGroup.getChildAt(i);
+            if (child.getId() != R.id.chip_category_all) {
+                dynamicChipCount++;
+            }
+        }
+
+        // 카테고리 목록이 변경되지 않았고, 칩이 정상적으로 있으면 스킵
+        if (categories.equals(currentCategories) && dynamicChipCount == categories.size()) {
+            return;
+        }
+        currentCategories = new ArrayList<>(categories);
+
+        // 모든 동적 칩 제거 (R.id.chip_category_all은 유지)
+        int childCount = chipGroup.getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            View child = chipGroup.getChildAt(i);
+            if (child.getId() != R.id.chip_category_all) {
+                chipGroup.removeViewAt(i);
+            }
+        }
+
+        // 새 카테고리 칩 추가
+        for (String category : categories) {
+            Chip chip = new Chip(requireContext());
+            chip.setText(category);
+            chip.setCheckable(true);
+            chip.setId(View.generateViewId());
+
+            // 스타일 프로그래밍 방식으로 적용
+            chip.setChipBackgroundColorResource(R.color.chip_background_state);
+            chip.setChipStrokeColorResource(R.color.chip_stroke_state);
+            chip.setChipStrokeWidth(1);
+            chip.setTextColor(getResources().getColorStateList(R.color.chip_text_state));
+            chip.setChipCornerRadius(16 * getResources().getDisplayMetrics().density);
+            chip.setChipMinHeight(32 * getResources().getDisplayMetrics().density);
+            chip.setChipStartPadding(12 * getResources().getDisplayMetrics().density);
+            chip.setChipEndPadding(12 * getResources().getDisplayMetrics().density);
+            chip.setTextSize(13);
+            chip.setCheckedIconVisible(false);
+            chip.setChipIconVisible(false);
+
+            chipGroup.addView(chip);
+        }
     }
 
     private void observeDatabase() {

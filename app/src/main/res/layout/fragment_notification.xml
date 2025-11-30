@@ -11,14 +11,15 @@
     android:clickable="true"
     android:focusable="true"
     android:background="@color/white"
-    tools:context=".ui.notification.NotificationFragment">
+    tools:context=".ui.notification.NotificationFragment"
+    android:fitsSystemWindows="true"
+    >
 
     <!-- 툴바 컨테이너 -->
     <FrameLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="20dp"
         android:background="@android:color/white"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent">
@@ -44,27 +45,65 @@
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
+                android:layout_gravity="center"
                 android:text="@string/notifications_title"
                 android:textColor="@android:color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 />
-
-            <!-- 기기 알림 켜기 토글 -->
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/toggle_device_notification"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginEnd="8dp"
-                android:text="기기 알림 켜기"
-                android:textColor="@android:color/black"
-                android:textSize="13sp"
-                android:minWidth="0dp"
-                android:minHeight="0dp" />
         </androidx.appcompat.widget.Toolbar>
     </FrameLayout>
+
+    <!-- 알림 권한 안내 카드 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_permission_tip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/screen_horizontal_padding"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#F6F8FF"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#E0E4FF"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@+id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="알림 권한 필요"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="마이페이지에서 알림 권한을 활성화하면 실시간으로 알림을 받을 수 있습니다"
+                android:textColor="#4D4D4D"
+                android:textSize="13sp"
+                android:lineSpacingExtra="2dp" />
+
+            <Button
+                android:id="@+id/btn_go_to_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="마이페이지로 이동"
+                android:textSize="13sp"
+                style="@style/Widget.MaterialComponents.Button.TextButton" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- 상단 헤더 영역 (읽지 않은 알림 개수 + 필터) -->
     <LinearLayout
@@ -75,7 +114,7 @@
         android:gravity="center_vertical"
         android:paddingHorizontal="@dimen/screen_horizontal_padding"
         android:paddingVertical="@dimen/item_spacing"
-        app:layout_constraintTop_toBottomOf="@+id/header"
+        app:layout_constraintTop_toBottomOf="@+id/card_permission_tip"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

@@ -426,7 +426,13 @@ public class MyPageFragment extends Fragment {
     }
 
     private void performLogout() {
+        // TokenManager에서 저장된 Bearer Token 삭제
+        TokenManager.clearToken(requireContext());
+
+        // Firebase Auth 로그아웃
         auth.signOut();
+
+        // Google Sign-In 로그아웃
         googleSignInClient.signOut().addOnCompleteListener(requireActivity(), task -> {
             Toast.makeText(requireContext(), "로그아웃 되었습니다", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(requireActivity(), Login.class);
