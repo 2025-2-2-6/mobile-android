@@ -32,7 +32,7 @@ public interface ApiService {
     Call<SiteRegisterResponse> registerSite(@Header("Authorization") String token, @Body SiteRegisterRequest request);
 
     // 등록한 사이트 전체 불러오기
-    @GET("/api/v1/sites")
+    @GET("/api/v1/sites/")
     Call<List<Site>> getSites(@Header("Authorization") String token);
 
     // 사이트 상세 조회

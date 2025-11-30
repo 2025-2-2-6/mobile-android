@@ -23,7 +23,7 @@
         android:id="@+id/toolbar_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MOP"
+        android:text="크롤리머"
         android:textColor="@android:color/black"
         android:textSize="20sp"
         android:layout_gravity="center" />
